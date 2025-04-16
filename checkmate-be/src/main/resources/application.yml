@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: checkmate-be
+
+springdoc:
+  # 특정 패키지 컨트롤러만 스캔
+  packages-to-scan: com.checkmate.domain.test
+
+  # API가 생성 및 소비하는 기본 미디어 타입 지정
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+
+  # OpenAPI 문서 생성을 위한 캐싱 설정 (true = 비활성화)
+  cache:
+    disabled: true
+
+  # OpenAPI 명세 문서의 경로 설정 (기본값 = /v3/api-docs)
+  api-docs:
+    path: /docs/json
+    groups:
+      enabled: true
+
+  # Swagger UI 활성화 여부 및 경로 설정
+  swagger-ui:
+    enabled: true
+    path: /docs.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+logging:
+  level:
+    root: INFO
+    com.checkmate: DEBUG

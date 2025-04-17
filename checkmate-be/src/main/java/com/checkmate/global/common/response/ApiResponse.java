@@ -2,7 +2,6 @@ package com.checkmate.global.common.response;
 
 import com.checkmate.global.common.dto.ExceptionDto;
 import com.checkmate.global.common.exception.CustomException;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nullable;
 import org.springframework.http.HttpStatus;

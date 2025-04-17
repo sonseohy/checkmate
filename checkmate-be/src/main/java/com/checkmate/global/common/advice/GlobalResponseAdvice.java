@@ -5,6 +5,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,8 +23,9 @@ public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
      * @return 항상 true
      */
     @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
+    public boolean supports(MethodParameter returnType,
+                            Class<? extends HttpMessageConverter<?>> converterType) {
+        return MappingJackson2HttpMessageConverter.class.isAssignableFrom(converterType);
     }
 
     /**
@@ -39,12 +41,18 @@ public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
      * @return 가공된 응답 본문
      */
     @Override
-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        if (returnType.getParameterType() == ApiResponse.class) {
-            HttpStatus status = ((ApiResponse<?>) body).status();
-            response.setStatusCode(status);
+    public Object beforeBodyWrite(Object body,
+                                  MethodParameter returnType,
+                                  MediaType selectedContentType,
+                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
+                                  ServerHttpRequest request,
+                                  ServerHttpResponse response) {
+        if (body instanceof ApiResponse<?> api) {
+            response.setStatusCode(api.status());
+            return api;
         }
-
-        return body;
+        ApiResponse<Object> wrap = ApiResponse.ok(body);
+        response.setStatusCode(wrap.status());
+        return wrap;
     }
 }

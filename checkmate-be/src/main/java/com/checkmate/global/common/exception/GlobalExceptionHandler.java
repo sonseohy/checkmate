@@ -26,8 +26,8 @@ public class GlobalExceptionHandler {
      * @return 에러 코드에 기반한 HTTP 응답 엔터티
      */
     @ExceptionHandler(CustomException.class)
-    protected ApiResponse<?> handleCustomException(final CustomException e) {
-        log.error("handleCustomException() in GlobalExceptionHandler throw CustomException : {}", e.getMessage());
+    protected ApiResponse<?> handleCustomException(CustomException e) {
+        log.error("handleCustomException: {}", e.getMessage());
         return ApiResponse.fail(e);
     }
 
@@ -45,8 +45,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     protected ApiResponse<?> handleException(Exception e) {
-        log.error("handle not custom exception", e);
-        e.printStackTrace();
+        log.error("Unhandled exception occurred: ", e);
         return ApiResponse.fail(new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
     }
 
@@ -61,28 +60,23 @@ public class GlobalExceptionHandler {
      * @param e 입력값 검증 예외
      * @return 검증 실패에 대한 HTTP 응답 엔터티
      */
-    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
+    @ExceptionHandler({ MethodArgumentNotValidException.class, ConstraintViolationException.class })
     public ApiResponse<?> handleValidException(Exception e) {
         String errorMessages;
-
-        if (e instanceof MethodArgumentNotValidException) {
-            BindingResult bindingResult = ((MethodArgumentNotValidException) e).getBindingResult();
+        if (e instanceof MethodArgumentNotValidException manvEx) {
+            BindingResult bindingResult = manvEx.getBindingResult();
             errorMessages = bindingResult.getFieldErrors().stream()
-                    .map(fieldError -> String.format("[%s](은)는 %s", fieldError.getField(), fieldError.getDefaultMessage()))
-                    .reduce((message1, message2) -> message1 + ". " + message2)
+                    .map(fieldError -> String.format("[%s]은(는) %s", fieldError.getField(), fieldError.getDefaultMessage()))
+                    .reduce((m1, m2) -> m1 + ". " + m2)
                     .orElse("입력값 검증 오류가 발생했습니다.");
-        } else if (e instanceof ConstraintViolationException constraintViolationException) {
-            errorMessages = constraintViolationException.getConstraintViolations().stream()
-                    .map(violation -> String.format("[%s](은)는 %s",
-                            violation.getPropertyPath(),
-                            violation.getMessage()))
-                    .reduce((message1, message2) -> message1 + ". " + message2)
+        } else { // ConstraintViolationException
+            ConstraintViolationException cve = (ConstraintViolationException) e;
+            errorMessages = cve.getConstraintViolations().stream()
+                    .map(violation -> String.format("[%s]은(는) %s", violation.getPropertyPath(), violation.getMessage()))
+                    .reduce((m1, m2) -> m1 + ". " + m2)
                     .orElse("입력값 검증 오류가 발생했습니다.");
-        } else {
-            errorMessages = "알 수 없는 검증 오류가 발생했습니다.";
         }
-        log.error("handleValidException() in GlobalExceptionHandler : {}", errorMessages);
-
+        log.error("handleValidException: {}", errorMessages);
         return ApiResponse.fail(new CustomException(ErrorCode.INVALID_INPUT_VALUE), errorMessages);
     }
 
@@ -96,6 +90,7 @@ public class GlobalExceptionHandler {
     public ApiResponse<?> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
         String name = ex.getParameterName();
         String message = String.format("필수 요청 파라미터 '%s'가 누락되었습니다.", name);
+        log.error("handleMissingServletRequestParameter: {}", message);
         return ApiResponse.fail(new CustomException(ErrorCode.INVALID_INPUT_VALUE), message);
     }
 }

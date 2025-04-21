@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 
+import java.util.TimeZone;
+
 @SpringBootApplication(exclude = {
         DataSourceAutoConfiguration.class,
         DataSourceTransactionManagerAutoConfiguration.class,
@@ -14,7 +16,9 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 public class CheckmateBeApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CheckmateBeApplication.class, args);
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
+        SpringApplication.run(CheckmateBeApplication.class, args
+        );
     }
 
 }

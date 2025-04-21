@@ -46,10 +46,16 @@ public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
+
+        if (!MediaType.APPLICATION_JSON.isCompatibleWith(selectedContentType)) {
+            return body;
+        }
+
         if (body instanceof ApiResponse<?> api) {
             response.setStatusCode(api.status());
             return api;
         }
+
         ApiResponse<Object> wrap = ApiResponse.ok(body);
         response.setStatusCode(wrap.status());
         return wrap;

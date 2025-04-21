@@ -14,7 +14,7 @@ springdoc:
   cache:
     disabled: true
 
-  # OpenAPI 명세 문서의 경로 설정 (기본값 = /v3/api-docs)
+  # OpenAPI 명세 문서의 경로 설정
   api-docs:
     path: /docs/json
     groups:

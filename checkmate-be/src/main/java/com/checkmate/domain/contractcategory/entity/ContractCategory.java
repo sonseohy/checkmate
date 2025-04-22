@@ -1,6 +1,7 @@
 package com.checkmate.domain.contractcategory.entity;
 
 import com.checkmate.domain.checklist.entity.CheckList;
+import com.checkmate.domain.template.entity.Template;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,7 +27,7 @@ public class ContractCategory {
     private Level level;
 
     @ManyToOne
-    @JoinColumn(name = "parent_id", referencedColumnName = "id")
+    @JoinColumn(name = "parent_id")
     private ContractCategory parent;
 
     @OneToMany(mappedBy = "parent",
@@ -40,6 +41,12 @@ public class ContractCategory {
             fetch = FetchType.LAZY)
     private List<CheckList> checkLists = new ArrayList<>();
 
+    @OneToMany(mappedBy = "category",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
+    private List<Template> templates = new ArrayList<>();
+
     public void addChild(ContractCategory child) {
         children.add(child);
         child.setParent(this);
@@ -52,6 +59,15 @@ public class ContractCategory {
     public void removeCheckList(CheckList cl) {
         checkLists.remove(cl);
         cl.setCategory(null);
+    }
+
+    public void addTemplate(Template t) {
+        templates.add(t);
+        t.setCategory(this);
+    }
+    public void removeTemplate(Template t) {
+        templates.remove(t);
+        t.setCategory(null);
     }
 
 }

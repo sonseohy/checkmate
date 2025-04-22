@@ -26,9 +26,7 @@ public class CheckList {
     private ContractCategory category;
 
     @Lob
-    @Column(name = "check_list_detail",
-            nullable = false,
-            columnDefinition = "TEXT")
+    @Column(name = "check_list_detail", nullable = false, columnDefinition = "TEXT")
     private String checkListDetail;
 
     @CreatedDate

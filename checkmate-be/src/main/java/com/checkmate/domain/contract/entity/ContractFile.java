@@ -21,7 +21,7 @@ public class ContractFile {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "contract_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "contract_id", nullable = false)
     private Contract contract;
 
     @Column(name = "file_type", length = 10, nullable = false)

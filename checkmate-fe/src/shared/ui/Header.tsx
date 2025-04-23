@@ -9,11 +9,11 @@ export const Header = () => {
     <header className="flex items-center justify-between w-full h-16 px-6 bg-white shadow">
       {/* Left - Logo */}
       <div className="flex items-center gap-2">
-        <img src="/logo.svg" alt="logo" className="w-6 h-6" />
+        <img src="/icons/favicon-96x96.png" alt="logo" className="w-6 h-6" />
       </div>
 
-      {/* Center - 메뉴 */}
-      <nav className="relative flex items-center gap-8 text-sm font-semibold text-black">
+      {/* Right - 메뉴 및 로그인 */}
+      <div className="flex items-center gap-8 text-sm font-semibold text-black">
         {/* 계약서 쓰기 */}
         <div className="relative">
           <button
@@ -47,11 +47,11 @@ export const Header = () => {
             </ul>
           )}
         </div>
-      </nav>
 
-      {/* Right - 로그인/회원가입 */}
-      <div className="text-blue-500">
-        <User className="w-5 h-5" />
+        {/* 로그인/회원가입 */}
+        <div className="text-sm font-normal text-gray-700 cursor-pointer hover:text-black">
+          회원가입 / 로그인
+        </div>
       </div>
     </header>
   );

@@ -1,8 +1,13 @@
+import React from 'react';
+import { AppLayout } from '@/shared';
 
-export default function MainPage()  {
+// ✅ default export로 변경
+const MainPage = () => {
     return (
-        <>
-            메인 페이지
-        </>
+      <AppLayout>
+        <div className="p-4">메인 콘텐츠</div>
+      </AppLayout>
     );
-}
+  };
+  
+  export default MainPage;

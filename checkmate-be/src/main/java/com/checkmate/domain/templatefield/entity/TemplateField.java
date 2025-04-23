@@ -30,6 +30,10 @@ public class TemplateField {
     @Column(name = "input_type", length = 20, nullable = false)
     private InputType inputType;
 
+    @Lob
+    @Column(name = "description", columnDefinition = "TEXT", nullable = false)
+    private String description;
+
     @Column(name = "is_required", nullable = false)
     private Boolean isRequired = false;
 

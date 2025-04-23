@@ -32,6 +32,10 @@ public class Section {
     @Column(name = "is_required", nullable = false)
     private Boolean isRequired = true;
 
+    @Lob
+    @Column(name = "description", columnDefinition = "TEXT", nullable = false)
+    private String description;
+
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<TemplateField> fields = new ArrayList<>();
 

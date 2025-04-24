@@ -21,8 +21,6 @@ export const AppLayout = ({
        flex-1
        overflow-y-auto
        snap-y snap-mandatory
-       pt-16            /* 일반 padding-top: 헤더 높이만큼 */
-       scroll-pt-16     /* scroll-padding-top: 스냅 기준을 헤더 아래로 */
        ${mainClassName}
      `}
    >

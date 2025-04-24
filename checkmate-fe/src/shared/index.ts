@@ -1,2 +1,2 @@
 export { Header } from './ui/Header';
-export { AppLayout } from './layout/AppLayout';
+export { AppLayout } from '../shared/ui/layout/AppLayout';

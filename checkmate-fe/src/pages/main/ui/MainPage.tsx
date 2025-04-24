@@ -1,11 +1,26 @@
-import React from 'react';
 import { AppLayout } from '@/shared';
+import {
+  Section1,
+  Section2,
+  Section3,
+  Section4,
+  Section5,
+  Section6,
+} from '@/widgets/main'
 
-// ✅ default export로 변경
 const MainPage = () => {
     return (
-      <AppLayout>
-        <div className="p-4">메인 콘텐츠</div>
+      <AppLayout
+      headerProps={{ className: 'bg-white shadow' }}
+      mainClassName="px-4"
+    ><main className="container mx-auto px-4 space-y-16">
+        <Section1 />
+        <Section2 />
+        <Section3 />
+        <Section4 />
+        <Section5 />
+        <Section6 />
+      </main>
       </AppLayout>
     );
   };

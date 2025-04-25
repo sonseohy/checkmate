@@ -32,7 +32,7 @@ const mobileVariants = {
   }),
 }
 
-// Hook to track md-breakpoint
+// 화면 너비 체크 훅 
 function useIsMd() {
   const [isMd, setIsMd] = useState(
     typeof window !== 'undefined' ? window.innerWidth >= 768 : false
@@ -63,7 +63,7 @@ const Section3 = () => {
           className="text-4xl font-bold leading-tight text-center md:text-6xl"
         >
           <span className="text-transparent bg-gradient-to-r from-blue-700 to-blue-300 bg-clip-text">
-            CHECKMATE
+            체크메이트
           </span>
           가<br /> 함께 써드릴게요
         </motion.h2>

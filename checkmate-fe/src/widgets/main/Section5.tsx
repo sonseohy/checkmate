@@ -63,7 +63,7 @@ const Section5 = () => {
           className="text-4xl font-bold leading-tight text-center md:text-6xl"
         >
           <span className="text-transparent bg-gradient-to-r from-blue-700 to-blue-300 bg-clip-text">
-            CHECKMATE
+          체크메이트
           </span>
           가<br /> 함께 봐드릴게요
         </motion.h2>

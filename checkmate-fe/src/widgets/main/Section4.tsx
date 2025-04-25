@@ -11,12 +11,17 @@ const steps = [
   },
   {
     title: 'AI 기반 계약서 분석',
-    desc: 'AI가 핵심 조항을 자동으로 분석해 드립니다.',
+    desc: (
+            <>
+              AI가 핵심 조항을<br />
+              자동으로 분석해 드립니다.
+            </>
+          ),
     icon: AnalysisIcon,
   },
   {
     title: '피드백 및 요약 제공',
-    desc: '중요 내용을 깔끔하게 요약해 드립니다.',
+    desc: (<>중요 내용을 <br /> 깔끔하게 요약해 드릴게요.</>),
     icon: SummaryIcon,
   },
 ]

@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     >
       {/* Left - Logo */}
       <div className="flex items-center gap-2">
-        <img src="/icons/favicon-96x96.png" alt="logo" className="w-6 h-6" />
+        <img src="/icons/favicon-96x96.png" alt="logo" className="w-10 h-10" />
       </div>
 
       {/* Right - 메뉴 및 로그인 */}

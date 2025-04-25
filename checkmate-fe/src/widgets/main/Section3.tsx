@@ -4,49 +4,66 @@ import RentalIcon from '@/assets/home/rental.png'
 import EmploymentIcon from '@/assets/home/employment.png'
 
 const templates = [
-  {
-    title: '부동산 매매 계약서',
-    icon: RealEstateIcon,
-  },
-  {
-    title: '임대차 계약서',
-    icon: RentalIcon,
-  },
-  {
-    title: '근로 계약서',
-    icon: EmploymentIcon,
-  },
+  { title: '부동산 매매 계약서', icon: RealEstateIcon },
+  { title: '임대차 계약서', icon: RentalIcon },
+  { title: '근로 계약서', icon: EmploymentIcon },
 ]
+
+const cardVariants = {
+  initial: { opacity: 0, scale: 0.5, x: 0, rotate: 0 },
+  animate: (i: number) => ({
+    opacity: 1,
+    scale: 1,
+    x: i === 0 ? -240 : i === 1 ? 0 : 240,
+    rotate: i === 0 ? -6 : i === 1 ? 0 : 6,
+    transition: { duration: 0.8, delay: i * 0.3 },
+  }),
+}
 
 const Section3 = () => (
   <section
     id="templates"
-    className="h-screen snap-start flex flex-col justify-center bg-white px-4"
+    className="relative overflow-hidden bg-white snap-start"
   >
-    <motion.h2
-      initial={{ opacity: 0, y: -30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8 }}
-      className="text-3xl font-bold text-center mb-12"
-    >
-      CHECKMATE가 함께 써드릴게요
-    </motion.h2>
+    <div className="max-w-6xl px-4 py-16 mx-auto sm:px-6 lg:px-8">
+      <motion.h2
+        initial={{ opacity: 0, y: -30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="text-4xl font-bold leading-tight text-center md:text-6xl"
+      >
+        <span className="text-transparent bg-gradient-to-r from-blue-700 to-blue-300 bg-clip-text">
+          CHECKMATE
+        </span>
+        가<br /> 함께 써드릴게요
+      </motion.h2>
 
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-      {templates.map(({ title, icon }, i) => (
-        <motion.div
-          key={title}
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: i * 0.2 }}
-          className="bg-white rounded-2xl p-8 flex flex-col items-center justify-center shadow-lg"
-        >
-          <img src={icon} alt={title} className="h-32 mb-4" />
-          <h3 className="text-xl font-semibold">{title}</h3>
-        </motion.div>
-      ))}
+      <div
+        className="flex flex-wrap justify-center max-w-6xl gap-8 mx-auto mt-8  md:relative md:flex-nowrap md:items-end md:h-80"
+      >
+        {templates.map(({ title, icon }, i) => (
+          <motion.div
+            key={title}
+            custom={i}
+            variants={cardVariants}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, amount: 0.5 }}
+            className="flex flex-col items-center justify-center w-full p-6 bg-white shadow-lg cursor-pointer  sm:w-72 sm:p-8 rounded-2xl md:absolute"
+            style={{ zIndex: i === 1 ? 20 : 10 }}
+            whileHover={{
+              scale: 1.05,
+              rotate: 0,
+              boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
+            }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <img src={icon} alt={title} className="mb-4 h-36" />
+            <h3 className="text-xl font-semibold text-center">{title}</h3>
+          </motion.div>
+        ))}
+      </div>
     </div>
   </section>
 )

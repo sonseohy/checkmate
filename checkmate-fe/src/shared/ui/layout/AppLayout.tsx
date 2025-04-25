@@ -21,8 +21,6 @@ export const AppLayout = ({
        flex-1
        overflow-y-auto
        snap-y snap-mandatory
-       pt-16           
-       scroll-pt-16     
        ${mainClassName}
      `}
    >

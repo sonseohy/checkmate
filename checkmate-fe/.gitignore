@@ -11,9 +11,7 @@ package-lock.json
 node_modules
 dist
 dist-ssr
-!dev-dist/
-dev-dist/*
-!dev-dist/sw.js
+dev-dist
 *.local
 build
 out/

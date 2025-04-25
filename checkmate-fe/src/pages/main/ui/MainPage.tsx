@@ -1,4 +1,4 @@
-import { AppLayout } from '@/shared';
+
 import {
   Section1,
   Section2,
@@ -10,11 +10,7 @@ import {
 
 const MainPage = () => {
   return (
-    <AppLayout
-      headerProps={{ className: 'bg-white shadow' }}
-      mainClassName="px-4 snap-y snap-mandatory overflow-y-auto"
-    >
-      <div className="container mx-auto">
+    <div className="container mx-auto">
         {[Section1, Section2, Section3, Section4, Section5, Section6].map(
           (Section, idx) => (
             <div
@@ -28,8 +24,7 @@ const MainPage = () => {
             </div>
           )
         )}
-      </div>
-    </AppLayout>
+    </div>
   );
 };
 

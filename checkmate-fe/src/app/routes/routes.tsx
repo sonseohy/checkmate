@@ -1,5 +1,6 @@
 import { Suspense, lazy } from "react"
 import { createBrowserRouter, RouteObject } from "react-router-dom"
+import { AppLayout } from "@/shared"
 
 //메인 페이지
 const MainPage = lazy(() => import("@pages/main").then((module) => ({ default: module.MainPage })))
@@ -11,7 +12,9 @@ const routes: RouteObject[] = [
         path: "/",
         element: (
             <Suspense fallback={<div>Loading...</div>}>
-                <MainPage />
+                <AppLayout>
+                    <MainPage />
+                </AppLayout>
             </Suspense>
         )
     },

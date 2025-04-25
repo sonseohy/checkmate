@@ -1,4 +1,4 @@
-import { AppLayout } from '@/shared'
+
 import {
   Section1,
   Section2,
@@ -10,10 +10,7 @@ import {
 
 const MainPage = () => {
   return (
-    <AppLayout
-      headerProps={{ className: 'bg-white shadow' }}
-      mainClassName="px-4 snap-y snap-mandatory overflow-y-auto"
-    >
+<>
       <div className="container mx-auto">
         <Section1 />
       </div>
@@ -30,7 +27,8 @@ const MainPage = () => {
         <Section5 />
         <Section6 />
       </div>
-    </AppLayout>
+      </>
+
   )
 }
 

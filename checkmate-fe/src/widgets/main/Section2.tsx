@@ -37,37 +37,32 @@ const features = [
 ]
 
 const Section2 = () => (
-  <section
-    id="features"
-    className="relative overflow-hidden bg-gray-50 snap-start"
-  >
-    <div className="flex flex-col items-center max-w-6xl px-4 py-16 mx-auto sm:px-6 lg:px-8">
-      <motion.h2
-        initial={{ opacity: 0, y: -30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="mb-12 text-3xl font-bold text-center"
-      >
-        어려운 계약서도 걱정 마세요
-      </motion.h2>
+  <section id="features" className="flex flex-col justify-center min-h-screen px-4 py-16 -mx-4 md:py-0 bg-gray-50 snap-start">
+    <motion.h2
+      initial={{ opacity: 0, y: -30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+      className="mb-12 text-3xl font-bold text-center"
+    >
+      어려운 계약서도 걱정 마세요
+    </motion.h2>
 
-      <div className="grid w-full grid-cols-1 gap-8 md:grid-cols-3">
-        {features.map(({ title, desc, icon }, i) => (
-          <motion.div
-            key={title}
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: i * 0.2 }}
-            className="px-6 text-center"
-          >
-            <img src={icon} alt={title} className="w-32 h-32 mx-auto mb-4" />
-            <h3 className="mb-2 text-xl font-semibold">{title}</h3>
-            <p className="text-gray-600 whitespace-pre-line">{desc}</p>
-          </motion.div>
-        ))}
-      </div>
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      {features.map(({ title, desc, icon }, i) => (
+        <motion.div
+          key={title}
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: i * 0.2 }}
+          className="px-6 text-center"
+        >
+          <img src={icon} alt={title} className="w-32 h-32 mx-auto mb-4" />
+          <h3 className="mb-2 text-xl font-semibold">{title}</h3>
+          <p className="text-gray-600 whitespace-pre-line">{desc}</p>
+        </motion.div>
+      ))}
     </div>
   </section>
 )

@@ -22,6 +22,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false, length = 20)
     private String name;
 
     private LocalDate birth;
@@ -30,12 +31,12 @@ public class User {
     @Email
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String phone;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 7, nullable = false)
-    private Status status;
+    private Status status = Status.ACTIVE;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")

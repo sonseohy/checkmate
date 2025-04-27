@@ -48,4 +48,11 @@ public class User {
     @Column(name = "provider_id", length = 255, nullable = false, unique = true)
     private String providerId;
 
+    /**
+     * 사용자 계정을 소프트 삭제합니다.
+     */
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+        this.status = Status.DELETED;  // 상태도 DELETED로 변경
+    }
 }

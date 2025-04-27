@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Table(name = "user")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)

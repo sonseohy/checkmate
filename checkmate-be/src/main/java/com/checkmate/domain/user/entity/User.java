@@ -55,4 +55,29 @@ public class User {
         this.deletedAt = LocalDateTime.now();
         this.status = Status.DELETED;  // 상태도 DELETED로 변경
     }
+
+    /**
+     * 계정 복구 가능 여부를 판단합니다.
+     * 삭제된 시점으로부터 30일 이내인 경우 복구 가능으로 간주합니다.
+     *
+     * @return 복구 가능하면 true, 아니면 false
+     */
+    public boolean isRecoverable() {
+        if (this.deletedAt == null) {
+            return false;
+        }
+
+        LocalDateTime recoverableUntil = this.deletedAt.plusDays(30);
+        return LocalDateTime.now().isBefore(recoverableUntil);
+    }
+
+    /**
+     * 사용자의 계정을 복구 처리합니다.
+     * 복구 가능 상태일 때 deletedAt 값을 null로 초기화합니다.
+     */
+    public void recover() {
+        if (isRecoverable()) {
+            this.deletedAt = null;
+        }
+    }
 }

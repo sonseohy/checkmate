@@ -3,7 +3,7 @@ package com.checkmate.global.common.filter;
 import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
-import com.checkmate.global.common.response.ApiResponse;
+import com.checkmate.global.common.response.ApiResult;
 import com.checkmate.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -115,8 +115,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType("application/json;charset=utf-8");
 
-        ApiResponse<?> apiResponse = ApiResponse.fail(new CustomException(ErrorCode.UNAUTHORIZED));
-        String jsonResponse = objectMapper.writeValueAsString(apiResponse);
+        ApiResult<?> apiResult = ApiResult.fail(new CustomException(ErrorCode.UNAUTHORIZED));
+        String jsonResponse = objectMapper.writeValueAsString(apiResult);
         response.getWriter().write(jsonResponse);
     }
 

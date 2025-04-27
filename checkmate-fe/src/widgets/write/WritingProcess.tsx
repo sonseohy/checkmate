@@ -1,4 +1,4 @@
-import React from "react"
+
 import { motion } from "framer-motion"
 import UploadIcon    from "@/assets/home/contract-upload.png"
 import AnalysisIcon  from "@/assets/home/ai-analysis.png"

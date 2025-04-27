@@ -1,5 +1,3 @@
-// src/pages/write/ui/WritePage.tsx
-import React from "react"
 import { Link, useParams } from "react-router-dom"
 import WritingProcess from "@/widgets/write/WritingProcess"
 import {
@@ -30,7 +28,7 @@ const introMap = {
   },
 } as const
 
-const WritePage: React.FC = () => {
+const WriteIntroPage: React.FC = () => {
   const { template } = useParams<Params>()
   const cfg = template ? introMap[template] : undefined
 
@@ -81,4 +79,4 @@ const WritePage: React.FC = () => {
   )
 }
 
-export default WritePage
+export default WriteIntroPage

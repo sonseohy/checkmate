@@ -1,5 +1,3 @@
-// src/features/write/components/RentalIntro.tsx
-import React from "react"
 import { Link } from "react-router-dom"
 
 const RentalIntro: React.FC = () => (

@@ -1,5 +1,4 @@
 // src/features/write/components/EmploymentIntro.tsx
-import React from "react"
 import { Link } from "react-router-dom"
 
 const EmploymentIntro: React.FC = () => (

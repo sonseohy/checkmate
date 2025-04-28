@@ -7,9 +7,14 @@ import {LuLayoutGrid,
         LuChevronRight, 
         LuChevronLeft } from "react-icons/lu";
 
-export default function SideBar() {
+interface SideBarProps {
+  onMenuClick: (label:string) => void;
+  selectedMenu: string;
+}
+
+
+export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
   const [ isOpen, setIsOpen ] = useState<boolean>(false)
-  console.log(isOpen)
 
   const menu = [
     {icon: LuLayoutGrid, label: "대시보드" },
@@ -55,18 +60,20 @@ export default function SideBar() {
             <button
               key={label}
               className="flex flex-row items-center gap-5 mb-5"
+              onClick={()=> onMenuClick(label)}
             >
               <Icon 
                 size={40} 
-                color='#202020' 
+                color= {selectedMenu === label ? "#60A5FA" : "#202020"}
+                style={{ strokeWidth:1.5 }}
               />
               <span
                 className={`
                   overflow-hidden whitespace-nowrap
-                  text-3xl font-semibold
+                  text-2xl font-medium
                   transition-[max-width,opacity] duration-300 ease-in-out
-                  ${isOpen ? "opacity-100"
-                           : "opacity-0"}`}
+                  ${isOpen ? "opacity-100": "opacity-0"}
+                  ${selectedMenu === label ? "text-[#60A5FA]" : "text-black"}`} 
               >
                 {label}
               </span>

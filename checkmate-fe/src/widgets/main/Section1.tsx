@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
-import HeroIllustration from '@/assets/home/hero-illustration.png'
+import { motion } from 'framer-motion';
+import HeroIllustration from '@/assets/images/home/hero-illustration.png';
 
 const Section1 = () => (
   <section
@@ -25,9 +25,7 @@ const Section1 = () => (
         transition={{ duration: 0.8, delay: 0.2 }}
         className="text-lg text-gray-600"
       >
-        복잡한 계약서,
-        클릭 몇 번으로
-        자동 작성·분석·관리까지
+        복잡한 계약서, 클릭 몇 번으로 자동 작성·분석·관리까지
       </motion.p>
 
       <motion.img
@@ -41,6 +39,6 @@ const Section1 = () => (
       />
     </motion.div>
   </section>
-)
+);
 
-export default Section1
+export default Section1;

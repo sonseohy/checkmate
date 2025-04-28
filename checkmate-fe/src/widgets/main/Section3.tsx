@@ -1,71 +1,74 @@
-import { motion } from 'framer-motion'
-import RealEstateIcon from '@/assets/home/real-estate.png'
-import RentalIcon from '@/assets/home/rental.png'
-import EmploymentIcon from '@/assets/home/employment.png'
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import ContentCertificationIcon from '@/assets/images/home/content-certification.png';
+import ContractIcon from '@/assets/images/home/contract.png';
+import PaymentOrderIcon from '@/assets/images/home/payment-order.png';
+import { useCardVariants } from '@/shared/animations/useCardVariants';
+import { desktopCardVariants } from '@/shared/animations/cardVariants';
 
 const templates = [
-  { title: '부동산 매매 계약서', icon: RealEstateIcon },
-  { title: '임대차 계약서', icon: RentalIcon },
-  { title: '근로 계약서', icon: EmploymentIcon },
-]
+  {
+    title: '내용증명',
+    icon: ContentCertificationIcon,
+    link: '/content-certification',
+  },
+  { title: '계약서', icon: ContractIcon, link: '/contract' },
+  { title: '지급명령', icon: PaymentOrderIcon, link: '/payment-order' },
+];
 
-// 카드 애니메이션 variants
-const cardVariants = {
-  initial: { opacity: 0, scale: 0.5, x: 0, rotate: 0 },
-  animate: (i: number) => ({
-    opacity: 1,
-    scale: 1,
-    x: i === 0 ? -240 : i === 1 ? 0 : 240,
-    rotate: i === 0 ? -6 : i === 1 ? 0 : 6,
-    transition: { duration: 0.8, delay: i * 0.3 },
-  }),
-}
+const Section3 = () => {
+  const variants = useCardVariants();
 
-const Section3 = () => (
-<section
-  id="templates"
-  className="
-    snap-start
-    -mt-16 pt-16
-    h-screen          /* 배경을 화면 전체 높이로 채움 */
-    bg-white
-    flex flex-col items-center justify-center
-    px-4
-  "
->
-    <motion.h2
-      initial={{ opacity: 0, y: -30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8 }}
-      className="mb-12 text-6xl font-bold leading-tight text-center"
+  return (
+    <section
+      id="templates"
+      className="relative min-h-[100vh] w-full overflow-hidden snap-start bg-gradient-move animate-gradient-move"
     >
-      <span className="text-transparent bg-gradient-to-r from-blue-700 to-blue-300 bg-clip-text">
-        CHECKMATE
-      </span>
-      가<br /> 함께 써드릴게요
-    </motion.h2>
-
-    <div className="relative flex items-end justify-center w-full max-w-4xl h-80">
-      {templates.map(({ title, icon }, i) => (
-        <motion.div
-          key={title}
-          custom={i}
-          variants={cardVariants}
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, amount: 0.5 }}
-          className="absolute flex flex-col items-center justify-center p-8 bg-white shadow-lg cursor-pointer w-72 rounded-2xl"
-          style={{ zIndex: i === 1 ? 20 : 10 }}
-          whileHover={{ scale: 1.05, rotate: 0, boxShadow: '0px 10px 20px rgba(0,0,0,0.15)' }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      <div className="flex flex-col items-center w-full py-16">
+        {/* 제목 애니메이션 */}
+        <motion.h2
+          initial={{ opacity: 0, y: -30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="text-4xl font-bold leading-tight text-center md:text-6xl"
         >
-          <img src={icon} alt={title} className="mb-4 h-36" />
-          <h3 className="text-xl font-semibold text-center">{title}</h3>
-        </motion.div>
-      ))}
-    </div>
-  </section>
-)
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-300">
+            CHECKMATE
+          </span>
+          가<br /> 함께 써드릴게요
+        </motion.h2>
 
-export default Section3
+        {/* 카드 목록 */}
+        <div className="flex flex-wrap justify-center gap-8 mt-8 md:relative md:flex-nowrap md:items-end md:h-80">
+          {templates.map(({ title, icon, link }, i) => (
+            <motion.div
+              key={title}
+              custom={i}
+              variants={variants}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true, amount: 0.5 }}
+              className="flex flex-col items-center justify-center w-full p-6 shadow-lg cursor-pointer h-80 bg-blue-50 rounded-2xl sm:w-72 sm:p-8 md:absolute"
+              style={{ zIndex: i === 1 ? 20 : 10 }}
+              whileHover={
+                variants === desktopCardVariants
+                  ? {
+                      scale: 1.05,
+                      rotate: 0,
+                      boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
+                    }
+                  : {}
+              }
+            >
+              <h1 className="mb-4 text-4xl font-bold text-center">{title}</h1>
+              <img src={icon} alt={title} className="h-40" />
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Section3;

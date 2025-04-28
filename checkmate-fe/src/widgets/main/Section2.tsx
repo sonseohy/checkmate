@@ -1,14 +1,15 @@
-import { motion } from 'framer-motion'
-import AutoWriteIcon from '@/assets/home/auto-write.png'
-import ESignIcon from '@/assets/home/e-sign.png'
-import DocManageIcon from '@/assets/home/doc-manage.png'
+import { motion } from 'framer-motion';
+import AutoWriteIcon from '@/assets/images/home/auto-write.png';
+import ESignIcon from '@/assets/images/home/e-sign.png';
+import DocManageIcon from '@/assets/images/home/doc-manage.png';
 
 const features = [
   {
     title: '자동 작성',
     desc: (
       <>
-        필요한 정보만 입력하면<br />
+        필요한 정보만 입력하면
+        <br />
         계약서를 자동으로 완성해 줍니다.
       </>
     ),
@@ -18,7 +19,8 @@ const features = [
     title: '전자 서명',
     desc: (
       <>
-        안전한 전자 서명으로 언제든지<br />
+        안전한 전자 서명으로 언제든지
+        <br />
         어디서나 계약을 체결할 수 있습니다.
       </>
     ),
@@ -28,18 +30,20 @@ const features = [
     title: '문서 관리',
     desc: (
       <>
-        모든 계약서를 한 곳에 모아두고<br />
+        모든 계약서를 한 곳에 모아두고
+        <br />
         키워드로 빠르게 검색하세요.
       </>
     ),
     icon: DocManageIcon,
   },
-]
+];
 
 const Section2 = () => (
   <section
     id="features"
-    className="flex flex-col justify-center h-screen px-4 -mx-4 snap-start bg-gray-50"  >
+    className="flex flex-col justify-center min-h-screen px-4 py-16 -mx-4 md:py-0 bg-gray-50 snap-start"
+  >
     <motion.h2
       initial={{ opacity: 0, y: -30 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -67,6 +71,6 @@ const Section2 = () => (
       ))}
     </div>
   </section>
-)
+);
 
-export default Section2
+export default Section2;

@@ -6,7 +6,8 @@ import { useMobile } from "@/shared";
 
 export default function Dashboard() {
     const isMobile = useMobile();
-    const   data:ContractListData = {
+    // 하드코딩 데이터 (삭제 예정)
+    const data:ContractListData = {
         contracts: [
           {
             "contract_id": 1,
@@ -33,6 +34,8 @@ export default function Dashboard() {
                 최근 활동
                 <span className="ml-1 text-[#60A5FA]"> 2 </span>
             </div>
+            
+            {/* 활동에 대한 그래프 */}
             <div className={`flex ${isMobile ? 'flex-col justify-center' : 'flex-row gap-10 ml-30'} items-center `}>
                 <div className={`${isMobile ? 'w-full mb-5' : 'w-150'}`}>
                     <PieDonutChart />
@@ -45,6 +48,8 @@ export default function Dashboard() {
                     작성: 4개
                 </div>
             </div>
+
+            {/* 계약서 리스트=> 캐러셀 구현 예정 */}
             <div className="flex flex-row gap-5 mt-5">
                 {data.contracts.map((contract) => (
                     <div key={contract.contract_id} 
@@ -55,7 +60,7 @@ export default function Dashboard() {
                         ? "bg-[#B4C7FF]"
                     : "bg-[#FFB4B5]"}`}>{contract.source_type === "USER_UPLOAD" ? "분석" : "작성"}</span>
                     <p className="my-5 text-2xl font-bold">{contract.title}</p>
-                    {/* created_at 데이터 변형 */}
+                    {/* created_at 데이터 변형 필요 */}
                     <p>{contract.created_at}</p> 
                     </div>
                 )) }

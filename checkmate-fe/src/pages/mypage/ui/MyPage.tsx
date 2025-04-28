@@ -32,6 +32,7 @@ export default function MyPage() {
 
     return (
         <div className="flex flex-row h-screen">
+            {/* 사이드바 */}
             <div className="flex-shrink-0">
                 <SideBar onMenuClick={handleMenuClick} selectedMenu={selectedMenu}/>
             </div>
@@ -40,6 +41,7 @@ export default function MyPage() {
                     안녕하세요 김싸피님
                 </div>
                 <div className="h-px bg-gray-200 " />
+                {/* 컴포넌트 */}
                 <div className="m-3">
                     { displayComponent }
                 </div>

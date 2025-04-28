@@ -1,4 +1,4 @@
-//도넌 파이 차트
+//대시 보드/ 도넛 파이 차트 
 import ReactApexChart from "react-apexcharts";
 import { useMobile } from "@/shared";
 

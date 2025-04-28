@@ -1,3 +1,4 @@
+//사이드 바
 import { useState } from "react";
 import {LuLayoutGrid, 
         LuFolder, 
@@ -48,6 +49,7 @@ export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
                   className="rounded-2xl bg-white shadow-[0px_2px_8px_rgba(0,0,0,0.2)]"
         /> }
       </button>
+      {/* 로고 */}
         <div className="my-3">
           <img src="/icons/favicon-32x32.png" 
               alt="logo"
@@ -55,6 +57,7 @@ export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
               height={40}
               />
         </div>
+        {/* 사이드바 메뉴 */}
         <div className="mt-5">
           {menu.map(({ icon: Icon, label }) => (
             <button

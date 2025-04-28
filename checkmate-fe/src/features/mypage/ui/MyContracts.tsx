@@ -3,7 +3,9 @@
 export default function MyContracts() {
     return (
         <div>
-            내 계약서
+            <div className="text-3xl font-bold mt-5">
+                내 계약서 
+            </div>
         </div>
     );
 };

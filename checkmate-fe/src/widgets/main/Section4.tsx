@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion'
-import UploadIcon from '@/assets/home/contract-upload.png'
-import AnalysisIcon from '@/assets/home/ai-analysis.png'
-import SummaryIcon from '@/assets/home/summary-feedback.png'
+import { motion } from 'framer-motion';
+import UploadIcon from '@/assets/images/home/contract-upload.png';
+import AnalysisIcon from '@/assets/images/home/ai-analysis.png';
+import SummaryIcon from '@/assets/images/home/summary-feedback.png';
 
 const steps = [
   {
@@ -12,19 +12,24 @@ const steps = [
   {
     title: 'AI 기반 계약서 분석',
     desc: (
-            <>
-              AI가 핵심 조항을<br />
-              자동으로 분석해 드립니다.
-            </>
-          ),
+      <>
+        AI가 핵심 조항을
+        <br />
+        자동으로 분석해 드립니다.
+      </>
+    ),
     icon: AnalysisIcon,
   },
   {
     title: '피드백 및 요약 제공',
-    desc: (<>중요 내용을 <br /> 깔끔하게 요약해 드릴게요.</>),
+    desc: (
+      <>
+        중요 내용을 <br /> 깔끔하게 요약해 드릴게요.
+      </>
+    ),
     icon: SummaryIcon,
   },
-]
+];
 
 const Section4 = () => (
   <section
@@ -58,6 +63,6 @@ const Section4 = () => (
       ))}
     </div>
   </section>
-)
+);
 
-export default Section4
+export default Section4;

@@ -16,15 +16,13 @@ const MainPage = () => {
       </div>
 
       <Section2 />
+      <Section3 />
 
-      <div className="container mx-auto">
-        <Section3 />
-      </div>
 
       <Section4 />
-
+      <Section5 />
       <div className="container mx-auto">
-        <Section5 />
+   
         <Section6 />
       </div>
       </>

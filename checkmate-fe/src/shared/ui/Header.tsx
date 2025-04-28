@@ -1,24 +1,23 @@
-// src/shared/ui/Header.tsx
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { ChevronDown, Menu, X } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ChevronDown, Menu, X } from 'lucide-react';
 
 export interface HeaderProps {
-  className?: string
+  className?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
-  const [writeOpen, setWriteOpen] = useState(false)
-  const [analyzeOpen, setAnalyzeOpen] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [writeOpen, setWriteOpen] = useState(false);
+  const [analyzeOpen, setAnalyzeOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // 모바일 메뉴 닫힐 때 서브메뉴도 닫기
   useEffect(() => {
     if (!mobileOpen) {
-      setWriteOpen(false)
-      setAnalyzeOpen(false)
+      setWriteOpen(false);
+      setAnalyzeOpen(false);
     }
-  }, [mobileOpen])
+  }, [mobileOpen]);
 
   return (
     <header
@@ -38,13 +37,16 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         <div className="relative">
           <button
             onClick={() => {
-              setWriteOpen(w => !w)
-              setAnalyzeOpen(false)
+              setWriteOpen((w) => !w);
+              setAnalyzeOpen(false);
             }}
             className="flex items-center gap-1 hover:text-blue-600"
           >
-            계약서 쓰기 
-            <ChevronDown size={16} className={writeOpen ? 'rotate-180 transition-transform' : ''} />
+            계약서 쓰기
+            <ChevronDown
+              size={16}
+              className={writeOpen ? 'rotate-180 transition-transform' : ''}
+            />
           </button>
           {writeOpen && (
             <ul className="absolute left-0 z-10 w-40 mt-2 bg-white border rounded shadow-md top-full">
@@ -83,13 +85,16 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         <div className="relative">
           <button
             onClick={() => {
-              setAnalyzeOpen(a => !a)
-              setWriteOpen(false)
+              setAnalyzeOpen((a) => !a);
+              setWriteOpen(false);
             }}
             className="flex items-center gap-1 hover:text-blue-600"
           >
-            계약서 분석 
-            <ChevronDown size={16} className={analyzeOpen ? 'rotate-180 transition-transform' : ''} />
+            계약서 분석
+            <ChevronDown
+              size={16}
+              className={analyzeOpen ? 'rotate-180 transition-transform' : ''}
+            />
           </button>
           {analyzeOpen && (
             <ul className="absolute left-0 z-10 w-40 mt-2 bg-white border rounded shadow-md top-full">
@@ -125,7 +130,10 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         </div>
 
         {/* 회원가입 / 로그인 */}
-        <Link to="/auth" className="text-sm font-normal text-gray-700 hover:text-black">
+        <Link
+          to="/auth"
+          className="text-sm font-normal text-gray-700 hover:text-black"
+        >
           회원가입 / 로그인
         </Link>
       </div>
@@ -133,7 +141,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       {/* Mobile Hamburger */}
       <button
         className="p-2 md:hidden"
-        onClick={() => setMobileOpen(m => !m)}
+        onClick={() => setMobileOpen((m) => !m)}
       >
         {mobileOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -146,13 +154,16 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             <div className="relative">
               <button
                 onClick={() => {
-                  setWriteOpen(w => !w)
-                  setAnalyzeOpen(false)
+                  setWriteOpen((w) => !w);
+                  setAnalyzeOpen(false);
                 }}
                 className="flex justify-between w-full py-2 text-left hover:text-blue-600"
               >
                 계약서 쓰기
-                <ChevronDown size={16} className={writeOpen ? 'rotate-180 transition-transform' : ''} />
+                <ChevronDown
+                  size={16}
+                  className={writeOpen ? 'rotate-180 transition-transform' : ''}
+                />
               </button>
               {writeOpen && (
                 <ul className="pl-4">
@@ -191,13 +202,18 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             <div className="relative">
               <button
                 onClick={() => {
-                  setAnalyzeOpen(a => !a)
-                  setWriteOpen(false)
+                  setAnalyzeOpen((a) => !a);
+                  setWriteOpen(false);
                 }}
                 className="flex justify-between w-full py-2 text-left hover:text-blue-600"
               >
                 계약서 분석
-                <ChevronDown size={16} className={analyzeOpen ? 'rotate-180 transition-transform' : ''} />
+                <ChevronDown
+                  size={16}
+                  className={
+                    analyzeOpen ? 'rotate-180 transition-transform' : ''
+                  }
+                />
               </button>
               {analyzeOpen && (
                 <ul className="pl-4">
@@ -244,7 +260,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         </div>
       )}
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

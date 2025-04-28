@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @font-face {
   font-family: 'Pretendard';
   src: url('../../shared/assets/fonts/Pretendard-Thin.woff2') format('woff2');
@@ -8,7 +8,8 @@
 
 @font-face {
   font-family: 'Pretendard';
-  src: url('../../shared/assets/fonts/Pretendard-ExtraLight.woff2') format('woff2');
+  src: url('../../shared/assets/fonts/Pretendard-ExtraLight.woff2')
+    format('woff2');
   font-weight: 200;
   font-style: normal;
 }
@@ -36,7 +37,8 @@
 
 @font-face {
   font-family: 'Pretendard';
-  src: url('../../shared/assets/fonts/Pretendard-SemiBold.woff2') format('woff2');
+  src: url('../../shared/assets/fonts/Pretendard-SemiBold.woff2')
+    format('woff2');
   font-weight: 600;
   font-style: normal;
 }
@@ -50,7 +52,8 @@
 
 @font-face {
   font-family: 'Pretendard';
-  src: url('../../shared/assets/fonts/Pretendard-ExtraBold.woff2') format('woff2');
+  src: url('../../shared/assets/fonts/Pretendard-ExtraBold.woff2')
+    format('woff2');
   font-weight: 800;
   font-style: normal;
 }
@@ -82,4 +85,25 @@ body {
   place-items: center; */
   min-width: 320px;
   min-height: 100vh;
+}
+
+@layer utilities {
+  .animated-gradient {
+    background: linear-gradient(to bottom, #ffffff 65%, #e0f2fe 100%);
+    background-size: 100% 200%;
+    animation: gradientMove 30s ease-in-out infinite;
+  }
+}
+
+/* ✅ 키프레임도 직접 작성 */
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
 }

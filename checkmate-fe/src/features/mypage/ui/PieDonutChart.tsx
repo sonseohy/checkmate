@@ -85,7 +85,7 @@ export const PieDonutChart: React.FC = () => {
 
     return (
         <div>
-            <ReactApexChart options={options} series={series} type="donut" height={isMobile ? 400 : 500}/>
+            <ReactApexChart options={options} series={series} type="donut" height={isMobile ? 300 : 400}/>
         </div>
     )
 };

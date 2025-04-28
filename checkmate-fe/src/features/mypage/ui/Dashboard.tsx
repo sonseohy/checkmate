@@ -33,11 +33,11 @@ export default function Dashboard() {
                 최근 활동
                 <span className="ml-1 text-[#60A5FA]"> 2 </span>
             </div>
-            <div className={`flex ${isMobile ? 'flex-col justify-center' : 'flex-row'} items-center `}>
+            <div className={`flex ${isMobile ? 'flex-col justify-center' : 'flex-row gap-10 ml-30'} items-center `}>
                 <div className={`${isMobile ? 'w-full mb-5' : 'w-150'}`}>
                     <PieDonutChart />
                 </div>
-                <div className={`flex-1 p-5 font-semibold text-2xl rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.2)] ${isMobile ? 'w-full' : 'max-w-150'}`}>
+                <div className={`flex-1 p-5 font-semibold text-2xl rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.2)] ${isMobile ? 'w-full' : 'max-w-150 min-h-100'}`}>
                     '김싸피'님의 계약서 현황입니다
                     <br />
                     분석: 5개

@@ -67,7 +67,7 @@ public class AuthController {
      * @param refreshTokenRequest 리프레시 토큰 요청 정보
      * @return 새로운 토큰 정보가 포함된 {@link ApiResult} 객체
      */
-    @PostMapping("/refresh")
+    @PostMapping("/reissue-token")
     public ApiResult<?> refreshAccessToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
         TokenPair refreshTokenResponse = authService.refreshAccessToken(refreshTokenRequest);
         return ApiResult.ok(refreshTokenResponse);

@@ -18,7 +18,7 @@ const Section3 = () => {
   return (
     <section
       id="templates"
-      className="relative min-h-[100vh] w-full overflow-hidden snap-start bg-gradient-move animate-gradient-move"
+      className="relative min-h-[100vh] w-full overflow-hidden snap-start animated-gradient"
     >
       <div className="flex flex-col items-center w-full py-16">
         {/* 제목 */}

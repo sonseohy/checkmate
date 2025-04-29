@@ -17,7 +17,7 @@ const templates = [
 const Section5 = () => {
   return (
     <section
-      id="demos"
+      id="templates"
       className="relative min-h-[100vh] w-full overflow-hidden snap-start animated-gradient"
     >
       <div className="flex flex-col items-center w-full py-16">

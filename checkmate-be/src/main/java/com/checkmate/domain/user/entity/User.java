@@ -32,7 +32,7 @@ public class User {
     @Email
     private String email;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private String phone;
 
     @Enumerated(EnumType.STRING)

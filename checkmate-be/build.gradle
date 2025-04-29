@@ -46,6 +46,11 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     runtimeOnly 'com.mysql:mysql-connector-j'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation group: 'software.amazon.awssdk', name: 's3', version: '2.29.44'
+    implementation group: 'software.amazon.awssdk', name: 'sts', version: '2.29.44'
+
+    implementation 'xyz.capybara:clamav-client:2.1.2'
 }
 
 tasks.named('test') {

@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { AnalyzeApi } from '@/features/analyze/api/AnalyzeApi'; // ✅ API 호출 분리!
+import { CategoryApi } from '@/features/analyze/api/CategoriesApi';
 
 interface SubCategory {
   id: string;
@@ -21,7 +21,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ mode }) => {
   } = useQuery<SubCategory[]>({
     queryKey: ['subcategories', mainCategoryId],
     queryFn: async () => {
-      const res = await AnalyzeApi.getSubCategories(mainCategoryId!);
+      const res = await CategoryApi.getSubCategories(mainCategoryId!);
       return res.data;
     },
     enabled: !!mainCategoryId,

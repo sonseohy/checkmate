@@ -1,10 +1,8 @@
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import ContentCertificationIcon from '@/assets/images/home/content-certification.png';
 import ContractIcon from '@/assets/images/home/contract.png';
 import PaymentOrderIcon from '@/assets/images/home/payment-order.png';
-import { useCardVariants } from '@/shared/animations/useCardVariants';
-import { desktopCardVariants } from '@/shared/animations/cardVariants';
+import { TemplateCardList } from '@/widgets/common/TemplateCardList';
 
 const templates = [
   {
@@ -17,9 +15,6 @@ const templates = [
 ];
 
 const Section5 = () => {
-  const variants = useCardVariants();
-  const navigate = useNavigate();
-
   return (
     <section
       id="demos"
@@ -41,32 +36,7 @@ const Section5 = () => {
         </motion.h2>
 
         {/* 카드 목록 */}
-        <div className="flex flex-wrap justify-center gap-8 mt-12 md:relative md:flex-nowrap md:items-end md:h-80">
-          {templates.map(({ title, icon, link }, i) => (
-            <motion.div
-              key={title}
-              custom={i}
-              variants={variants}
-              initial="initial"
-              whileInView="animate"
-              viewport={{ once: true, amount: 0.5 }}
-              className="flex flex-col items-center justify-center w-full p-6 shadow-lg cursor-pointer h-80 bg-blue-50 rounded-2xl sm:w-72 sm:p-8 md:absolute"
-              style={{ zIndex: i === 1 ? 20 : 10 }}
-              whileHover={
-                variants === desktopCardVariants
-                  ? {
-                      scale: 1.05,
-                      rotate: 0,
-                      boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
-                    }
-                  : {}
-              }
-            >
-              <h1 className="mb-4 text-4xl font-bold text-center">{title}</h1>
-              <img src={icon} alt={title} className="h-40" />
-            </motion.div>
-          ))}
-        </div>
+        <TemplateCardList templates={templates} />
       </div>
     </section>
   );

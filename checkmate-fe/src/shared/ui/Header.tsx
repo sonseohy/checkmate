@@ -52,29 +52,29 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             <ul className="absolute left-0 z-10 w-40 mt-2 bg-white border rounded shadow-md top-full">
               <li>
                 <Link
-                  to="/write/real-estate"
+                  to="/write/contract"
                   className="block px-4 py-2 hover:bg-gray-100"
                   onClick={() => setWriteOpen(false)}
                 >
-                  부동산매매 계약서
+                  계약서
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/write/employment"
+                  to="/write/content-certification"
                   className="block px-4 py-2 hover:bg-gray-100"
                   onClick={() => setWriteOpen(false)}
                 >
-                  근로계약서
+                  내용증명
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/write/rental"
+                  to="/write/payment-order"
                   className="block px-4 py-2 hover:bg-gray-100"
                   onClick={() => setWriteOpen(false)}
                 >
-                  임대차 계약서
+                  지급명령
                 </Link>
               </li>
             </ul>
@@ -100,29 +100,29 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             <ul className="absolute left-0 z-10 w-40 mt-2 bg-white border rounded shadow-md top-full">
               <li>
                 <Link
-                  to="/analyze/real-estate"
+                  to="/analyze/contract"
                   className="block px-4 py-2 hover:bg-gray-100"
                   onClick={() => setAnalyzeOpen(false)}
                 >
-                  부동산매매 계약서
+                  계약서
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/analyze/employment"
+                  to="/analyze/content-certification"
                   className="block px-4 py-2 hover:bg-gray-100"
                   onClick={() => setAnalyzeOpen(false)}
                 >
-                  근로계약서
+                  내용증명
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/analyze/rental"
+                  to="/analyze/payment-order"
                   className="block px-4 py-2 hover:bg-gray-100"
                   onClick={() => setAnalyzeOpen(false)}
                 >
-                  임대차 계약서
+                  지급명령
                 </Link>
               </li>
             </ul>
@@ -169,29 +169,29 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                 <ul className="pl-4">
                   <li>
                     <Link
-                      to="/write/real-estate"
+                      to="/write/contract"
                       className="block py-1 hover:bg-gray-100"
                       onClick={() => setMobileOpen(false)}
                     >
-                      부동산매매 계약서
+                      계약서
                     </Link>
                   </li>
                   <li>
                     <Link
-                      to="/write/employment"
+                      to="/write/content-certification"
                       className="block py-1 hover:bg-gray-100"
                       onClick={() => setMobileOpen(false)}
                     >
-                      근로계약서
+                      내용증명
                     </Link>
                   </li>
                   <li>
                     <Link
-                      to="/write/rental"
+                      to="/write/payment-order"
                       className="block py-1 hover:bg-gray-100"
                       onClick={() => setMobileOpen(false)}
                     >
-                      임대차 계약서
+                      지급명령
                     </Link>
                   </li>
                 </ul>
@@ -219,29 +219,29 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                 <ul className="pl-4">
                   <li>
                     <Link
-                      to="/analyze/real-estate"
+                      to="/analyze/contract"
                       className="block py-1 hover:bg-gray-100"
                       onClick={() => setMobileOpen(false)}
                     >
-                      부동산매매 계약서
+                      계약서
                     </Link>
                   </li>
                   <li>
                     <Link
-                      to="/analyze/employment"
+                      to="/analyze/content-certification"
                       className="block py-1 hover:bg-gray-100"
                       onClick={() => setMobileOpen(false)}
                     >
-                      근로계약서
+                      내용증명
                     </Link>
                   </li>
                   <li>
                     <Link
-                      to="/analyze/rental"
+                      to="/analyze/payment-order"
                       className="block py-1 hover:bg-gray-100"
                       onClick={() => setMobileOpen(false)}
                     >
-                      임대차 계약서
+                      지급명령
                     </Link>
                   </li>
                 </ul>

@@ -1,26 +1,25 @@
-
-import { motion } from "framer-motion"
-import UploadIcon    from "@/assets/home/contract-upload.png"
-import AnalysisIcon  from "@/assets/home/ai-analysis.png"
-import SummaryIcon   from "@/assets/home/summary-feedback.png"
+import { motion } from 'framer-motion';
+import UploadIcon from '@/assets/images/home/contract-upload.png';
+import AnalysisIcon from '@/assets/images/home/ai-analysis.png';
+import SummaryIcon from '@/assets/images/home/summary-feedback.png';
 
 const steps = [
   {
-    title: "작성 전 주의사항 제공",
-    desc: "체크리스트를 통해 놓치기 쉬운 항목을 미리 확인하세요.",
+    title: '작성 전 주의사항 제공',
+    desc: '체크리스트를 통해 놓치기 쉬운 항목을 미리 확인하세요.',
     icon: UploadIcon,
   },
   {
-    title: "간편 작성 기능",
-    desc: "질문에 답하기만 하면 주요 조항을 자동으로 채워드립니다.",
+    title: '간편 작성 기능',
+    desc: '질문에 답하기만 하면 주요 조항을 자동으로 채워드립니다.',
     icon: AnalysisIcon,
   },
   {
-    title: "최종 계약서 제공",
-    desc: "완성된 계약서를 PDF로 다운로드 하실 수 있습니다.",
+    title: '최종 계약서 제공',
+    desc: '완성된 계약서를 PDF로 다운로드 하실 수 있습니다.',
     icon: SummaryIcon,
   },
-]
+];
 
 const WritingProcess: React.FC = () => (
   <section
@@ -54,6 +53,6 @@ const WritingProcess: React.FC = () => (
       ))}
     </div>
   </section>
-)
+);
 
-export default WritingProcess
+export default WritingProcess;

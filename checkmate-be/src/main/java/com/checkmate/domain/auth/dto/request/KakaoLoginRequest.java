@@ -19,10 +19,9 @@ public record KakaoLoginRequest(
         @NotBlank @Email String email,
         @Pattern(regexp = "^$|\\d{4}") String birthyear,
         @Pattern(regexp = "^$|\\d{4}") String birthday,
-        String gender,
         @NotBlank String phoneNumber,
-        @NotBlank String providerId,
-        @NotBlank String fcmToken
+        @NotBlank String providerId
+
 ) {
     public User toUserEntity() {
         User.UserBuilder builder = User.builder()

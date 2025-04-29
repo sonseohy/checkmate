@@ -44,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     >
       {/* Logo 클릭 시 메인으로 이동 */}
       <Link to="/" className="flex items-center gap-2">
-        <img src="/icons/favicon-96x96.png" alt="logo" className="w-6 h-6" />
+        <img src="/icons/favicon-96x96.png" alt="logo" className="w-10 h-10" />
       </Link>
 
       {/* Desktop Menu */}

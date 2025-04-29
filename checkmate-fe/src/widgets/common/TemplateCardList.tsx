@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { useCardVariants } from '@/shared/animations/useCardVariants';
-import { desktopCardVariants } from '@/shared/animations/cardVariants';
+import { useCardVariants } from '@/shared/constants/animations/useCardVariants';
+import { desktopCardVariants } from '@/shared/constants/animations/cardVariants';
 
 interface TemplateCardListProps {
   templates: { title: string; icon: string; link: string }[];

@@ -1,15 +1,34 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
+import { categorySlugMap } from '@/shared/constants/categorySlugMap'; // ✅ 경로 확인
 
 export interface HeaderProps {
   className?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
+  const navigate = useNavigate(); // ✅ useNavigate는 컴포넌트 안에 있어야 함
   const [writeOpen, setWriteOpen] = useState(false);
   const [analyzeOpen, setAnalyzeOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // 메뉴 클릭 핸들러
+  const handleWriteClick = (categoryName: string) => {
+    const slug = categorySlugMap[categoryName];
+    if (slug) {
+      navigate(`/write/${slug}`);
+      setWriteOpen(false);
+    }
+  };
+
+  const handleAnalyzeClick = (categoryName: string) => {
+    const slug = categorySlugMap[categoryName];
+    if (slug) {
+      navigate(`/analyze/${slug}`);
+      setAnalyzeOpen(false);
+    }
+  };
 
   // 모바일 메뉴 닫힐 때 서브메뉴도 닫기
   useEffect(() => {
@@ -21,10 +40,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
   return (
     <header
-      className={`
-        sticky top-0 z-50 flex items-center justify-between
-        w-full h-16 px-6 bg-white shadow ${className}
-      `}
+      className={`sticky top-0 z-50 flex items-center justify-between w-full h-16 px-6 bg-white shadow ${className}`}
     >
       {/* Logo 클릭 시 메인으로 이동 */}
       <Link to="/" className="flex items-center gap-2">
@@ -50,33 +66,16 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           </button>
           {writeOpen && (
             <ul className="absolute left-0 z-10 w-40 mt-2 bg-white border rounded shadow-md top-full">
-              <li>
-                <Link
-                  to="/write/contract"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                  onClick={() => setWriteOpen(false)}
-                >
-                  계약서
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/write/content-certification"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                  onClick={() => setWriteOpen(false)}
-                >
-                  내용증명
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/write/payment-order"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                  onClick={() => setWriteOpen(false)}
-                >
-                  지급명령
-                </Link>
-              </li>
+              {['계약서', '내용증명', '지급명령'].map((name) => (
+                <li key={name}>
+                  <button
+                    onClick={() => handleWriteClick(name)}
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+                    {name}
+                  </button>
+                </li>
+              ))}
             </ul>
           )}
         </div>
@@ -98,33 +97,16 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           </button>
           {analyzeOpen && (
             <ul className="absolute left-0 z-10 w-40 mt-2 bg-white border rounded shadow-md top-full">
-              <li>
-                <Link
-                  to="/analyze/contract"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                  onClick={() => setAnalyzeOpen(false)}
-                >
-                  계약서
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/analyze/content-certification"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                  onClick={() => setAnalyzeOpen(false)}
-                >
-                  내용증명
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/analyze/payment-order"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                  onClick={() => setAnalyzeOpen(false)}
-                >
-                  지급명령
-                </Link>
-              </li>
+              {['계약서', '내용증명', '지급명령'].map((name) => (
+                <li key={name}>
+                  <button
+                    onClick={() => handleAnalyzeClick(name)}
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+                    {name}
+                  </button>
+                </li>
+              ))}
             </ul>
           )}
         </div>
@@ -167,33 +149,16 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
               </button>
               {writeOpen && (
                 <ul className="pl-4">
-                  <li>
-                    <Link
-                      to="/write/contract"
-                      className="block py-1 hover:bg-gray-100"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      계약서
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/write/content-certification"
-                      className="block py-1 hover:bg-gray-100"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      내용증명
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/write/payment-order"
-                      className="block py-1 hover:bg-gray-100"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      지급명령
-                    </Link>
-                  </li>
+                  {['계약서', '내용증명', '지급명령'].map((name) => (
+                    <li key={name}>
+                      <button
+                        onClick={() => handleWriteClick(name)}
+                        className="block py-1 text-left hover:bg-gray-100"
+                      >
+                        {name}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
@@ -217,33 +182,16 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
               </button>
               {analyzeOpen && (
                 <ul className="pl-4">
-                  <li>
-                    <Link
-                      to="/analyze/contract"
-                      className="block py-1 hover:bg-gray-100"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      계약서
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/analyze/content-certification"
-                      className="block py-1 hover:bg-gray-100"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      내용증명
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/analyze/payment-order"
-                      className="block py-1 hover:bg-gray-100"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      지급명령
-                    </Link>
-                  </li>
+                  {['계약서', '내용증명', '지급명령'].map((name) => (
+                    <li key={name}>
+                      <button
+                        onClick={() => handleAnalyzeClick(name)}
+                        className="block py-1 text-left hover:bg-gray-100"
+                      >
+                        {name}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>

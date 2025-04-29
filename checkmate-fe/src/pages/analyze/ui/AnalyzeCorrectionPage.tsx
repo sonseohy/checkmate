@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 interface OCRLine {
   id: number;
@@ -7,22 +7,12 @@ interface OCRLine {
 }
 
 const AnalyzeCorrectionPage: React.FC = () => {
-  const { template, subtype } = useParams<{
-    template: string;
-    subtype: string;
-  }>();
+  const { subtype } = useParams<{ subtype: string }>();
   const navigate = useNavigate();
-  // 예시: OCR API 호출 후 얻은 텍스트 라인
-  const [lines, setLines] = useState<OCRLine[]>([]);
+  const location = useLocation();
+  const { ocrLines } = location.state as { ocrLines: OCRLine[] };
 
-  useEffect(() => {
-    // TODO: 실제 OCR 호출
-    setLines([
-      { id: 1, text: '제1조 (근로계약의 목적)' },
-      { id: 2, text: '근로자(을)과 사업주(갑)는…' },
-      // …
-    ]);
-  }, []);
+  const [lines, setLines] = useState<OCRLine[]>(ocrLines || []);
 
   const onNext = () => navigate(`../${subtype}/result`);
 

@@ -7,6 +7,7 @@ import {LuLayoutGrid,
         LuLogOut, 
         LuChevronRight, 
         LuChevronLeft } from "react-icons/lu";
+import { Link } from "react-router-dom";
 
 interface SideBarProps {
   onMenuClick: (label:string) => void;
@@ -51,11 +52,14 @@ export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
       </button>
       {/* 로고 */}
         <div className="my-3">
-          <img src="/icons/favicon-32x32.png" 
-              alt="logo"
-              width={40}
-              height={40}
-              />
+          <Link to='/'>
+            <img src="/icons/favicon-32x32.png" 
+                alt="logo"
+                width={40}
+                height={40}
+                />
+          </Link>
+          
         </div>
         {/* 사이드바 메뉴 */}
         <div className="mt-5">

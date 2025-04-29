@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.repository.ContractRepository;
 import com.checkmate.domain.question.dto.response.QuestionResponseDto;
 import com.checkmate.domain.question.entity.Question;

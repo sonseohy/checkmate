@@ -18,10 +18,10 @@ public record CourthouseResponseDto (int courthouseId, String courthouseName, St
 
 	public Courthouse toEntity() {
 		return Courthouse.builder()
-			.CourthouseId(courthouseId)
-			.CourthouseName(courthouseName)
-			.CourthouseAddress(courthouseAddress)
-			.CourthousePhoneNumber(courthousePhoneNumber)
+			.courthouseId(courthouseId)
+			.courthouseName(courthouseName)
+			.courthouseAddress(courthouseAddress)
+			.courthousePhoneNumber(courthousePhoneNumber)
 			.build();
 
 	}

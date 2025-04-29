@@ -19,15 +19,15 @@ public class Courthouse {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(nullable = false)
-	private int CourthouseId;
+	private int courthouseId;
 
 	@Column(nullable = false, length = 30)
-	private String CourthouseName;
+	private String courthouseName;
 
 	@Column(nullable = false)
-	private String CourthouseAddress;
+	private String courthouseAddress;
 
 	@Column(nullable = false, length = 15)
-	private String CourthousePhoneNumber;
+	private String courthousePhoneNumber;
 
 }

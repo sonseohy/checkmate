@@ -16,7 +16,9 @@ public enum ErrorCode {
     TOKEN_STORAGE_FAILED("AUTH-004", HttpStatus.INTERNAL_SERVER_ERROR, "토큰 저장 중 오류가 발생했습니다."),
     INVALID_REFRESH_TOKEN("AUTH-005", HttpStatus.UNAUTHORIZED, "Redis 리프레시 토큰과 다릅니다."),
 
-    CATEGORY_NOT_FOUND("CATEGORY-001", HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다.");
+    CATEGORY_NOT_FOUND("CATEGORY-001", HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
+
+    CONTRACT_NOT_FOUND("CONTRACT-001", HttpStatus.NOT_FOUND, "존재하지 않는 계약서입니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

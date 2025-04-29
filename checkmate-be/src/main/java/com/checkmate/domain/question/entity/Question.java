@@ -27,7 +27,7 @@ public class Question {
     private Contract contract;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "contract_category_id", nullable = false)
     private ContractCategory category;
 
     @Lob

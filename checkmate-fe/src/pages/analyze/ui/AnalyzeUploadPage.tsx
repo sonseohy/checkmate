@@ -1,7 +1,19 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { uploadContract, requestOCR } from '@/features/analyze/services';
-import { mockCategories } from '@/shared/constants/mockCategories'; // ✅ 추가 import
+import {
+  uploadContract,
+  requestOCR,
+} from '@/features/analyze/services/UploadService';
+import { mockCategories } from '@/shared/constants/mockCategories';
+import { Upload } from 'lucide-react'; // ✅ Upload 아이콘 사용
+
+const ALLOWED_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'application/pdf',
+  'application/x-hwp',
+];
+const MAX_FILES = 20;
 
 const AnalyzeUploadPage: React.FC = () => {
   const { mainCategoryId, subCategoryId } = useParams<{
@@ -9,59 +21,115 @@ const AnalyzeUploadPage: React.FC = () => {
     subCategoryId: string;
   }>();
   const navigate = useNavigate();
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
-  // ✅ mainCategoryId로 대분류 이름 찾기
+  if (!mainCategoryId || !subCategoryId) {
+    return <div className="py-16 text-center">잘못된 접근입니다.</div>;
+  }
+
   const mainCategoryName =
-    mockCategories.find((cat) => cat.id === mainCategoryId)?.name ?? '계약서'; // 없으면 기본값
+    mockCategories.find((cat) => cat.id === mainCategoryId)?.name ?? '계약서';
+
+  const realCategoryId = mockCategories
+    .flatMap((cat) => cat.midcategories)
+    .flatMap((mid) => mid.subcategories)
+    .find((sub) => sub.id === subCategoryId)?.categoryId;
 
   const onNext = async () => {
-    if (!file) return alert('파일을 선택해주세요.');
+    if (files.length === 0) return alert('파일을 선택해주세요.');
+    if (!realCategoryId) return alert('유효한 카테고리를 찾을 수 없습니다.');
 
     try {
-      const uploadRes = await uploadContract({
-        title: mainCategoryName, // ✅ 대분류 이름으로 업로드
-        categoryId: 12, // TODO: categoryId 매칭
-        file,
-      });
+      for (const file of files) {
+        const uploadRes = await uploadContract({
+          title: mainCategoryName,
+          categoryId: realCategoryId,
+          file,
+        });
+        const contractId = uploadRes.contractId;
+        await requestOCR(contractId);
+      }
 
-      const contractId = uploadRes.contractId;
-
-      const ocrRes = await requestOCR(contractId);
-
-      navigate(`../${subCategoryId}/review`, {
-        state: { ocrLines: ocrRes.lines },
-      });
+      navigate(`../${subCategoryId}/review`, { state: { ocrLines: [] } });
     } catch (error) {
       console.error(error);
       alert('업로드에 실패했습니다.');
     }
   };
 
-  if (!mainCategoryId || !subCategoryId) {
-    return <div className="py-16 text-center">잘못된 접근입니다.</div>;
-  }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files ?? []);
+
+    const filteredFiles = selectedFiles.filter((file) =>
+      ALLOWED_TYPES.includes(file.type),
+    );
+
+    if (filteredFiles.length !== selectedFiles.length) {
+      alert('jpg, png, pdf, hwp 파일만 업로드 가능합니다.');
+    }
+
+    if (files.length + filteredFiles.length > MAX_FILES) {
+      alert('최대 20개 파일까지만 업로드할 수 있습니다.');
+      return;
+    }
+
+    setFiles((prev) => [...prev, ...filteredFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   return (
-    <section className="container px-4 py-16 mx-auto text-center">
-      <h1 className="mb-8 text-3xl font-bold">
-        {/* ✅ 대분류 이름 표시 */}
+    <section className="container px-2 py-12 mx-auto text-center">
+      <h1 className="mb-6 text-2xl font-bold">
         {`${mainCategoryName} 파일을 업로드 해주세요`}
       </h1>
 
       <div className="max-w-md mx-auto">
-        <div className="p-8 mb-4 border-2 border-dashed rounded-lg">
+        {/* 업로드 박스 */}
+        <div className="p-6 mb-6 border-2 border-dashed rounded-lg">
+          <label
+            htmlFor="file-upload"
+            className="flex flex-col items-center justify-center w-full h-40 cursor-pointer hover:opacity-80"
+          >
+            <Upload size={48} />
+            <span className="mt-2 text-gray-600">파일 선택 (최대 20개)</span>
+          </label>
           <input
+            id="file-upload"
             type="file"
-            accept=".pdf,image/*"
-            onChange={(e) => e.target.files && setFile(e.target.files[0])}
+            multiple
+            accept=".jpg,.png,.pdf,.hwp"
+            className="hidden"
+            onChange={handleFileChange}
           />
-          {file && <p className="mt-2 text-sm">선택된 파일: {file.name}</p>}
+
+          {/* 선택된 파일 목록 */}
+          {files.length > 0 && (
+            <div className="mt-4 text-sm text-left">
+              <p className="mb-2 font-semibold">{`선택된 파일 (${files.length}개)`}</p>
+              <ul className="space-y-1">
+                {files.map((file, index) => (
+                  <li key={index} className="flex items-center justify-between">
+                    {file.name}
+                    <button
+                      onClick={() => removeFile(index)}
+                      className="ml-2 text-xs text-red-500 hover:underline"
+                    >
+                      삭제
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
+        {/* 다음 버튼 */}
         <button
           onClick={onNext}
-          className="px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
+          className="w-full px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
         >
           다음
         </button>

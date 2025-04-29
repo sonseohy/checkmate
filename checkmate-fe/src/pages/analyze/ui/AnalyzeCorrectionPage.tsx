@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-
-interface OCRLine {
-  id: number;
-  text: string;
-}
+import { OCRFetchResponse, OCRLine } from '@/features/analyze/model/types';
 
 const AnalyzeCorrectionPage: React.FC = () => {
   const { subtype } = useParams<{ subtype: string }>();
@@ -26,11 +22,13 @@ const AnalyzeCorrectionPage: React.FC = () => {
         <div className="space-y-2">
           {lines.map((line) => (
             <textarea
-              key={line.id}
-              value={line.text}
+              key={line.ocr_id}
+              value={line.ocr_text}
               onChange={(e) => {
                 const newLines = lines.map((l) =>
-                  l.id === line.id ? { ...l, text: e.target.value } : l,
+                  l.ocr_id === line.ocr_id
+                    ? { ...l, ocr_text: e.target.value }
+                    : l,
                 );
                 setLines(newLines);
               }}
@@ -39,6 +37,7 @@ const AnalyzeCorrectionPage: React.FC = () => {
             />
           ))}
         </div>
+
         <div className="mt-4 text-right">
           <button
             onClick={onNext}

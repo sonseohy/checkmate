@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserGetResponse(
-        Integer user_id,
+        Integer userId,
         String name,
         String birth,
         String email,
         String phone,
-        String created_at
+        String createdAt
 ) {
 }

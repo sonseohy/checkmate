@@ -19,11 +19,11 @@ public class ContractCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name", length = 20)
+    @Column(name = "name", length = 30)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "level", length = 5)
+    @Column(name = "level", length = 63)
     private Level level;
 
     @ManyToOne

@@ -3,6 +3,7 @@ package com.checkmate.domain.contractcategory.service;
 
 import com.checkmate.domain.contractcategory.dto.response.CategoryResponse;
 import com.checkmate.domain.contractcategory.dto.response.SubCategoryResponse;
+import com.checkmate.domain.contractcategory.entity.ContractCategory;
 import com.checkmate.domain.contractcategory.repository.ContractCategoryRepository;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
@@ -52,4 +53,11 @@ public class ContractCategoryService {
                 .collect(Collectors.toList());
 
     }
+
+    @Transactional(readOnly = true)
+    public ContractCategory findContractCategoryById(Integer categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+    }
+
 }

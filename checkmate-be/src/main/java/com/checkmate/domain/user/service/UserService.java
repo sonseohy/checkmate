@@ -3,6 +3,8 @@ package com.checkmate.domain.user.service;
 import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.domain.user.entity.User;
 import com.checkmate.domain.user.repository.UserRepository;
+import com.checkmate.global.common.exception.CustomException;
+import com.checkmate.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,5 +28,12 @@ public class UserService implements UserDetailsService {
 
         return new CustomUserDetails(user.getId());
     }
+
+    @Transactional(readOnly = true)
+    public User findUserById(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
 
 }

@@ -20,6 +20,12 @@ import com.checkmate.global.common.response.ApiResponse;
 public class QuestionController {
 	private final QuestionService questionService;
 
+	/**
+	 * 각 계약서에 해당되는 질문 리스트 조회
+	 *
+	 * @param contractId
+	 * @return 질문 내용과 질문 ID
+	 */
 	@GetMapping("/contracts/{contractId}/questions")
 	// @PreAuthorize("isAuthenticated()")
 	public ApiResponse<List<QuestionResponseDto>> getQuestions(@PathVariable(value = "contractId") int contractId) {

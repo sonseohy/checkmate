@@ -23,6 +23,12 @@ public class QuestionService {
 	private final QuestionRepository questionRepository;
 	private final ContractRepository contractRepository;
 
+	/**
+	 * 각 계약서에 해당하는 질문 리스트를 데이터베이스에서 조회
+	 *
+ 	 * @param contractId
+	 * @return 질문 리스트 DTO
+	 */
 	@Transactional(readOnly = true)
 	public List<QuestionResponseDto> getQuestions(int contractId) {
 		if (!contractRepository.existsById(contractId)) {

@@ -18,7 +18,7 @@ import com.checkmate.domain.checklist.service.CheckListService;
 import com.checkmate.global.common.response.ApiResult;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/check-list")
 @RequiredArgsConstructor
 @Tag(name = "CheckList API", description = "체크 리스트 조회 API")
 public class CheckListController {
@@ -36,7 +36,7 @@ public class CheckListController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "체크 리스트 없음"),
 	})
-	@GetMapping("/check-list/{categoryId}")
+	@GetMapping("/{categoryId}")
 	// @PreAuthorize("isAuthenticated()")
 	public ApiResult<List<CheckListResponseDto>> getCheckListsByContractCategoryId(
 		@PathVariable(value = "categoryId") int categoryId) {

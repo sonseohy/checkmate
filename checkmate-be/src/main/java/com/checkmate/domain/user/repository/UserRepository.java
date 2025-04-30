@@ -41,7 +41,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @param userId 사용자 ID
      * @return 30일 이내 삭제된 사용자가 있으면 true, 없으면 false
      */
-    @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.id = :userId AND u.deletedAt IS NOT NULL AND u.deletedAt > DATEADD(DAY, -30, CURRENT_TIMESTAMP)")
+    @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.userId = :userId AND u.deletedAt IS NOT NULL AND u.deletedAt > DATEADD(DAY, -30, CURRENT_TIMESTAMP)")
     boolean isUserDeletedWithin30Days(Integer userId);
 
 }

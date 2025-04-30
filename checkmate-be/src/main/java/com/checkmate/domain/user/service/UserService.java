@@ -43,7 +43,7 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findById(Integer.valueOf(userId))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with userId: " + userId));
 
-        return new CustomUserDetails(user.getId());
+        return new CustomUserDetails(user.getUserId());
     }
 
     /**

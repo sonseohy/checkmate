@@ -21,7 +21,8 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
     @Column(nullable = false, length = 20)
     private String name;
@@ -79,6 +80,7 @@ public class User {
     public void recover() {
         if (isRecoverable()) {
             this.deletedAt = null;
+            this.status = Status.ACTIVE;
         }
     }
 }

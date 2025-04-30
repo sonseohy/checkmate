@@ -9,7 +9,6 @@ public record UserGetResponse(
         String name,
         String birth,
         String email,
-        String phone,
-        String createdAt
+        String phone
 ) {
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserUpdateResponse(
-        Integer user_id,
+        Integer userId,
         String name,
         String birth,
         String email,

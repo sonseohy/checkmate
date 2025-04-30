@@ -3,7 +3,7 @@ package com.checkmate.domain.contractcategory.controller;
 import com.checkmate.domain.contractcategory.dto.response.CategoryResponse;
 import com.checkmate.domain.contractcategory.dto.response.SubCategoryResponse;
 import com.checkmate.domain.contractcategory.service.ContractCategoryService;
-import com.checkmate.global.common.response.ApiResponse;
+import com.checkmate.global.common.response.ApiResult;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,20 +21,20 @@ public class ContractCategoryController {
     private final ContractCategoryService contractCategoryService;
 
     @GetMapping
-    public ApiResponse<List<CategoryResponse>> getMajorCategories() {
+    public ApiResult<List<CategoryResponse>> getMajorCategories() {
 
         List<CategoryResponse> categoryResponses = contractCategoryService.getMajorCategories();
 
-        return ApiResponse.ok(categoryResponses);
+        return ApiResult.ok(categoryResponses);
 
     }
 
     @GetMapping("{parentId}/subcategories")
-    public ApiResponse<List<SubCategoryResponse>> getSubCategories(@PathVariable @Min(1) Integer parentId) {
+    public ApiResult<List<SubCategoryResponse>> getSubCategories(@PathVariable @Min(1) Integer parentId) {
 
         List<SubCategoryResponse> subCategoryResponses = contractCategoryService.getSubCategories(parentId);
 
-        return ApiResponse.ok(subCategoryResponses);
+        return ApiResult.ok(subCategoryResponses);
 
     }
 

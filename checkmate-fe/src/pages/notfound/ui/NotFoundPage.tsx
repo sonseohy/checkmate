@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import NotFoundImage from '@/assets/images/not-found/your-404-image.png'; // 너가 업로드한 이미지 경로에 맞게 수정!
 

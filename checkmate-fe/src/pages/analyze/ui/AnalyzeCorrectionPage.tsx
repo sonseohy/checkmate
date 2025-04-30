@@ -1,44 +1,43 @@
-import React, { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-
-interface OCRLine { id: number; text: string }
+import { useState } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { OCRLine } from '@/features/analyze/model/types';
 
 const AnalyzeCorrectionPage: React.FC = () => {
-  const { template, subtype } = useParams<{template:string, subtype:string}>()
-  const navigate = useNavigate()
-  // 예시: OCR API 호출 후 얻은 텍스트 라인
-  const [lines, setLines] = useState<OCRLine[]>([])
+  const { subtype } = useParams<{ subtype: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { ocrLines } = location.state as { ocrLines: OCRLine[] };
 
-  useEffect(() => {
-    // TODO: 실제 OCR 호출
-    setLines([
-      { id:1, text:"제1조 (근로계약의 목적)" },
-      { id:2, text:"근로자(을)과 사업주(갑)는…" },
-      // …
-    ])
-  }, [])
+  const [lines, setLines] = useState<OCRLine[]>(ocrLines || []);
 
-  const onNext = () => navigate(`../${subtype}/result`)
+  const onNext = () => navigate(`../${subtype}/result`);
 
   return (
     <section className="min-h-screen p-8 bg-gray-100">
       <div className="container p-6 mx-auto bg-white rounded-lg">
-        <h1 className="mb-4 text-3xl font-bold">업로드된 계약서를 확인해주세요</h1>
+        <h1 className="mb-4 text-3xl font-bold">
+          업로드된 계약서를 확인해주세요
+        </h1>
         <p className="mb-6 text-gray-600">잘못된 내용이 있다면 수정해주세요</p>
         <div className="space-y-2">
-          {lines.map(line => (
+          {lines.map((line) => (
             <textarea
-              key={line.id}
-              value={line.text}
-              onChange={e => {
-                const newLines = lines.map(l => l.id === line.id ? {...l, text:e.target.value} : l)
-                setLines(newLines)
+              key={line.ocr_id}
+              value={line.ocr_text}
+              onChange={(e) => {
+                const newLines = lines.map((l) =>
+                  l.ocr_id === line.ocr_id
+                    ? { ...l, ocr_text: e.target.value }
+                    : l,
+                );
+                setLines(newLines);
               }}
               className="w-full px-2 py-1 border rounded"
               rows={1}
             />
           ))}
         </div>
+
         <div className="mt-4 text-right">
           <button
             onClick={onNext}
@@ -49,7 +48,7 @@ const AnalyzeCorrectionPage: React.FC = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default AnalyzeCorrectionPage
+export default AnalyzeCorrectionPage;

@@ -1,48 +1,46 @@
-// src/pages/write/ui/WritePage.tsx
-import React from "react"
-import { Link, useParams } from "react-router-dom"
-import WritingProcess from "@/widgets/write/WritingProcess"
+import { Link, useParams } from 'react-router-dom';
+import WritingProcess from '@/widgets/write/WritingProcess';
 import {
   RealEstateIntro,
   EmploymentIntro,
   RentalIntro,
-} from '@/features/write'
+} from '@/features/write';
 
 type Params = {
-  template: "real-estate" | "employment" | "rental"
-}
+  template: 'real-estate' | 'employment' | 'rental';
+};
 
 const introMap = {
-  "real-estate": {
-    title: "부동산 매매 계약서 자동 작성",
+  'real-estate': {
+    title: '부동산 매매 계약서 자동 작성',
     Component: RealEstateIntro,
-    videoUrl: "https://www.youtube.com/embed/REAL_ESTATE_ID",
+    videoUrl: 'https://www.youtube.com/embed/REAL_ESTATE_ID',
   },
   employment: {
-    title: "근로 계약서 자동 작성",
+    title: '근로 계약서 자동 작성',
     Component: EmploymentIntro,
-    videoUrl: "https://www.youtube.com/embed/EMPLOYMENT_ID",
+    videoUrl: 'https://www.youtube.com/embed/EMPLOYMENT_ID',
   },
   rental: {
-    title: "임대차 계약서 자동 작성",
+    title: '임대차 계약서 자동 작성',
     Component: RentalIntro,
-    videoUrl: "https://www.youtube.com/embed/RENTAL_ID",
+    videoUrl: 'https://www.youtube.com/embed/RENTAL_ID',
   },
-} as const
+} as const;
 
 const WritePage: React.FC = () => {
-  const { template } = useParams<Params>()
-  const cfg = template ? introMap[template] : undefined
+  const { template } = useParams<Params>();
+  const cfg = template ? introMap[template] : undefined;
 
   if (!cfg) {
     return (
       <div className="container py-16 mx-auto text-center text-red-500">
         잘못된 경로입니다.
       </div>
-    )
+    );
   }
 
-  const { title, Component: Intro, videoUrl } = cfg
+  const { title, Component: Intro, videoUrl } = cfg;
 
   return (
     <div className="container py-16 mx-auto space-y-16">
@@ -78,7 +76,7 @@ const WritePage: React.FC = () => {
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default WritePage
+export default WritePage;

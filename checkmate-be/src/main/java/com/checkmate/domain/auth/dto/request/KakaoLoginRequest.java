@@ -1,5 +1,6 @@
 package com.checkmate.domain.auth.dto.request;
 
+import com.checkmate.domain.user.entity.Status;
 import com.checkmate.domain.user.entity.User;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -28,6 +29,7 @@ public record KakaoLoginRequest(
                 .email(email)
                 .providerId(providerId)
                 .phone(phoneNumber)
+                .status(Status.ACTIVE)
                 .createdAt(LocalDateTime.now());
 
         if (Objects.nonNull(name) && !name.isBlank()) {

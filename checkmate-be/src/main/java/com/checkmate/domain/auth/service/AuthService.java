@@ -58,13 +58,14 @@ public class AuthService {
                 if (existingUser.isRecoverable()) { // 복구 가능
                     resultType = LoginResultType.RECOVERED;
                     existingUser.recover();
+                    existingUser = userRepository.save(existingUser);
                 } else { // 복구 불가능
                     resultType = LoginResultType.EXPIRED;
                     userRepository.delete(existingUser);
                     user = registerUser(kakaoLoginRequest);
 
                     // 토큰 발급 및 반환
-                    TokenPair tokenPair = tokenService.generateTokens(user.getId());
+                    TokenPair tokenPair = tokenService.generateTokens(user.getUserId());
                     return new KakaoLoginResponse(tokenPair.accessToken(), tokenPair.refreshToken(), accessTokenValidity, resultType);
                 }
             }
@@ -75,7 +76,7 @@ public class AuthService {
         }
 
         // 토큰 발급
-        TokenPair tokenPair = tokenService.generateTokens(user.getId());
+        TokenPair tokenPair = tokenService.generateTokens(user.getUserId());
 
         return new KakaoLoginResponse(tokenPair.accessToken(), tokenPair.refreshToken(), accessTokenValidity, resultType);
     }

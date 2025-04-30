@@ -15,14 +15,4 @@ public record CourthouseResponseDto (int courthouseId, String courthouseName, St
 			courthouse.getCourthousePhoneNumber()
 		);
 	}
-
-	public Courthouse toEntity() {
-		return Courthouse.builder()
-			.courthouseId(courthouseId)
-			.courthouseName(courthouseName)
-			.courthouseAddress(courthouseAddress)
-			.courthousePhoneNumber(courthousePhoneNumber)
-			.build();
-
-	}
 }

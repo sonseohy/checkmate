@@ -1,7 +1,5 @@
 package com.checkmate.domain.question.dto.response;
 
-import com.checkmate.domain.contract.entity.Contract;
-import com.checkmate.domain.contractcategory.entity.ContractCategory;
 import com.checkmate.domain.question.entity.Question;
 
 import lombok.Builder;
@@ -16,15 +14,5 @@ public record QuestionResponseDto (int contractId, int contractCategoryId, int q
 			question.getQuestionId(),
 			question.getQuestionDetail()
 		);
-	}
-
-	public Question toEntity(Contract contract, ContractCategory contractCategory) {
-		return Question.builder()
-			.contract(contract)
-			.category(contractCategory)
-			.questionDetail(questionDetail)
-			.questionId(questionId)
-			.build();
-
 	}
 }

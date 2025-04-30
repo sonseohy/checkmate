@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { OCRFetchResponse, OCRLine } from '@/features/analyze/model/types';
+import { OCRLine } from '@/features/analyze/model/types';
 
 const AnalyzeCorrectionPage: React.FC = () => {
   const { subtype } = useParams<{ subtype: string }>();

@@ -39,7 +39,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ mode }) => {
             <li key={mid.id}>
               <Link
                 to={`/${mode}/${mainCategoryId}/${mid.id}`}
-                className="block p-6 text-center bg-white border rounded-lg hover:shadow-md"
+                className="block p-6 font-bold text-center text-white bg-blue-500 border rounded-lg hover:shadow-md"
               >
                 {mid.name}
               </Link>
@@ -69,14 +69,14 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ mode }) => {
         {midCategory.subcategories.map((sub) => {
           const toPath =
             mode === 'write'
-              ? `/write/${mainCategoryId}/${midCategory.id}/${sub.id}`
+              ? `/write/${mainCategoryId}/${midCategory.id}/${sub.id}/intro`
               : `/analyze/${mainCategoryId}/${midCategory.id}/${sub.id}/upload`;
 
           return (
             <li key={sub.id}>
               <Link
                 to={toPath}
-                className="block p-6 text-center bg-white border rounded-lg hover:shadow-md"
+                className="block p-6 font-bold text-center text-white bg-blue-500 border rounded-lg hover:shadow-md"
               >
                 {sub.name}
               </Link>

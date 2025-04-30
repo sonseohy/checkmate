@@ -13,7 +13,7 @@ export const TemplateCardList: React.FC<TemplateCardListProps> = ({
 
   return (
     <div className="flex flex-wrap justify-center gap-8 mt-8 md:relative md:flex-nowrap md:items-end md:h-80">
-      {templates.map(({ title, icon, link }, i) => (
+      {templates.map(({ title, icon }, i) => (
         <motion.div
           key={title}
           custom={i}

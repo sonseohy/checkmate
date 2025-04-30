@@ -59,22 +59,36 @@ export const router = createBrowserRouter([
       { path: 'mypage', element: <MyPage /> },
 
       // 계약서 쓰기 플로우
-      { path: 'write/:template', element: <WriteCategoryPage /> },
-      { path: 'write/:template/:subtype', element: <WriteIntroPage /> },
-      { path: 'write/:template/:subtype/fill', element: <WriteFillPage /> },
+      { path: 'write/:mainCategoryId', element: <WriteCategoryPage /> }, // 대분류 선택 후 중분류 선택
+      {
+        path: 'write/:mainCategoryId/:midCategoryId',
+        element: <WriteCategoryPage />,
+      }, // 중분류 선택 후 소분류 선택
+      {
+        path: 'write/:mainCategoryId/:midCategoryId/:subCategoryId/intro',
+        element: <WriteIntroPage />,
+      }, // 소분류 선택 완료
+      {
+        path: 'write/:mainCategoryId/:midCategoryId/:subCategoryId/fill',
+        element: <WriteFillPage />,
+      },
 
       // 계약서 분석 플로우
-      { path: 'analyze/:template', element: <AnalyzeCategoryPage /> },
+      { path: 'analyze/:mainCategoryId', element: <AnalyzeCategoryPage /> },
       {
-        path: 'analyze/:template/:subtype/upload',
+        path: 'analyze/:mainCategoryId/:midCategoryId',
+        element: <AnalyzeCategoryPage />,
+      }, // 중분류 선택 후 소분류 선택
+      {
+        path: 'analyze/:mainCategoryId/:midCategoryId/:subCategoryId/upload',
         element: <AnalyzeUploadPage />,
       },
       {
-        path: 'analyze/:template/:subtype/review',
+        path: 'analyze/:mainCategoryId/:midCategoryId/:subCategoryId/review',
         element: <AnalyzeReviewPage />,
       },
       {
-        path: 'analyze/:template/:subtype/result',
+        path: 'analyze/:mainCategoryId/:midCategoryId/:subCategoryId/result',
         element: <AnalyzeResultPage />,
       },
 
@@ -83,3 +97,47 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
+
+// const routes: RouteObject[] = [
+//     {
+//         path: "/",
+//         element: (
+//             <Suspense fallback={<div>Loading...</div>}>
+//                 <AppLayout>
+//                     <MainPage />
+//                 </AppLayout>
+//             </Suspense>
+//         )
+//     },
+//     {
+//         path: "/mypage",
+//         element: (
+//             <Suspense fallback={<div>Loading...</div>}>
+//                 <MyPage />
+//             </Suspense>
+//         )
+//     },
+//     {
+//         path: "/write/:template",
+//         element: (
+//             <Suspense fallback={<div>Loading...</div>}>
+//                 <AppLayout>
+//                 <WritePage />
+//                 </AppLayout>
+//             </Suspense>
+//         )
+//     },
+//     {
+//         path: "/analyze/:template",
+//         element: (
+//             <Suspense fallback={<div>Loading...</div>}>
+//                                                 <AppLayout>
+//                 <AnalyzePage />
+//                 </AppLayout>
+
+//             </Suspense>
+//         )
+//     },
+// ];
+
+// export const router = createBrowserRouter(routes);

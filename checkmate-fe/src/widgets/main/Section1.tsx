@@ -13,9 +13,11 @@ const Section1 = () => (
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
-        className="text-5xl font-extrabold"
+        className="text-5xl font-extrabold leading-snug md:text-6xl lg:text-7xl"
       >
-        계약 전엔, 체크메이트
+        계약 전엔,
+        <br />
+        체크메이트
       </motion.h1>
 
       <motion.p

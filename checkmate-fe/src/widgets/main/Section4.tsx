@@ -41,7 +41,7 @@ const Section4 = () => (
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
-      className="mb-12 text-3xl font-bold text-center"
+      className="mb-12 text-2xl font-bold text-center md:text-3xl lg:text-4xl"
     >
       복잡한 계약서도 걱정 마세요
     </motion.h2>
@@ -57,7 +57,9 @@ const Section4 = () => (
           className="px-6 text-center"
         >
           <img src={icon} alt={title} className="w-32 h-32 mx-auto mb-4" />
-          <h3 className="mb-2 text-xl font-semibold">{title}</h3>
+          <h3 className="mb-2 text-lg font-semibold md:text-xl lg:text-2xl">
+            {title}
+          </h3>
           <p className="text-gray-600">{desc}</p>
         </motion.div>
       ))}

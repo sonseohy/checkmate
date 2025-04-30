@@ -5,15 +5,13 @@ module.exports = {
     extend: {
       colors: {
         black: '#202020',
-      },
-      fontFamily: {
-        pretendard: ['Pretendard'],
-      },
-      colors: {
         'text-point-blue': '#60A5FA',
         'point-blue': '#3B82F6',
         'checkmate-blue-700': '#1D4ED8',
         'checkmate-blue-300': '#93C5FD',
+      },
+      fontFamily: {
+        pretendard: ['Pretendard'],
       },
       backgroundImage: {
         'gradient-move':

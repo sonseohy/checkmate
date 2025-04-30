@@ -1,11 +1,11 @@
 // 대시 보드
-import { PieDonutChart } from "./PieDonutChart";
-import { ContractListData } from "../model/types";
-import { useMobile } from "@/shared";
+import { PieDonutChart, 
+    ContractListData } from "@/features/mypage";
+import useDeviceType from "@/shared/hooks/useMobile";
 
 
 export default function Dashboard() {
-    const isMobile = useMobile();
+    const isMobile = useDeviceType();
     // 하드코딩 데이터 (삭제 예정)
     const data:ContractListData = {
         contracts: [

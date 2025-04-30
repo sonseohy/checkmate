@@ -20,14 +20,7 @@ const AnalyzeResultPage   = lazy(() => import("@pages/analyze").then(m=>({defaul
 //404 페이지
 const NotFoundPage = lazy(() => import("@pages/notfound").then(module => ({ default: module.NotFoundPage })))
 export const router = createBrowserRouter([
-  {
-    path: "/mypage",
-    element: (
-      <Suspense fallback={<div>Loading...</div>}>
-        <MyPage />
-      </Suspense>
-    )
-  },  
+
   {
       element: (
         <Suspense fallback={<div>Loading...</div>}>
@@ -38,7 +31,7 @@ export const router = createBrowserRouter([
       ),
       children: [
         { index: true, path: "/",                             element: <MainPage /> },
- 
+        { path: "/mypage", element: <MyPage />},
         // 계약서 쓰기 플로우
         { path: "write/:template",                            element: <WriteCategoryPage /> },
         { path: "write/:template/:subtype",                   element: <WriteIntroPage /> },

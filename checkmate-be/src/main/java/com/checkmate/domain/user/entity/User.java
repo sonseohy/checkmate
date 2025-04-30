@@ -1,5 +1,6 @@
 package com.checkmate.domain.user.entity;
 
+import com.checkmate.global.converter.PhoneNumberEncryptConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
@@ -34,6 +35,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @Convert(converter = PhoneNumberEncryptConverter.class)
     private String phone;
 
     @Enumerated(EnumType.STRING)

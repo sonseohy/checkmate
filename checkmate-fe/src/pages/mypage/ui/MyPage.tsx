@@ -37,9 +37,7 @@ export default function MyPage() {
                 <SideBar onMenuClick={handleMenuClick} selectedMenu={selectedMenu}/>
             </div>
             <div className="flex-1">
-                <div className="text-2xl my-3 ml-3">
-                    안녕하세요 김싸피님
-                </div>
+
                 <div className="h-px bg-gray-200 " />
                 {/* 컴포넌트 */}
                 <div className="m-3">

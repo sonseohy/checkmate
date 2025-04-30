@@ -25,7 +25,7 @@ public class CheckListService {
 	/**
 	 * 카테고리 별로 데이터베이스에 있는 체크 리스트를 조회
 	 *
-	 * @param categoryId
+	 * @param categoryId 카테고리 ID
 	 * @return checkListResponseDto -> 체크리스트ID, 카테고리 ID, 체크리스트 내용
 	 */
 	@Transactional(readOnly = true)

@@ -18,7 +18,7 @@ import com.checkmate.domain.question.service.QuestionService;
 import com.checkmate.global.common.response.ApiResult;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/questions")
 @RequiredArgsConstructor
 @Tag(name = "Question API", description = "질문 리스트 조회 API")
 public class QuestionController {
@@ -36,7 +36,7 @@ public class QuestionController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "질문 리스트 없음"),
 	})
-	@GetMapping("/contracts/{contractId}/questions")
+	@GetMapping("/{contractId}")
 	// @PreAuthorize("isAuthenticated()")
 	public ApiResult<List<QuestionResponseDto>> getQuestions(@PathVariable(value = "contractId") int contractId) {
 		List<QuestionResponseDto> data = questionService.getQuestions(contractId);

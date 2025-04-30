@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/courthouses")
 @Tag(name = "Courthouse API", description = "법원 정보 조회 API")
 public class CourthouseController {
 
@@ -34,8 +34,7 @@ public class CourthouseController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "법원 정보 없음"),
 	})
-	@GetMapping("/courthouses")
-	// @PreAuthorize("isAuthenticated()")
+	@GetMapping
 	public ApiResult<List<CourthouseResponseDto>> getCourthouse() {
 		List<CourthouseResponseDto> data = courthouseService.getAllCourthouseInfo();
 		return ApiResult.ok(data);

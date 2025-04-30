@@ -37,7 +37,6 @@ public class CheckListController {
 		@ApiResponse(responseCode = "404", description = "체크 리스트 없음"),
 	})
 	@GetMapping("/{categoryId}")
-	// @PreAuthorize("isAuthenticated()")
 	public ApiResult<List<CheckListResponseDto>> getCheckListsByContractCategoryId(
 		@PathVariable(value = "categoryId") int categoryId) {
 		List<CheckListResponseDto> data = checkListService.getCheckListByContractCategoryId(categoryId);

@@ -30,7 +30,7 @@ import java.util.Collections;
 public class SecurityConfig {
 
     public static final String[] allowUrls = {
-            "/docs/**", "/api/auth/**", "/api/categories/**"
+            "/docs/**", "/api/auth/**", "/api/categories/**", "/api/questions/**", "/api/courthouses/**"
     };
 
     private final JwtUtil jwtUtil;

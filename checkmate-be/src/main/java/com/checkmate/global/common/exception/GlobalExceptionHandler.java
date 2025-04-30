@@ -1,6 +1,6 @@
 package com.checkmate.global.common.exception;
 
-import com.checkmate.global.common.response.ApiResponse;
+import com.checkmate.global.common.response.ApiResult;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindingResult;
@@ -26,9 +26,9 @@ public class GlobalExceptionHandler {
      * @return 에러 코드에 기반한 HTTP 응답 엔터티
      */
     @ExceptionHandler(CustomException.class)
-    protected ApiResponse<?> handleCustomException(CustomException e) {
+    protected ApiResult<?> handleCustomException(CustomException e) {
         log.error("handleCustomException: {}", e.getMessage());
-        return ApiResponse.fail(e);
+        return ApiResult.fail(e);
     }
 
     /**
@@ -44,9 +44,9 @@ public class GlobalExceptionHandler {
      * @return 내부 서버 에러를 나타내는 HTTP 응답 엔터티
      */
     @ExceptionHandler(Exception.class)
-    protected ApiResponse<?> handleException(Exception e) {
+    protected ApiResult<?> handleException(Exception e) {
         log.error("Unhandled exception occurred: ", e);
-        return ApiResponse.fail(new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+        return ApiResult.fail(new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
     }
 
     /**
@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
      * @return 검증 실패에 대한 HTTP 응답 엔터티
      */
     @ExceptionHandler({ MethodArgumentNotValidException.class, ConstraintViolationException.class })
-    public ApiResponse<?> handleValidException(Exception e) {
+    public ApiResult<?> handleValidException(Exception e) {
         String errorMessages;
         if (e instanceof MethodArgumentNotValidException manvEx) {
             BindingResult bindingResult = manvEx.getBindingResult();
@@ -77,21 +77,21 @@ public class GlobalExceptionHandler {
                     .orElse("입력값 검증 오류가 발생했습니다.");
         }
         log.error("handleValidException: {}", errorMessages);
-        return ApiResponse.fail(new CustomException(ErrorCode.INVALID_INPUT_VALUE), errorMessages);
+        return ApiResult.fail(new CustomException(ErrorCode.INVALID_INPUT_VALUE), errorMessages);
     }
 
     /**
      * 필수 요청 파라미터가 누락되었을 때 발생하는 예외를 처리합니다.
      *
      * @param ex {@link MissingServletRequestParameterException}
-     * @return 요청 파라미터 누락에 대한 {@link ApiResponse} 응답
+     * @return 요청 파라미터 누락에 대한 {@link ApiResult} 응답
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ApiResponse<?> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
+    public ApiResult<?> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
         String name = ex.getParameterName();
         String message = String.format("필수 요청 파라미터 '%s'가 누락되었습니다.", name);
         log.error("handleMissingServletRequestParameter: {}", message);
-        return ApiResponse.fail(new CustomException(ErrorCode.INVALID_INPUT_VALUE), message);
+        return ApiResult.fail(new CustomException(ErrorCode.INVALID_INPUT_VALUE), message);
     }
 }
 

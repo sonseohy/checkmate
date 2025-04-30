@@ -4,10 +4,7 @@ import {LuLayoutGrid,
         LuFolder, 
         LuMap, 
         LuUserCog, 
-        LuLogOut, 
-        LuChevronRight, 
-        LuChevronLeft } from "react-icons/lu";
-import { Link } from "react-router-dom";
+        LuLogOut } from "react-icons/lu";
 
 interface SideBarProps {
   onMenuClick: (label:string) => void;
@@ -16,7 +13,6 @@ interface SideBarProps {
 
 
 export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
-  const [ isOpen, setIsOpen ] = useState<boolean>(false)
 
   const menu = [
     {icon: LuLayoutGrid, label: "대시보드" },
@@ -29,38 +25,13 @@ export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
 
   return (
     <div
-      className={`
+      className="
         relative flex flex-col h-screen
         bg-white px-6
-        transition-all duration-300
-        ${isOpen ? "w-full" : "w-25"}
-      `}
+       "
     >
       <div className="absolute inset-y-0 right-2 w-px bg-gray-200" />
-      <button
-        onClick={()=> setIsOpen(!isOpen)}
-        className="absolute top-100 right-[-5px]"
-      >
-        {isOpen? <LuChevronRight
-                  size={30} 
-                  className="rounded-2xl bg-white shadow-[0px_2px_8px_rgba(0,0,0,0.2)]"
-                  />: 
-                  <LuChevronLeft
-                  size={30} 
-                  className="rounded-2xl bg-white shadow-[0px_2px_8px_rgba(0,0,0,0.2)]"
-        /> }
-      </button>
-      {/* 로고 */}
-        <div className="my-3">
-          <Link to='/'>
-            <img src="/icons/favicon-32x32.png" 
-                alt="logo"
-                width={40}
-                height={40}
-                />
-          </Link>
-          
-        </div>
+
         {/* 사이드바 메뉴 */}
         <div className="mt-5">
           {menu.map(({ icon: Icon, label }) => (
@@ -79,7 +50,6 @@ export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
                   overflow-hidden whitespace-nowrap
                   text-2xl font-medium
                   transition-[max-width,opacity] duration-300 ease-in-out
-                  ${isOpen ? "opacity-100": "opacity-0"}
                   ${selectedMenu === label ? "text-[#60A5FA]" : "text-black"}`} 
               >
                 {label}

@@ -1,48 +1,71 @@
-import { useParams, Link } from 'react-router-dom';
-import { mockCategories } from '@/shared/constants/mockCategories'; // 대분류 + 중분류 + 소분류 mock 데이터
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  useMidCategories,
+  useSubCategories,
+} from '@/features/categories/hooks/useCategories';
+import { MidCategory, SubCategory } from '@/features/categories/model/types';
+import {
+  categoryIdToNameMap,
+  categoryIdToSlugMap,
+} from '@/shared/constants/categorySlugMap';
 
-interface CategorySelectorProps {
+interface Props {
   mode: 'write' | 'analyze';
+  mainCategoryId: number;
+  selectedMid: MidCategory | null;
+  selectedSub: SubCategory | null;
+  onSelectMid: (mid: MidCategory) => void;
+  onSelectSub: (sub: SubCategory) => void;
 }
 
-const CategorySelector: React.FC<CategorySelectorProps> = ({ mode }) => {
-  const { mainCategoryId, midCategoryId } = useParams<{
-    mainCategoryId: string;
-    midCategoryId?: string;
-  }>();
+const CategorySelector: React.FC<Props> = ({
+  mode,
+  mainCategoryId,
+  selectedMid,
+  selectedSub,
+  onSelectMid,
+  onSelectSub,
+}) => {
+  const navigate = useNavigate();
 
-  if (!mainCategoryId) {
-    return <div className="py-16 text-center">잘못된 접근입니다.</div>;
-  }
+  const { data: midCategories } = useMidCategories(mainCategoryId);
+  const { data: subCategories } = useSubCategories(selectedMid?.id);
+  const categoryName = categoryIdToNameMap[mainCategoryId] || '카테고리';
+  const slug = categoryIdToSlugMap[mainCategoryId];
 
-  // 대분류 찾기
-  const mainCategory = mockCategories.find(
-    (category) => category.id === mainCategoryId,
-  );
+  // 소분류 선택시 다음페이지(업로드 or 소개)로 이동
+  useEffect(() => {
+    if (selectedSub) {
+      const path =
+        mode === 'write' ? `/write/${slug}/intro` : `/analyze/${slug}/upload`;
 
-  if (!mainCategory) {
-    return (
-      <div className="py-16 text-center">카테고리를 찾을 수 없습니다.</div>
-    );
-  }
+      navigate(path, {
+        state: {
+          selectedMid,
+          selectedSub,
+        },
+      });
+    }
+  }, [selectedSub]);
 
-  // 만약 midCategoryId가 없으면 중분류 선택 페이지
-  if (!midCategoryId) {
+  // ✅ 중분류 선택 화면
+  if (!selectedMid) {
     return (
       <section className="container py-16 mx-auto">
         <h1 className="mb-8 text-3xl font-bold text-center">
-          어떤 {mainCategory.name}을 {mode === 'write' ? '작성' : '분석'}
+          어떤 {categoryName} 카테고리를 {mode === 'write' ? '작성' : '분석'}
           하시겠습니까?
         </h1>
         <ul className="grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 md:grid-cols-3">
-          {mainCategory.midcategories.map((mid) => (
+          {midCategories?.map((mid) => (
             <li key={mid.id}>
-              <Link
-                to={`/${mode}/${mainCategoryId}/${mid.id}`}
-                className="block p-6 font-bold text-center text-white bg-blue-500 border rounded-lg hover:shadow-md"
+              <button
+                onClick={() => onSelectMid(mid)}
+                className="block w-full p-6 font-bold text-center text-white bg-blue-500 border rounded-lg hover:shadow-md"
               >
                 {mid.name}
-              </Link>
+              </button>
             </li>
           ))}
         </ul>
@@ -50,39 +73,24 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ mode }) => {
     );
   }
 
-  // midCategoryId가 있으면 소분류 선택 페이지
-  const midCategory = mainCategory.midcategories.find(
-    (mid) => mid.id === midCategoryId,
-  );
-
-  if (!midCategory) {
-    return <div className="py-16 text-center">소분류를 찾을 수 없습니다.</div>;
-  }
-
+  // ✅ 소분류 선택 화면
   return (
     <section className="container py-16 mx-auto">
       <h1 className="mb-8 text-3xl font-bold text-center">
-        어떤 {midCategory.name}을 {mode === 'write' ? '작성' : '분석'}
+        어떤 {selectedMid.name}을 {mode === 'write' ? '작성' : '분석'}
         하시겠습니까?
       </h1>
       <ul className="grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 md:grid-cols-3">
-        {midCategory.subcategories.map((sub) => {
-          const toPath =
-            mode === 'write'
-              ? `/write/${mainCategoryId}/${midCategory.id}/${sub.id}/intro`
-              : `/analyze/${mainCategoryId}/${midCategory.id}/${sub.id}/upload`;
-
-          return (
-            <li key={sub.id}>
-              <Link
-                to={toPath}
-                className="block p-6 font-bold text-center text-white bg-blue-500 border rounded-lg hover:shadow-md"
-              >
-                {sub.name}
-              </Link>
-            </li>
-          );
-        })}
+        {subCategories?.map((sub) => (
+          <li key={sub.id}>
+            <button
+              onClick={() => onSelectSub(sub)}
+              className="block w-full p-6 font-bold text-center text-white bg-blue-500 border rounded-lg hover:shadow-md"
+            >
+              {sub.name}
+            </button>
+          </li>
+        ))}
       </ul>
     </section>
   );

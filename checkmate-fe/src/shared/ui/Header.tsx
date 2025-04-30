@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
-import { categorySlugMap } from '@/shared/constants/categorySlugMap'; // ✅ 경로 확인
+import { categoryNameToSlugMap } from '@/shared/constants/categorySlugMap';
 
 export interface HeaderProps {
   className?: string;
@@ -15,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
   // 메뉴 클릭 핸들러
   const handleWriteClick = (categoryName: string) => {
-    const slug = categorySlugMap[categoryName];
+    const slug = categoryNameToSlugMap[categoryName];
     if (slug) {
       navigate(`/write/${slug}`);
       setWriteOpen(false);
@@ -23,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   };
 
   const handleAnalyzeClick = (categoryName: string) => {
-    const slug = categorySlugMap[categoryName];
+    const slug = categoryNameToSlugMap[categoryName];
     if (slug) {
       navigate(`/analyze/${slug}`);
       setAnalyzeOpen(false);
@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
       {/* Desktop Menu */}
       <div className="items-center hidden gap-8 text-sm font-semibold text-black md:flex">
-        {/* 계약서 쓰기 */}
+        {/* 계약서 작성 */}
         <div className="relative">
           <button
             onClick={() => {
@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             }}
             className="flex items-center gap-1 hover:text-blue-600"
           >
-            계약서 쓰기
+            계약서 작성
             <ChevronDown
               size={16}
               className={writeOpen ? 'rotate-180 transition-transform' : ''}
@@ -132,7 +132,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       {mobileOpen && (
         <div className="absolute left-0 z-40 w-full bg-white border-b shadow-md top-full md:hidden">
           <div className="flex flex-col p-4 space-y-2">
-            {/* 계약서 쓰기 모바일 */}
+            {/* 계약서 작성 모바일 */}
             <div className="relative">
               <button
                 onClick={() => {
@@ -141,7 +141,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                 }}
                 className="flex justify-between w-full py-2 text-left hover:text-blue-600"
               >
-                계약서 쓰기
+                계약서 작성
                 <ChevronDown
                   size={16}
                   className={writeOpen ? 'rotate-180 transition-transform' : ''}

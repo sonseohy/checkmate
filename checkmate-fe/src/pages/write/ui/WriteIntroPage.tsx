@@ -1,46 +1,51 @@
-import { Link, useParams } from "react-router-dom"
-import WritingProcess from "@/widgets/write/WritingProcess"
+import { Link, useParams } from 'react-router-dom';
+import WritingProcess from '@/widgets/write/WritingProcess';
 import {
   RealEstateIntro,
   EmploymentIntro,
   RentalIntro,
-} from '@/features/write'
+} from '@/features/write';
 
-type Params = {
-  template: "real-estate" | "employment" | "rental"
-}
+// slug 타입(url에 사용)
+type Slug = 'contract' | 'certification' | 'order';
 
-const introMap = {
-  "real-estate": {
-    title: "부동산 매매 계약서 자동 작성",
+//slug에 따라서
+const introMap: Record<
+  Slug,
+  { title: string; Component: React.FC; videoUrl: string }
+> = {
+  contract: {
+    title: '부동산 매매 계약서 자동 작성',
     Component: RealEstateIntro,
-    videoUrl: "https://www.youtube.com/embed/REAL_ESTATE_ID",
+    videoUrl: 'https://www.youtube.com/embed/REAL_ESTATE_ID',
   },
-  employment: {
-    title: "근로 계약서 자동 작성",
+  certification: {
+    title: '근로 계약서 자동 작성',
     Component: EmploymentIntro,
-    videoUrl: "https://www.youtube.com/embed/EMPLOYMENT_ID",
+    videoUrl: 'https://www.youtube.com/embed/EMPLOYMENT_ID',
   },
-  rental: {
-    title: "임대차 계약서 자동 작성",
+  order: {
+    title: '임대차 계약서 자동 작성',
     Component: RentalIntro,
-    videoUrl: "https://www.youtube.com/embed/RENTAL_ID",
+    videoUrl: 'https://www.youtube.com/embed/RENTAL_ID',
   },
-} as const
+};
 
 const WriteIntroPage: React.FC = () => {
-  const { template } = useParams<Params>()
-  const cfg = template ? introMap[template] : undefined
+  // url에서 slug를 가져와서 introMap에서 해당하는 컴포넌트를 찾음
+  const { mainCategorySlug } = useParams<{ mainCategorySlug: Slug }>();
+  const cfg = mainCategorySlug ? introMap[mainCategorySlug] : undefined;
 
+  //유효하지않은 slug일경우 에러처리
   if (!cfg) {
     return (
       <div className="container py-16 mx-auto text-center text-red-500">
         잘못된 경로입니다.
       </div>
-    )
+    );
   }
 
-  const { title, Component: Intro, videoUrl } = cfg
+  const { title, Component: Intro, videoUrl } = cfg;
 
   return (
     <div className="container py-16 mx-auto space-y-16">
@@ -69,14 +74,14 @@ const WriteIntroPage: React.FC = () => {
       {/* 작성 시작 버튼 */}
       <div className="text-center">
         <Link
-          to={`/write/${template}/fill`}
+          to={`/write/${mainCategorySlug}/fill`}
           className="inline-block px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
         >
           계약서 작성 시작하기
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default WriteIntroPage
+export default WriteIntroPage;

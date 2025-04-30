@@ -20,7 +20,7 @@ const Section3 = () => {
       id="templates"
       className="relative min-h-[100vh] w-full overflow-hidden snap-start animated-gradient"
     >
-      <div className="flex flex-col items-center w-full py-16">
+      <div className="flex flex-col items-center max-w-screen-xl px-4 py-16 mx-auto">
         {/* 제목 */}
         <motion.h2
           initial={{ opacity: 0, y: -30 }}

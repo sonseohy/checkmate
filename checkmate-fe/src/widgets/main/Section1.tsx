@@ -4,7 +4,7 @@ import HeroIllustration from '@/assets/images/home/hero-illustration.png';
 const Section1 = () => (
   <section
     id="hero"
-    className="flex flex-col items-center justify-center h-screen px-4 text-center bg-white snap-start"
+    className="flex flex-col items-center justify-center w-full h-screen text-center bg-white snap-start"
   >
     {/* Content group with even vertical spacing */}
     <motion.div className="flex flex-col items-center space-y-6">

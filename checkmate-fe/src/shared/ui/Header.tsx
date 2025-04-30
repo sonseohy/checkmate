@@ -8,7 +8,7 @@ export interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
-  const navigate = useNavigate(); // ✅ useNavigate는 컴포넌트 안에 있어야 함
+  const navigate = useNavigate();
   const [writeOpen, setWriteOpen] = useState(false);
   const [analyzeOpen, setAnalyzeOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

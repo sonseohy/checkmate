@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+
 @font-face {
   font-family: 'Pretendard';
   src: url('../../shared/assets/fonts/Pretendard-Thin.woff2') format('woff2');
@@ -81,10 +82,10 @@
 
 body {
   margin: 0;
-  /* display: flex;
-  place-items: center; */
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 @layer utilities {

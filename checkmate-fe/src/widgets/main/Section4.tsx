@@ -34,7 +34,7 @@ const steps = [
 const Section4 = () => (
   <section
     id="process"
-    className="flex flex-col justify-center min-h-screen px-4 py-16 -mx-4 md:py-0 bg-gray-50 snap-start"
+    className="flex flex-col justify-center w-full min-h-screen bg-gray-50 snap-start"
   >
     <motion.h2
       initial={{ opacity: 0, y: -30 }}

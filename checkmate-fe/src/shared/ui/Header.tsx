@@ -19,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     if (slug) {
       navigate(`/write/${slug}`);
       setWriteOpen(false);
+      setMobileOpen(false);
     }
   };
 
@@ -27,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     if (slug) {
       navigate(`/analyze/${slug}`);
       setAnalyzeOpen(false);
+      setMobileOpen(false);
     }
   };
 

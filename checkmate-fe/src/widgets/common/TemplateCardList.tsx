@@ -4,10 +4,12 @@ import { desktopCardVariants } from '@/shared/constants/animations/cardVariants'
 
 interface TemplateCardListProps {
   templates: { title: string; icon: string; link: string }[];
+  onClickCard?: (title: string) => void;
 }
 
 export const TemplateCardList: React.FC<TemplateCardListProps> = ({
   templates,
+  onClickCard,
 }) => {
   const variants = useCardVariants();
 
@@ -32,8 +34,11 @@ export const TemplateCardList: React.FC<TemplateCardListProps> = ({
                 }
               : {}
           }
+          onClick={() => onClickCard?.(title)}
         >
+          {/* 카드 제목 */}
           <h1 className="mb-4 text-4xl font-bold text-center">{title}</h1>
+          {/* 카드 이미지 */}
           <img src={icon} alt={title} className="h-40" />
         </motion.div>
       ))}

@@ -3,6 +3,8 @@ import ContentCertificationIcon from '@/assets/images/home/content-certification
 import ContractIcon from '@/assets/images/home/contract.png';
 import PaymentOrderIcon from '@/assets/images/home/payment-order.png';
 import { TemplateCardList } from '@/widgets/common/TemplateCardList'; // ✅ 공통 컴포넌트 import
+import { categoryNameToSlugMap } from '@/shared/constants/categorySlugMap';
+import { useNavigate } from 'react-router-dom';
 
 const templates = [
   {
@@ -15,6 +17,14 @@ const templates = [
 ];
 
 const Section3 = () => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (title: string) => {
+    const slug = categoryNameToSlugMap[title];
+    if (slug) {
+      navigate(`/write/${slug}`);
+    }
+  };
   return (
     <section
       id="templates"
@@ -36,7 +46,7 @@ const Section3 = () => {
         </motion.h2>
 
         {/* 카드 목록 */}
-        <TemplateCardList templates={templates} />
+        <TemplateCardList templates={templates} onClickCard={handleCardClick} />
       </div>
     </section>
   );

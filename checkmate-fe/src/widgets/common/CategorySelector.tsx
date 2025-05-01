@@ -53,16 +53,16 @@ const CategorySelector: React.FC<Props> = ({
   if (!selectedMid) {
     return (
       <section className="container py-16 mx-auto">
-        <h1 className="mb-8 text-3xl font-bold text-center">
-          어떤 {categoryName} 카테고리를 {mode === 'write' ? '작성' : '분석'}
-          하시겠습니까?
+        <h1 className="mb-8 text-3xl font-bold leading-relaxed text-center">
+          어떤 {categoryName} 카테고리를 <br className="sm:hidden" />
+          {mode === 'write' ? '작성' : '분석'}하시겠습니까?
         </h1>
-        <ul className="grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 md:grid-cols-3">
+        <ul className="flex flex-wrap justify-center gap-6 px-4">
           {midCategories?.map((mid) => (
             <li key={mid.id}>
               <button
                 onClick={() => onSelectMid(mid)}
-                className="block w-full p-6 font-bold text-center text-white bg-blue-500 border rounded-lg hover:shadow-md"
+                className="w-72 p-6 font-bold text-center text-white bg-[#3B82F6] border rounded-4xl hover:shadow-md"
               >
                 {mid.name}
               </button>
@@ -77,8 +77,8 @@ const CategorySelector: React.FC<Props> = ({
   return (
     <section className="container py-16 mx-auto">
       <h1 className="mb-8 text-3xl font-bold text-center">
-        어떤 {selectedMid.name}을 {mode === 'write' ? '작성' : '분석'}
-        하시겠습니까?
+        어떤 {selectedMid.name}을 <br className="sm:hidden" />
+        {mode === 'write' ? '작성' : '분석'} 하시겠습니까?
       </h1>
       <ul className="grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 md:grid-cols-3">
         {subCategories?.map((sub) => (

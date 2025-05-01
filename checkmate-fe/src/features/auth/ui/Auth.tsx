@@ -9,7 +9,7 @@ export default function Auth() {
       if (!code) return;
   
       PostKakaoCallback(code)
-        .then((res) => {
+        .then(res => {
           console.log("[Auth] callback 성공:", res);
           window.location.replace("/");
         })

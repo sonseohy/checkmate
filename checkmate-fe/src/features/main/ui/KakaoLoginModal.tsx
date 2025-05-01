@@ -14,10 +14,7 @@ const kakaoURL = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API}&
 export default function KakaoLoginModal({ onClose }: KakaoLoginModalProps) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-
-
   const handleKakaoLogin = () => {
-    console.log("🟢 카카오 로그인 버튼 클릭, 리다이렉트 URL:", kakaoURL);
     window.location.href = kakaoURL;
   };
 

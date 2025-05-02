@@ -13,5 +13,6 @@ export { default as Dropdown } from "./ui/mycontracts/DropDown";
 export { default as ContractTable } from "./ui/mycontracts/ContractTable";
 
 export type {
-    ContractListData
+    ContractListData,
+    CourtList,
 } from "./model/types"

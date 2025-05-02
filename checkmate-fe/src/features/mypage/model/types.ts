@@ -10,3 +10,13 @@ export interface Contract {
 export interface ContractListData {
     contracts: Contract[];
 };
+
+//법원 조회 
+export interface CourtList {
+    courthouseId: number;
+    courthouseName: string;
+    courthouseAddress: string;
+    courthousePhoneNumber: string;
+};
+
+

@@ -30,7 +30,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;
 
     private static final String[] AllowUrls = new String[]{
-            "/api/auth/", "/docs.html", "/api/categories"
+            "/api/auth/",
+            "/docs.html",
+            "/docs",
+            "/swagger-ui",
+            "/swagger-ui.html",
+            "/swagger-resources",
+            "/v3/api-docs",
+            "/webjars",
+            "/api/categories"
     };
 
     /**

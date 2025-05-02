@@ -21,8 +21,8 @@ spring:
       port: 6379
 
 springdoc:
-  # 특정 패키지 컨트롤러만 스캔
-  packages-to-scan: com.checkmate.domain.test
+  paths-to-match:
+    - /api/**
 
   # API가 생성 및 소비하는 기본 미디어 타입 지정
   default-consumes-media-type: application/json;charset=UTF-8
@@ -44,6 +44,8 @@ springdoc:
     path: /docs.html
     tags-sorter: alpha
     operations-sorter: alpha
+    disable-swagger-default-url: true
+    display-request-duration: true
 
 logging:
   level:

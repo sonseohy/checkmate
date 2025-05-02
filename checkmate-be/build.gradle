@@ -31,7 +31,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-configuration-processor'
 
     // Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
@@ -50,6 +50,17 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     runtimeOnly 'com.mysql:mysql-connector-j'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation group: 'software.amazon.awssdk', name: 's3', version: '2.29.44'
+    implementation group: 'software.amazon.awssdk', name: 'sts', version: '2.29.44'
+
+    implementation 'xyz.capybara:clamav-client:2.1.2'
+
+    implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.31'
+
+    implementation 'org.bytedeco:javacv:1.5.11'
+    implementation "org.bytedeco:opencv-platform:4.10.0-1.5.11"
+
 }
 
 tasks.named('test') {

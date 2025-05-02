@@ -16,15 +16,23 @@ public enum ErrorCode {
     TOKEN_STORAGE_FAILED("AUTH-004", HttpStatus.INTERNAL_SERVER_ERROR, "토큰 저장 중 오류가 발생했습니다."),
     INVALID_REFRESH_TOKEN("AUTH-005", HttpStatus.UNAUTHORIZED, "Redis 리프레시 토큰과 다릅니다."),
 
+    CATEGORY_NOT_FOUND("CATEGORY-001", HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
+
+    FILE_NOT_FOUND("FILE-001", HttpStatus.NOT_FOUND, "파일이 존재하지 않습니다."),
+    FILE_VIRUS_DETECTED("FILE-002", HttpStatus.UNPROCESSABLE_ENTITY, "악성 파일이 감지되었습니다."),
+    UNSUPPORTED_FILE_TYPE("FILE-003", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "파일 확장자를 확인할 수 없습니다."),
+    FILE_TOO_LARGE("FILE-004", HttpStatus.PAYLOAD_TOO_LARGE, "파일 최대 크기를 초과했습니다."),
+    FILE_UPLOAD_FAILED("FILE-005", HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 실패로 롤백 처리되었습니다."),
+
     ENCRYPT_FAILED("ENCRYPT-001", HttpStatus.INTERNAL_SERVER_ERROR, "암호화에 실패했습니다."),
     DECRYPT_FAILED("ENCRYPT-002", HttpStatus.INTERNAL_SERVER_ERROR, "복호화에 실패했습니다."),
 
     USER_NOT_FOUND("USER-001", HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
     USER_DELETED("USER-002", HttpStatus.BAD_REQUEST, "탈퇴한 회원입니다."),
 
-    CATEGORY_NOT_FOUND("CATEGORY-001", HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
+    CONTRACT_TITLE_REQUIRED("CONTRACT-001", HttpStatus.UNPROCESSABLE_ENTITY, "계약서명을 입력하지 않았습니다."),
+    CONTRACT_NOT_FOUND("CONTRACT-002", HttpStatus.NOT_FOUND, "존재하지 않는 계약서입니다."),
 
-    CONTRACT_NOT_FOUND("CONTRACT-001", HttpStatus.NOT_FOUND, "존재하지 않는 계약서입니다."),
     COURTHOUSE_NOT_FOUND("COURT-001", HttpStatus.NOT_FOUND, "법원 정보를 찾을 수 없습니다.");
 
 

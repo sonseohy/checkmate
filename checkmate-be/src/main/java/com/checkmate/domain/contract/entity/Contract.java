@@ -19,6 +19,7 @@ import java.util.*;
 @Table(name = "contract")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -37,14 +38,14 @@ public class Contract {
     private ContractCategory category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", nullable = true)
+    @JoinColumn(name = "template_id")
     private Template template;
 
     @Column(name = "title", length = 20, nullable = false)
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "process_status", length = 11, nullable = false)
+    @Column(name = "process_status", length = 11)
     private ProcessStatus processStatus;
 
     @Enumerated(EnumType.STRING)
@@ -55,7 +56,7 @@ public class Contract {
     @Column(name = "source_type", length = 17, nullable = false)
     private SourceType sourceType;
 
-    @Column(name = "page_no", nullable = false)
+    @Column(name = "page_no")
     private Integer pageNo;
 
     @CreatedDate

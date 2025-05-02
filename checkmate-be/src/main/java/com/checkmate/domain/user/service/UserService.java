@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class UserService implements UserDetailsService {
+
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final TokenService tokenService;

@@ -1,13 +1,41 @@
 package com.checkmate.domain.improvementreport.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import com.checkmate.domain.aianalysisreport.repository.AiAnalysisReportRepository;
+import com.checkmate.domain.improvementreport.dto.response.ImprovementResponseDto;
+import com.checkmate.domain.improvementreport.entity.ImprovementReport;
+import com.checkmate.domain.improvementreport.repository.ImprovementReportRepository;
+import com.checkmate.global.common.exception.CustomException;
+import com.checkmate.global.common.exception.ErrorCode;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ImprovementReportService {
+	private final ImprovementReportRepository improvementReportRepository;
+	private final AiAnalysisReportRepository aiAnalysisReportRepository;
+
+	/**
+	 * 각 ai 분석 리포트에 해당되는 개선 사항 리포트를 데이터베이스에서 조회
+	 *
+	 * @param aiAnalysisReportId ai 분석 리포트 ID
+	 * @return 개선 사항 리포트 DTO 리스트
+	 */
+	public List<ImprovementResponseDto> getImprovementReport(String aiAnalysisReportId) {
+		if (!aiAnalysisReportRepository.existsById(aiAnalysisReportId)) {
+			throw new CustomException(ErrorCode.AI_ANALYSIS_REPORT_NOT_FOUND);
+		}
+		List<ImprovementReport> improvementReports = improvementReportRepository
+			.findAllByAiAnalysisReportId(aiAnalysisReportId);
+		return improvementReports.stream()
+			.map(ImprovementResponseDto::fromEntity)
+			.collect(Collectors.toList());
+	}
+
 }

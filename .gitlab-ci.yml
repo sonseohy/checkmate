@@ -25,11 +25,6 @@ build_checkmate_be:
     - echo "$BACKEND_ENV" > .env
     - echo "✅ .env 파일 생성 완료"
 
-    # ✅ 디버깅용 로그
-    - echo "📁 현재 위치: $PWD"
-    - ls -al
-    - ls -al checkmate-be
-
     # ✅ Docker 이미지 정리 및 빌드
     - docker stop $DOCKER_IMAGE || true
     - docker rm $DOCKER_IMAGE || true
@@ -54,11 +49,6 @@ deploy_checkmate_be:
   only:
     - be
   script:
-    # ✅ 디버깅: 현재 디렉토리 구조 확인
-    - echo "📁 배포 단계에서의 현재 위치: $PWD"
-    - ls -al
-    - cat .env
-
     - docker stop $DOCKER_IMAGE || true
     - docker rm $DOCKER_IMAGE || true
     - docker run -d --name $DOCKER_IMAGE -p 8080:8080 --env-file .env $DOCKER_IMAGE

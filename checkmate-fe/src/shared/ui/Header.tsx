@@ -1,21 +1,26 @@
 // shared/ui/header/Header.tsx
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
 import { categoryNameToSlugMap } from '@/shared/constants/categorySlugMap';
 import MobileMenu from './MobileMenu';
 import HeaderDropdown from './HeaderDropdown';
+import { KakaoLoginModal } from '@/features/main';
+import { Menu, X } from 'lucide-react';
 
 export interface HeaderProps {
   className?: string;
 }
 
-export const Header = ({ className = '' }: HeaderProps) => {
+export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const navigate = useNavigate();
-  const [writeOpen, setWriteOpen] = useState(false);
-  const [analyzeOpen, setAnalyzeOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [writeOpen, setWriteOpen] = useState<boolean>(false);
+  const [analyzeOpen, setAnalyzeOpen] = useState<boolean>(false);
+  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
 
+  //회원가입/로그인 모달 제어
+  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
+
+  // 메뉴 클릭 핸들러
   const handleWriteClick = (name: string) => {
     const slug = categoryNameToSlugMap[name];
     if (slug) {
@@ -34,6 +39,12 @@ export const Header = ({ className = '' }: HeaderProps) => {
     }
   };
 
+  // 로그인/회원가입 모달
+  const showModal = () => {
+    setModalIsOpen(!modalIsOpen);
+  };
+
+  // 모바일 메뉴 닫힐 때 서브메뉴도 닫기
   useEffect(() => {
     if (!mobileOpen) {
       setWriteOpen(false);
@@ -68,12 +79,12 @@ export const Header = ({ className = '' }: HeaderProps) => {
           }}
           onItemClick={handleAnalyzeClick}
         />
-        <Link
-          to="/auth"
+        <button
+          onClick={showModal}
           className="text-sm font-normal text-gray-700 hover:text-black"
         >
           회원가입 / 로그인
-        </Link>
+        </button>
       </div>
 
       <button
@@ -98,8 +109,11 @@ export const Header = ({ className = '' }: HeaderProps) => {
           handleWriteClick={handleWriteClick}
           handleAnalyzeClick={handleAnalyzeClick}
           closeMobile={() => setMobileOpen(false)}
+          showModal={showModal}
         />
       )}
+
+      {modalIsOpen && <KakaoLoginModal onClose={showModal} />}
     </header>
   );
 };

@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import { AppLayout } from '@/shared';
 
+
 //메인 페이지
 const MainPage = lazy(() =>
   import('@pages/main').then((module) => ({ default: module.MainPage })),
@@ -45,6 +46,12 @@ const NotFoundPage = lazy(() =>
     default: module.NotFoundPage,
   })),
 );
+
+// 카카오 로그인 콜백 페이지
+const Auth = lazy(() =>
+ import('@features/auth/ui/Auth').then(module => ({ default: module.default }))
+  );
+
 export const router = createBrowserRouter([
   {
     element: (
@@ -80,6 +87,8 @@ export const router = createBrowserRouter([
 
       // 404 페이지
       { path: '*', element: <NotFoundPage /> },
+      //kakao 콜백 페이지
+      { path: 'kakao/login', element: <Auth /> },
     ],
   },
 ]);

@@ -1,6 +1,5 @@
 // shared/ui/header/MobileMenu.tsx
 import { ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface MobileMenuProps {
   writeOpen: boolean;
@@ -10,6 +9,7 @@ interface MobileMenuProps {
   handleWriteClick: (name: string) => void;
   handleAnalyzeClick: (name: string) => void;
   closeMobile: () => void;
+  showModal: () => void;
 }
 
 const items = ['계약서', '내용증명', '지급명령'];
@@ -22,6 +22,7 @@ const MobileMenu = ({
   handleWriteClick,
   handleAnalyzeClick,
   closeMobile,
+  showModal,
 }: MobileMenuProps) => (
   <div className="absolute left-0 z-40 w-full bg-white border-b shadow-md top-full md:hidden">
     <div className="flex flex-col p-4 space-y-2">
@@ -81,14 +82,16 @@ const MobileMenu = ({
         )}
       </div>
 
-      {/* 로그인 링크 */}
-      <Link
-        to="/auth"
+      {/* 회원가입 / 로그인 */}
+      <button
+        onClick={() => {
+          showModal(); // ✅ 모달 열기
+          closeMobile(); // ✅ 모바일 메뉴 닫기
+        }}
         className="pt-4 text-center text-gray-700 border-t cursor-pointer hover:text-black"
-        onClick={closeMobile}
       >
         회원가입 / 로그인
-      </Link>
+      </button>
     </div>
   </div>
 );

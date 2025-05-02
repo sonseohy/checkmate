@@ -19,7 +19,7 @@ public class ContractCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name", length = 30)
+    @Column(name = "name", length = 40)
     private String name;
 
     @Enumerated(EnumType.STRING)

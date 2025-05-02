@@ -1,4 +1,4 @@
-import { customAxios } from '@/shared/api/client/customAxios';
+import { customAxios } from '@/shared/api';
 
 // api/ContractApi.ts
 export const postContractUpload = (formData: FormData) =>

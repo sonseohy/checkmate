@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "contract_file")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)

@@ -28,7 +28,15 @@ import java.util.Collections;
 public class SecurityConfig {
 
     public static final String[] allowUrls = {
-            "/docs/**", "/api/auth/**", "/api/categories/**"
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/docs.html",
+            "/swagger-resources/**",
+            "/docs/**",
+            "/v3/api-docs/**",
+            "/webjars/**",
+            "/api/auth/**",
+            "/api/categories/**"
     };
 
     private final JwtUtil jwtUtil;

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,18 +15,24 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
+
+        SecurityScheme securityScheme = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")
+                .in(SecurityScheme.In.HEADER)
+                .name("Authorization");
+
+        SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
+
         return new OpenAPI()
+                .addServersItem(new Server().url("/"))
                 .components(new Components()
-                        .addSecuritySchemes("bearerAuth",
-                                new SecurityScheme()
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme("bearer")
-                                        .bearerFormat("JWT")))
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                        .addSecuritySchemes("bearerAuth", securityScheme))
+                .addSecurityItem(securityRequirement)
                 .info(new Info()
                         .title("CheckMate API Document")
                         .version("v0.0.1")
                         .description("CheckMate API 명세서입니다."));
     }
-
 }

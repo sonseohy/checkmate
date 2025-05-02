@@ -3,9 +3,12 @@ package com.checkmate.domain.missingclausereport.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.checkmate.domain.aianalysisreport.entity.AiAnalysisReport;
-import com.checkmate.domain.clause.entity.Clause;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter

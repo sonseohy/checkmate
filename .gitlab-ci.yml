@@ -29,6 +29,7 @@ build_checkmate_be:
     - docker build -t $DOCKER_IMAGE .
   artifacts:
     paths:
+      - checkmate-be/.env
       - checkmate-be/build/libs/
 
 deploy_checkmate_be:
@@ -36,6 +37,7 @@ deploy_checkmate_be:
   only:
     - be
   script:
+    - echo "$BACKEND_ENV" > checkmate-be/.env
     - docker stop $DOCKER_IMAGE || true
     - docker rm $DOCKER_IMAGE || true
     - docker run -d --name $DOCKER_IMAGE -p 8080:8080 --env-file checkmate-be/.env $DOCKER_IMAGE

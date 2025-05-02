@@ -22,7 +22,11 @@ public enum ErrorCode {
     USER_NOT_FOUND("USER-001", HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
     USER_DELETED("USER-002", HttpStatus.BAD_REQUEST, "탈퇴한 회원입니다."),
 
-    CATEGORY_NOT_FOUND("CATEGORY-001", HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다.");
+    CATEGORY_NOT_FOUND("CATEGORY-001", HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
+
+    CONTRACT_NOT_FOUND("CONTRACT-001", HttpStatus.NOT_FOUND, "존재하지 않는 계약서입니다."),
+    COURTHOUSE_NOT_FOUND("COURT-001", HttpStatus.NOT_FOUND, "법원 정보를 찾을 수 없습니다.");
+
 
     private final String code;
     private final HttpStatus httpStatus;

@@ -1,21 +1,4 @@
-// import { CategoryApi } from '../api/CategoriesApi';
-// import { Category } from '../model/types';
-
-// // 대분류 카테고리 가져오기
-// export const fetchMainCategories = async (): Promise<Category[]> => {
-//   const res = await CategoryApi.getCategories();
-//   return res.data;
-// };
-
-// // 중분류 or 소분류 카테고리 가져오기
-// export const fetchSubcategories = async (
-//   parentId: number,
-// ): Promise<Category[]> => {
-//   const res = await CategoryApi.getSubCategories(parentId);
-//   return res.data;
-// };
-
-import { Category } from '../model/types';
+import { Category } from '@/features/categories/model/types';
 
 export const fetchMainCategories = async (): Promise<Category[]> => {
   // 대분류는 parent_id가 null

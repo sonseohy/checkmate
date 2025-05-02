@@ -49,17 +49,17 @@ build_checkmate_be:
 # ------------------ deploy ------------------
 deploy_checkmate_be:
   stage: deploy
-  needs: [build_checkmate_be]          # build Job 아티팩트(.env) 자동으로 받아옴
+  needs: [build_checkmate_be]
   only:
     - be
   script:
     - docker stop $DOCKER_IMAGE || true
     - docker rm   $DOCKER_IMAGE || true
-    - docker run -d --name $DOCKER_IMAGE \
+    - >
+      docker run -d --name $DOCKER_IMAGE \
         -p 8080:8080 \
-        --env-file .env \              # 루트의 .env 사용
+        --env-file .env \
         $DOCKER_IMAGE
-
   after_script:
     - |
       if [ "$CI_JOB_STATUS" == "success" ]; then
@@ -69,4 +69,3 @@ deploy_checkmate_be:
         curl -X POST -H 'Content-Type: application/json' \
              -d "{\"text\": \"❌ [백엔드 배포 실패] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
       fi
-

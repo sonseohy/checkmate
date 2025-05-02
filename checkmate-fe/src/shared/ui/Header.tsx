@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { categorySlugMap } from '@/shared/constants/categorySlugMap'; // ✅ 경로 확인
+import { KakaoLoginModal } from '@/features/main';
 
 export interface HeaderProps {
   className?: string;
@@ -9,9 +10,11 @@ export interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const navigate = useNavigate(); // ✅ useNavigate는 컴포넌트 안에 있어야 함
-  const [writeOpen, setWriteOpen] = useState(false);
-  const [analyzeOpen, setAnalyzeOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [writeOpen, setWriteOpen] = useState<boolean>(false);
+  const [analyzeOpen, setAnalyzeOpen] = useState<boolean>(false);
+  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  //회원가입/로그인 모달 제어
+  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
 
   // 메뉴 클릭 핸들러
   const handleWriteClick = (categoryName: string) => {
@@ -28,6 +31,11 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       navigate(`/analyze/${slug}`);
       setAnalyzeOpen(false);
     }
+  };
+
+  // 로그인/회원가입 모달
+  const showModal = () => {
+    setModalIsOpen(!modalIsOpen)
   };
 
   // 모바일 메뉴 닫힐 때 서브메뉴도 닫기
@@ -112,12 +120,12 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         </div>
 
         {/* 회원가입 / 로그인 */}
-        <Link
-          to="/auth"
+        <button
           className="text-sm font-normal text-gray-700 hover:text-black"
+          onClick={showModal}
         >
           회원가입 / 로그인
-        </Link>
+        </button>
       </div>
 
       {/* Mobile Hamburger */}
@@ -197,16 +205,17 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             </div>
 
             {/* 회원가입 / 로그인 모바일 */}
-            <Link
-              to="/auth"
-              className="pt-4 text-center text-gray-700 border-t cursor-pointer hover:text-black"
-              onClick={() => setMobileOpen(false)}
+            <button
+              className="text-sm font-normal text-gray-700 hover:text-black"
+              onClick={showModal}
             >
               회원가입 / 로그인
-            </Link>
+            </button>
           </div>
         </div>
       )}
+
+      {modalIsOpen && <KakaoLoginModal onClose={showModal} />}
     </header>
   );
 };

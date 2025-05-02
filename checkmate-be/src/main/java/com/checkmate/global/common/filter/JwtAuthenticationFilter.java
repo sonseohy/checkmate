@@ -123,8 +123,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType("application/json;charset=utf-8");
 
-        ApiResult<?> apiResponse = ApiResult.fail(new CustomException(ErrorCode.UNAUTHORIZED));
-        String jsonResponse = objectMapper.writeValueAsString(apiResponse);
+        ApiResult<?> apiResult = ApiResult.fail(new CustomException(ErrorCode.UNAUTHORIZED));
+        String jsonResponse = objectMapper.writeValueAsString(apiResult);
         response.getWriter().write(jsonResponse);
     }
 

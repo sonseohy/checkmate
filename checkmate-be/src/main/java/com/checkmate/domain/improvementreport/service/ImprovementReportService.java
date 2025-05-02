@@ -24,15 +24,15 @@ public class ImprovementReportService {
 	/**
 	 * 각 ai 분석 리포트에 해당되는 개선 사항 리포트를 데이터베이스에서 조회
 	 *
-	 * @param aiAnalysisReportId ai 분석 리포트 ID
+	 * @param aiAnalysisId ai 분석 리포트 ID
 	 * @return 개선 사항 리포트 DTO 리스트
 	 */
-	public List<ImprovementResponseDto> getImprovementReport(String aiAnalysisReportId) {
-		if (!aiAnalysisReportRepository.existsById(aiAnalysisReportId)) {
+	public List<ImprovementResponseDto> getImprovementReport(String aiAnalysisId) {
+		if (!aiAnalysisReportRepository.existsById(aiAnalysisId)) {
 			throw new CustomException(ErrorCode.AI_ANALYSIS_REPORT_NOT_FOUND);
 		}
 		List<ImprovementReport> improvementReports = improvementReportRepository
-			.findAllByAiAnalysisReportId(aiAnalysisReportId);
+			.findAllByAiAnalysisReportId(aiAnalysisId);
 		return improvementReports.stream()
 			.map(ImprovementResponseDto::fromEntity)
 			.collect(Collectors.toList());

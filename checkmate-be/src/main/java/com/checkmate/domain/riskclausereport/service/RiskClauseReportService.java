@@ -22,11 +22,17 @@ public class RiskClauseReportService {
 	private final RiskClauseReportRepository riskClauseReportRepository;
 	private final AiAnalysisReportRepository aiAnalysisReportRepository;
 
-	public List<RiskClauseReportResponseDto> getImprovementReportsByAnalysisId(String analysisId) {
-		if (!aiAnalysisReportRepository.existsById(analysisId)) {
+	/**
+	 * 각 ai 분석 리포트에 해당되는 위험 사항 리포트를 데이터베이스에서 조회
+	 *
+	 * @param aiAnalysisId ai 분석 리포트 ID
+	 * @return 위험 사항 리포트 DTO 리스트
+	 */
+	public List<RiskClauseReportResponseDto> getImprovementReportsByAnalysisId(String aiAnalysisId) {
+		if (!aiAnalysisReportRepository.existsById(aiAnalysisId)) {
 			throw new CustomException(ErrorCode.AI_ANALYSIS_REPORT_NOT_FOUND);
 		}
-		List<RiskClauseReport> risks = riskClauseReportRepository.findAllByAiAnalysisReportId(analysisId);
+		List<RiskClauseReport> risks = riskClauseReportRepository.findAllByAiAnalysisReportId(aiAnalysisId);
 		return risks.stream()
 			.map(RiskClauseReportResponseDto::fromEntity)
 			.collect(Collectors.toList());

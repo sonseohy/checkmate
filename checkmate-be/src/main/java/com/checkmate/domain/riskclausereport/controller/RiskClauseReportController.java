@@ -2,6 +2,7 @@ package com.checkmate.domain.riskclausereport.controller;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,9 +18,16 @@ import com.checkmate.global.common.response.ApiResult;
 @RestController
 @RequestMapping("/api/risk")
 @RequiredArgsConstructor
+@Tag(name = "Risk API", description = "위험 사항 리포트 조회 API")
 public class RiskClauseReportController {
 	private final RiskClauseReportService riskClauseReportService;
 
+	/**
+	 * 각 ai 분석 리포트에 해당되는 위험 사항 리포트 조회
+	 *
+	 * @param aiAnalysisId ai 분석 리포트 ID
+	 * @return 위험 사항 ID, ai 분석 리포트 ID, 위험 사항 내용
+	 */
 	@GetMapping("/{aiAnalysisId}")
 	// @PreAuthorize("isAuthenticated()")
 	public ApiResult<List<RiskClauseReportResponseDto>> getRiskClauseReportsByAnalysisId(

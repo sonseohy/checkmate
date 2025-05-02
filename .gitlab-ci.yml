@@ -1,0 +1,52 @@
+image: docker:latest
+
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_IMAGE: checkmate-be
+
+before_script:
+  - echo "🚀 백엔드 GitLab CI 시작"
+  - docker --version
+
+build_checkmate_be:
+  stage: build
+  only:
+    - be
+  script:
+    - cd checkmate-be
+    # ✅ application-secret.yml 생성
+    - echo "$APPLICATION_SECRET_YML" > src/main/resources/application-secret.yml
+    # ✅ .env 파일 생성
+    - echo "$BACKEND_ENV" > .env
+    - echo "✅ application-secret.yml, .env 파일 생성 완료"
+    # ✅ Docker 이미지 정리 및 빌드
+    - docker stop $DOCKER_IMAGE || true
+    - docker rm $DOCKER_IMAGE || true
+    - docker rmi $DOCKER_IMAGE || true
+    - docker build -t $DOCKER_IMAGE .
+  artifacts:
+    paths:
+      - checkmate-be/build/libs/
+
+deploy_checkmate_be:
+  stage: deploy
+  only:
+    - be
+  script:
+    - docker stop $DOCKER_IMAGE || true
+    - docker rm $DOCKER_IMAGE || true
+    - docker run -d --name $DOCKER_IMAGE -p 8080:8080 --env-file checkmate-be/.env $DOCKER_IMAGE
+
+after_script:
+  - |
+    if [ "$CI_JOB_STATUS" == "success" ]; then
+      curl -X POST -H 'Content-Type: application/json' \
+      -d "{\"text\": \"✅ [백엔드 배포 성공] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+    else
+      curl -X POST -H 'Content-Type: application/json' \
+      -d "{\"text\": \"❌ [백엔드 배포 실패] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+    fi
+

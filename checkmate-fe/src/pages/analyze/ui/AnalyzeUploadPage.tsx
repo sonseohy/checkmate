@@ -1,11 +1,15 @@
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import {
   uploadContract,
   requestOCR,
 } from '@/features/analyze/services/UploadService';
-import { mockCategories } from '@/shared/constants/mockCategories';
-import { Upload } from 'lucide-react'; // ✅ Upload 아이콘 사용
+import { Upload } from 'lucide-react';
+import {
+  categoryIdToNameMap,
+  categorySlugMap,
+} from '@/shared/constants/categorySlugMap';
+import { SubCategory } from '@/features/categories/model/types';
 
 const ALLOWED_TYPES = [
   'image/jpeg',
@@ -16,41 +20,46 @@ const ALLOWED_TYPES = [
 const MAX_FILES = 20;
 
 const AnalyzeUploadPage: React.FC = () => {
-  const { mainCategoryId, subCategoryId } = useParams<{
-    mainCategoryId: string;
-    subCategoryId: string;
-  }>();
+  const { mainCategorySlug } = useParams<{ mainCategorySlug: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const selectedSub = location.state?.selectedSub as SubCategory | undefined;
+  const categoryId = selectedSub?.id;
+  const mainCategoryId =
+    categorySlugMap[mainCategorySlug as keyof typeof categorySlugMap];
+  const mainCategoryName = categoryIdToNameMap[mainCategoryId];
+
   const [files, setFiles] = useState<File[]>([]);
 
-  if (!mainCategoryId || !subCategoryId) {
-    return <div className="py-16 text-center">잘못된 접근입니다.</div>;
+  if (!mainCategorySlug || !selectedSub || !categoryId) {
+    return (
+      <div className="py-16 text-center text-red-500">
+        잘못된 접근입니다. 카테고리를 다시 선택해주세요.
+      </div>
+    );
   }
 
-  const mainCategoryName =
-    mockCategories.find((cat) => cat.id === mainCategoryId)?.name ?? '계약서';
-
-  const realCategoryId = mockCategories
-    .flatMap((cat) => cat.midcategories)
-    .flatMap((mid) => mid.subcategories)
-    .find((sub) => sub.id === subCategoryId)?.categoryId;
-
   const onNext = async () => {
-    if (files.length === 0) return alert('파일을 선택해주세요.');
-    if (!realCategoryId) return alert('유효한 카테고리를 찾을 수 없습니다.');
+    if (files.length === 0) {
+      alert('파일을 선택해주세요.');
+      return;
+    }
 
     try {
       for (const file of files) {
         const uploadRes = await uploadContract({
           title: mainCategoryName,
-          categoryId: realCategoryId,
+          categoryId,
           file,
         });
         const contractId = uploadRes.contractId;
         await requestOCR(contractId);
       }
 
-      navigate(`../${subCategoryId}/review`, { state: { ocrLines: [] } });
+      navigate(`/analyze/${mainCategorySlug}/review`, {
+        state: { ocrLines: [] },
+      });
     } catch (error) {
       console.error(error);
       alert('업로드에 실패했습니다.');
@@ -83,7 +92,7 @@ const AnalyzeUploadPage: React.FC = () => {
   return (
     <section className="container px-2 py-12 mx-auto text-center">
       <h1 className="mb-6 text-2xl font-bold">
-        {`${mainCategoryName} 파일을 업로드 해주세요`}
+        {mainCategoryName} 파일을 업로드 해주세요
       </h1>
 
       <div className="max-w-md mx-auto">

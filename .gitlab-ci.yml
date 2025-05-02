@@ -19,17 +19,19 @@ build_checkmate_be:
     - cd checkmate-be
     # ✅ application-secret.yml 생성
     - echo "$APPLICATION_SECRET_YML" > src/main/resources/application-secret.yml
+    - echo "✅ application-secret.yml 파일 생성 완료"
     # ✅ .env 파일 생성
+    - cd ..
     - echo "$BACKEND_ENV" > .env
-    - echo "✅ application-secret.yml, .env 파일 생성 완료"
+    - echo "✅ .env 파일 생성 완료"
     # ✅ Docker 이미지 정리 및 빌드
     - docker stop $DOCKER_IMAGE || true
     - docker rm $DOCKER_IMAGE || true
     - docker rmi $DOCKER_IMAGE || true
-    - docker build -t $DOCKER_IMAGE .
+    - docker build -t $DOCKER_IMAGE checkmate-be
   artifacts:
     paths:
-      - checkmate-be/.env
+      - .env
       - checkmate-be/build/libs/
   after_script:
     - |
@@ -46,7 +48,6 @@ deploy_checkmate_be:
   only:
     - be
   script:
-    - echo "$BACKEND_ENV" > checkmate-be/.env
     - docker stop $DOCKER_IMAGE || true
     - docker rm $DOCKER_IMAGE || true
     - docker run -d --name $DOCKER_IMAGE -p 8080:8080 --env-file checkmate-be/.env $DOCKER_IMAGE

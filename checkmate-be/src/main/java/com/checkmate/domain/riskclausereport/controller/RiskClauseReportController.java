@@ -2,6 +2,9 @@ package com.checkmate.domain.riskclausereport.controller;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +31,11 @@ public class RiskClauseReportController {
 	 * @param aiAnalysisId ai 분석 리포트 ID
 	 * @return 위험 사항 ID, ai 분석 리포트 ID, 위험 사항 내용
 	 */
+	@Operation(summary = "위험 사항 리포트 조회", description = "위험 사항 리포트를 조회합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "위험 사항 리포트 조회 성공"),
+		@ApiResponse(responseCode = "401", description = "인증 실패"),
+	})
 	@GetMapping("/{aiAnalysisId}")
 	// @PreAuthorize("isAuthenticated()")
 	public ApiResult<List<RiskClauseReportResponseDto>> getRiskClauseReportsByAnalysisId(

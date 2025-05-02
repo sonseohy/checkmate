@@ -3,19 +3,17 @@ package com.checkmate.domain.riskclausereport.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.checkmate.domain.aianalysisreport.repository.AiAnalysisReportRepository;
-import com.checkmate.domain.question.dto.response.QuestionResponseDto;
-import com.checkmate.domain.question.entity.Question;
 import com.checkmate.domain.riskclausereport.dto.response.RiskClauseReportResponseDto;
 import com.checkmate.domain.riskclausereport.entity.RiskClauseReport;
 import com.checkmate.domain.riskclausereport.repository.RiskClauseReportRepository;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

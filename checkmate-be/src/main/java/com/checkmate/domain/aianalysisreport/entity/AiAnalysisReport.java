@@ -7,36 +7,33 @@ import com.checkmate.domain.riskclausereport.entity.RiskClauseReport;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
-@Table(name = "ai_analysis_report")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
+@Builder
+@Document(collection = "ai_analysis_report")
 public class AiAnalysisReport {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String aiAnalysisReportId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id", nullable = false)
-    private Contract contract;
+    @Indexed
+    private String contractId;
 
-    @Column(name = "analysis_date", nullable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime analysisDate;
 
-    @OneToMany(mappedBy = "analysisReport", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<ImprovementReport> improvements = new ArrayList<>();
+    private List<ImprovementReport> improvements;
 
-    @OneToMany(mappedBy = "analysisReport", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<MissingClauseReport> missingClauses = new ArrayList<>();
+    private List<MissingClauseReport> missingClauses;
 
-    @OneToMany(mappedBy = "analysisReport", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<RiskClauseReport> riskClauses = new ArrayList<>();
+    private List<RiskClauseReport> riskClauses;
 }

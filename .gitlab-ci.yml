@@ -31,6 +31,15 @@ build_checkmate_be:
     paths:
       - checkmate-be/.env
       - checkmate-be/build/libs/
+  after_script:
+    - |
+      if [ "$CI_JOB_STATUS" == "success" ]; then
+        curl -X POST -H 'Content-Type: application/json' \
+        -d "{\"text\": \"✅ [백엔드 빌드 성공] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+      else
+        curl -X POST -H 'Content-Type: application/json' \
+        -d "{\"text\": \"❌ [백엔드 빌드 실패] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+      fi
 
 deploy_checkmate_be:
   stage: deploy

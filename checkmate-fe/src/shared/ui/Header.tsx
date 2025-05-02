@@ -6,7 +6,11 @@ import { categoryNameToSlugMap } from '@/shared/constants/categorySlugMap';
 import MobileMenu from './MobileMenu';
 import HeaderDropdown from './HeaderDropdown';
 
-export const Header = () => {
+export interface HeaderProps {
+  className?: string;
+}
+
+export const Header = ({ className = '' }: HeaderProps) => {
   const navigate = useNavigate();
   const [writeOpen, setWriteOpen] = useState(false);
   const [analyzeOpen, setAnalyzeOpen] = useState(false);
@@ -38,7 +42,9 @@ export const Header = () => {
   }, [mobileOpen]);
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-6 bg-white shadow">
+    <header
+      className={`sticky top-0 z-50 flex items-center justify-between w-full h-16 px-6 ${className}`}
+    >
       <Link to="/" className="flex items-center gap-2">
         <img src="/icons/favicon-96x96.png" alt="logo" className="w-10 h-10" />
       </Link>
@@ -97,5 +103,3 @@ export const Header = () => {
     </header>
   );
 };
-
-export default Header;

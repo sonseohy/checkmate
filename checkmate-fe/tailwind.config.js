@@ -16,8 +16,6 @@ module.exports = {
       backgroundImage: {
         'gradient-move':
           'linear-gradient(to bottom, #ffffff 65%, #e0f2fe 100%)',
-        'checkmate-gradient':
-          'linear-gradient(to right, var(--tw-gradient-stops))',
       },
       animation: {
         'gradient-move': 'gradientMove 30s ease-in-out infinite',

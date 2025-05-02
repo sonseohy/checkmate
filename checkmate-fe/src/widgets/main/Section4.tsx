@@ -34,19 +34,19 @@ const steps = [
 const Section4 = () => (
   <section
     id="process"
-    className="flex flex-col justify-center min-h-screen px-4 py-16 -mx-4 md:py-0 bg-gray-50 snap-start"
+    className="flex flex-col justify-center w-full min-h-screen gap-y-40 bg-gray-50 snap-start"
   >
     <motion.h2
       initial={{ opacity: 0, y: -30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
-      className="mb-12 text-3xl font-bold text-center"
+      className="text-2xl font-bold text-center md:text-4xl lg:text-5xl"
     >
       복잡한 계약서도 걱정 마세요
     </motion.h2>
 
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+    <div className="grid grid-cols-1 md:grid-cols-3">
       {steps.map(({ title, desc, icon }, i) => (
         <motion.div
           key={title}
@@ -54,11 +54,13 @@ const Section4 = () => (
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: i * 0.2 }}
-          className="px-6 text-center"
+          className="px-4 text-center"
         >
-          <img src={icon} alt={title} className="w-32 h-32 mx-auto mb-4" />
-          <h3 className="mb-2 text-xl font-semibold">{title}</h3>
-          <p className="text-gray-600">{desc}</p>
+          <img src={icon} alt={title} className="mx-auto mb-2 w-28 h-28" />
+          <h3 className="mb-1 text-lg font-semibold md:text-xl lg:text-2xl">
+            {title}
+          </h3>
+          <p className="text-sm text-gray-600 md:text-base">{desc}</p>
         </motion.div>
       ))}
     </div>

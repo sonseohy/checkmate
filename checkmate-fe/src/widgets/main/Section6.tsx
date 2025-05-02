@@ -1,32 +1,32 @@
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface NewsItem {
-  title: string
-  originallink: string
-  link: string
-  description: string
-  pubDate: string
+  title: string;
+  originallink: string;
+  link: string;
+  description: string;
+  pubDate: string;
 }
 
 const Section6 = () => {
-  const [articles, setArticles] = useState<NewsItem[]>([])
-  const [error, setError] = useState<string|null>(null)
+  const [articles, setArticles] = useState<NewsItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/news?q=계약서')
       .then((res) => res.json())
       .then((data) => setArticles(data))
       .catch((err) => {
-        console.error(err)
-        setError('뉴스를 불러오는 중 오류가 발생했습니다.')
-      })
-  }, [])
+        console.error(err);
+        setError('뉴스를 불러오는 중 오류가 발생했습니다.');
+      });
+  }, []);
 
   return (
     <section
       id="related-news"
-      className="flex flex-col items-center justify-center min-h-screen px-4 -mx-4 bg-white snap-start"
+      className="flex flex-col items-center justify-center w-full h-screen text-center bg-white snap-start"
     >
       <motion.h2
         initial={{ opacity: 0, y: -20 }}
@@ -58,7 +58,8 @@ const Section6 = () => {
                 className="mb-2 font-semibold text-gray-800 line-clamp-2"
                 dangerouslySetInnerHTML={{ __html: item.title }}
               />
-              <p className="text-sm text-gray-600 line-clamp-4" 
+              <p
+                className="text-sm text-gray-600 line-clamp-4"
                 dangerouslySetInnerHTML={{ __html: item.description }}
               />
               <p className="mt-4 text-xs text-gray-400">
@@ -71,6 +72,6 @@ const Section6 = () => {
         {/* 좌/우 화살표 (추가 구현 가능) */}
       </div>
     </section>
-  )
-}
-export default Section6
+  );
+};
+export default Section6;

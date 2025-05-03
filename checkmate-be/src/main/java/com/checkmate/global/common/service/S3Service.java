@@ -54,7 +54,6 @@ public class S3Service {
                 .bucket(bucketName)
                 .key(fileName)
                 .contentType(file.getContentType())
-                .acl(ObjectCannedACL.PUBLIC_READ)
                 .build();
 
         try (InputStream inputStream = file.getInputStream()) {
@@ -95,7 +94,6 @@ public class S3Service {
                 .bucket(bucketName)
                 .key(key)
                 .contentType(contentType)
-                .acl(ObjectCannedACL.PUBLIC_READ)
                 .build();
 
         PutObjectResponse response = s3Client.putObject(putObjectRequest,

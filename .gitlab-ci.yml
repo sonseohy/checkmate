@@ -23,7 +23,7 @@ build_checkmate_be:
     - echo "✅ application-secret.yml 파일 생성 완료"
     # ✅ .env 파일 생성 (프로젝트 루트로 돌아와서 만들기)
     - cd ..
-    - cp "$BACKEND_ENV" > .env
+    - cp "$BACKEND_ENV" .env
     - echo "✅ .env 파일 생성 완료"
 
     # ✅ Docker 이미지 정리 및 빌드

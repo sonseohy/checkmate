@@ -6,6 +6,7 @@ import MobileMenu from './MobileMenu';
 import HeaderDropdown from './HeaderDropdown';
 import { KakaoLoginModal } from '@/features/main';
 import { Menu, X } from 'lucide-react';
+import { useMainCategories } from '@/features/categories/hooks/useCategories';
 
 export interface HeaderProps {
   className?: string;
@@ -13,14 +14,15 @@ export interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const navigate = useNavigate();
-  const [writeOpen, setWriteOpen] = useState<boolean>(false);
-  const [analyzeOpen, setAnalyzeOpen] = useState<boolean>(false);
-  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  const [writeOpen, setWriteOpen] = useState(false);
+  const [analyzeOpen, setAnalyzeOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
-  //회원가입/로그인 모달 제어
-  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
+  // ✅ 대분류 카테고리 목록 가져오기
+  const { data: mainCategories } = useMainCategories();
+  const categoryNames = mainCategories?.map((cat) => cat.name) ?? [];
 
-  // 메뉴 클릭 핸들러
   const handleWriteClick = (name: string) => {
     const slug = categoryNameToSlugMap[name];
     if (slug) {
@@ -39,12 +41,10 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     }
   };
 
-  // 로그인/회원가입 모달
   const showModal = () => {
     setModalIsOpen(!modalIsOpen);
   };
 
-  // 모바일 메뉴 닫힐 때 서브메뉴도 닫기
   useEffect(() => {
     if (!mobileOpen) {
       setWriteOpen(false);
@@ -69,6 +69,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             setAnalyzeOpen(false);
           }}
           onItemClick={handleWriteClick}
+          categoryNames={categoryNames} // ✅ 추가
         />
         <HeaderDropdown
           open={analyzeOpen}
@@ -78,6 +79,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             setWriteOpen(false);
           }}
           onItemClick={handleAnalyzeClick}
+          categoryNames={categoryNames} // ✅ 추가
         />
         <button
           onClick={showModal}
@@ -110,6 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           handleAnalyzeClick={handleAnalyzeClick}
           closeMobile={() => setMobileOpen(false)}
           showModal={showModal}
+          categoryNames={categoryNames} // ✅ 모바일 메뉴도 전달
         />
       )}
 

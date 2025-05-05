@@ -1,4 +1,3 @@
-// features/categories/services/CategoryService.ts
 import { CategoryApi } from '@/features/categories/api/CategoriesApi';
 
 export const CategoryService = {

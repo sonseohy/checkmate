@@ -35,4 +35,17 @@ public class ContractFile {
     @Column(name = "upload_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime uploadAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "file_category", length = 10, nullable = false)
+    private FileCategory fileCategory;
+
+    @Column(name = "encrypted_data_key", columnDefinition = "VARBINARY(512)")
+    private byte[] encryptedDataKey;
+
+    @Column(name = "iv", length = 16)
+    private byte[] iv;
+
+    @Column(name = "key_id", length = 255)
+    private String keyId;
+
 }

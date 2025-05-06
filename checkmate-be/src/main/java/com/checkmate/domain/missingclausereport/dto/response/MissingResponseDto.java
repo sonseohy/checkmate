@@ -9,11 +9,11 @@ import lombok.Builder;
 public record MissingResponseDto(String missingClauseReportId, String aiAnalysisReportId,
 								 Importance importance, String description) {
 	public static MissingResponseDto fromEntity(MissingClauseReport missingClauseReport) {
-		return new MissingResponseDto(
-			missingClauseReport.getMissingClauseReportId(),
-			missingClauseReport.getAiAnalysisReportId(),
-			missingClauseReport.getImportance(),
-			missingClauseReport.getDescription()
-		);
+		return MissingResponseDto.builder()
+			.missingClauseReportId(missingClauseReport.getMissingClauseReportId())
+			.aiAnalysisReportId(missingClauseReport.getAiAnalysisReportId())
+			.importance(missingClauseReport.getImportance())
+			.description(missingClauseReport.getDescription())
+			.build();
 	}
 }

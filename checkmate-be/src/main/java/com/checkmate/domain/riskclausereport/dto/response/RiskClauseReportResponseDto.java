@@ -8,12 +8,12 @@ import lombok.Builder;
 public record RiskClauseReportResponseDto (String riskClauseReportId, String aiAnalysisReportId,
 										   int riskLevel, String originalText, String description) {
 	public static RiskClauseReportResponseDto fromEntity(RiskClauseReport riskClauseReport) {
-		return new RiskClauseReportResponseDto(
-			riskClauseReport.getRiskClauseReportId(),
-			riskClauseReport.getAiAnalysisReportId(),
-			riskClauseReport.getRiskLevel(),
-			riskClauseReport.getOriginalText(),
-			riskClauseReport.getDescription()
-		);
+		return RiskClauseReportResponseDto.builder()
+			.riskClauseReportId(riskClauseReport.getRiskClauseReportId())
+			.aiAnalysisReportId(riskClauseReport.getAiAnalysisReportId())
+			.riskLevel(riskClauseReport.getRiskLevel())
+			.originalText(riskClauseReport.getOriginalText())
+			.description(riskClauseReport.getDescription())
+			.build();
 	}
 }

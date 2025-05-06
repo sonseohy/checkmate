@@ -7,10 +7,10 @@ import lombok.Builder;
 @Builder
 public record ImprovementResponseDto (String improvementReportId, String aiAnalysisReportId, String description) {
 	public static ImprovementResponseDto fromEntity(ImprovementReport improvementReport) {
-		return new ImprovementResponseDto(
-			improvementReport.getImprovementReportId(),
-			improvementReport.getAiAnalysisReportId(),
-			improvementReport.getDescription()
-		);
+		return ImprovementResponseDto.builder()
+			.improvementReportId(improvementReport.getImprovementReportId())
+			.aiAnalysisReportId(improvementReport.getAiAnalysisReportId())
+			.description(improvementReport.getDescription())
+			.build();
 	}
 }

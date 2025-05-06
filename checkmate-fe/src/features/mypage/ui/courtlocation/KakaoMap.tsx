@@ -46,8 +46,7 @@ export default function KakaoMap() {
       pos.coords.latitude, // 위도
       pos.coords.longitude // 경도
     );
-    console.log("위도: ", pos.coords.latitude);
-    console.log("경도: ", pos.coords.longitude);
+
     // 지도 이동
     mapInstance.panTo(currentPos);
     // 새로운 마커 삽입
@@ -65,7 +64,7 @@ export default function KakaoMap() {
           height: "400px",
         }}
       ></div>
-      <div onClick={() => getCurrentPosBtn(map, marker)}>현재 위치</div>
+      <div onClick={() => getCurrentPosBtn(map, marker)}></div>
     </>
   );
 }

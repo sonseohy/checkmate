@@ -18,5 +18,14 @@ export interface CourtList {
     courthouseAddress: string;
     courthousePhoneNumber: string;
 };
+// 법원 응답 + 위도+ 경도
+export interface CourtWithCoords extends CourtList {
+    lat: number;
+    lng: number;
+}
 
-
+//위도, 경도
+export interface LatLng {
+    lat: number;
+    lng: number;
+}

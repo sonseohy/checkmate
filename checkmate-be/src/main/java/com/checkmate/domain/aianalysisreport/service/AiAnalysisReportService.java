@@ -1,22 +1,16 @@
 package com.checkmate.domain.aianalysisreport.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisReportResponseDto;
-import com.checkmate.domain.aianalysisreport.entity.AiAnalysisReport;
 import com.checkmate.domain.aianalysisreport.entity.CompleteAiAnalysisReport;
 import com.checkmate.domain.aianalysisreport.repository.AiAnalysisReportRepository;
 import com.checkmate.domain.contract.repository.ContractRepository;
-import com.checkmate.domain.improvementreport.dto.response.ImprovementResponseDto;
-import com.checkmate.domain.improvementreport.entity.ImprovementReport;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

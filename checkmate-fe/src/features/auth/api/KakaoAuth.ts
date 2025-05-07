@@ -20,8 +20,8 @@ export async function PostKakaoCallback(code: string) {
 
     console.log(tokenRes.data); // 성공 시 데이터 출력
 
-    // 2) 액세스 토큰 추출
-    const { access_token } = tokenRes.data;
+    // 2) 액세스 토큰 추출 (refresh_token을 제거)
+    const { access_token } = tokenRes.data; // refresh_token은 사용하지 않음
 
     // 3) 카카오 유저 프로필 조회
     profileRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
@@ -51,11 +51,14 @@ export async function PostKakaoCallback(code: string) {
       provider_id: id.toString()  // provider_id 필드명 수정
     });
 
-    console.log('로그인 응답:', loginResponse.data );
+    console.log('로그인 응답:', loginResponse.data);
 
-    // 5) 로그인 성공 여부 확인
     if (loginResponse.data.success) {
-      console.log("로그인 성공!");
+
+      // 로컬 스토리지에 토큰 저장하는 코드
+      localStorage.setItem('access_token', loginResponse.data.data.access_token);
+      localStorage.setItem('refresh_token', loginResponse.data.data.refresh_token);
+
       return loginResponse.data;  // 로그인 성공 시 데이터 반환
     } else {
       console.error("로그인 실패:", loginResponse.data.error.message);

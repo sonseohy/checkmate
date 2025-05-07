@@ -11,8 +11,8 @@ export default function Auth() {
     const code = new URL(window.location.href).searchParams.get("code");
     if (!code || isProcessed) return; // 이미 처리된 경우 다시 처리하지 않도록
 
-    setIsProcessed(true); 
-    
+    setIsProcessed(true);
+
     const processCallback = async () => {
       try {
         const res = await PostKakaoCallback(code);
@@ -24,17 +24,23 @@ export default function Auth() {
       } catch (err) {
         setError("카카오 콜백 처리 중 오류가 발생했습니다.");
         console.error(err);
-      }finally {
+      } finally {
         setIsProcessed(false);  // 호출이 끝나면 isProcessed를 false로 돌려놓기
       }
     };
 
     processCallback();
-  }, [ navigate]); // isProcessed, navigate 상태에 따라 한 번만 호출되도록 의존성 관리
+  }, [navigate]); // isProcessed, navigate 상태에 따라 한 번만 호출되도록 의존성 관리
+
+  useEffect(() => {
+    if (error) {
+      alert(error); // 오류 발생 시 alert로 표시
+    }
+  }, [error]);
 
   return (
     <div className="h-screen flex items-center justify-center">
-      {error ? <p className="text-red-500">{error}</p> : <p>로그인 처리 중입니다…</p>}
+      {!error && <p>로그인 처리 중입니다…</p>} {/* 기본 메시지 */}
     </div>
   );
 }

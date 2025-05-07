@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { CategorySelector } from '@/widgets/common';
 import { MidCategory, SubCategory } from '@/features/categories/model/types';
 import { categorySlugMap } from '@/shared/constants/categorySlugMap';
-import { navigateInvalidAccess } from '@/shared/utils/navigation'; // ✅ 유틸 임포트
+import { navigateInvalidAccess } from '@/shared/utils/navigation';
 
 const AnalyzeCategoryPage: React.FC = () => {
   const { mainCategorySlug } = useParams<{ mainCategorySlug: string }>();

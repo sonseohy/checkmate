@@ -2,8 +2,13 @@ import { motion } from 'framer-motion';
 import { useCardVariants } from '@/shared/constants/animations/useCardVariants';
 import { desktopCardVariants } from '@/shared/constants/animations/cardVariants';
 
+interface TemplateItem {
+  title: string;
+  icon: string;
+}
+
 interface TemplateCardListProps {
-  templates: { title: string; icon: string; link: string }[];
+  templates: TemplateItem[];
   onClickCard?: (title: string) => void;
 }
 

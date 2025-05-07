@@ -10,9 +10,8 @@ interface MobileMenuProps {
   handleAnalyzeClick: (name: string) => void;
   closeMobile: () => void;
   showModal: () => void;
+  categoryNames: string[];
 }
-
-const items = ['계약서', '내용증명', '지급명령'];
 
 const MobileMenu = ({
   writeOpen,
@@ -23,6 +22,7 @@ const MobileMenu = ({
   handleAnalyzeClick,
   closeMobile,
   showModal,
+  categoryNames,
 }: MobileMenuProps) => (
   <div className="absolute left-0 z-40 w-full bg-white border-b shadow-md top-full md:hidden">
     <div className="flex flex-col p-4 space-y-2">
@@ -40,7 +40,7 @@ const MobileMenu = ({
         </button>
         {writeOpen && (
           <ul className="pl-4">
-            {items.map((name) => (
+            {categoryNames.map((name) => (
               <li key={name}>
                 <button
                   onClick={() => handleWriteClick(name)}
@@ -68,7 +68,7 @@ const MobileMenu = ({
         </button>
         {analyzeOpen && (
           <ul className="pl-4">
-            {items.map((name) => (
+            {categoryNames.map((name) => (
               <li key={name}>
                 <button
                   onClick={() => handleAnalyzeClick(name)}
@@ -85,8 +85,8 @@ const MobileMenu = ({
       {/* 회원가입 / 로그인 */}
       <button
         onClick={() => {
-          showModal(); // ✅ 모달 열기
-          closeMobile(); // ✅ 모바일 메뉴 닫기
+          showModal();
+          closeMobile();
         }}
         className="pt-4 text-center text-gray-700 border-t cursor-pointer hover:text-black"
       >

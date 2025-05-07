@@ -32,9 +32,9 @@ const AnalyzeCategoryPage = lazy(() =>
 const AnalyzeUploadPage = lazy(() =>
   import('@pages/analyze').then((m) => ({ default: m.AnalyzeUploadPage })),
 );
-const AnalyzeReviewPage = lazy(() =>
-  import('@pages/analyze').then((m) => ({ default: m.AnalyzeCorrectionPage })),
-);
+// const AnalyzeReviewPage = lazy(() =>
+//   import('@pages/analyze').then((m) => ({ default: m.AnalyzeCorrectionPage })),
+// );
 const AnalyzeResultPage = lazy(() =>
   import('@pages/analyze').then((m) => ({ default: m.AnalyzeResultPage })),
 );
@@ -77,10 +77,10 @@ export const router = createBrowserRouter([
         path: 'analyze/:mainCategorySlug/upload',
         element: <AnalyzeUploadPage />,
       },
-      {
-        path: 'analyze/:mainCategorySlug/review',
-        element: <AnalyzeReviewPage />,
-      },
+      // {
+      //   path: 'analyze/:mainCategorySlug/review',
+      //   element: <AnalyzeReviewPage />,
+      // },
       {
         path: 'analyze/:mainCategorySlug/result',
         element: <AnalyzeResultPage />,

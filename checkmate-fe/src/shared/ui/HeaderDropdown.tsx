@@ -5,6 +5,7 @@ interface HeaderDropdownProps {
   onToggle: () => void;
   onItemClick: (categoryName: string) => void;
   title: string;
+  categoryNames: string[];
 }
 
 const HeaderDropdown = ({
@@ -12,6 +13,7 @@ const HeaderDropdown = ({
   onToggle,
   onItemClick,
   title,
+  categoryNames,
 }: HeaderDropdownProps) => (
   <div className="relative">
     <button
@@ -26,7 +28,7 @@ const HeaderDropdown = ({
     </button>
     {open && (
       <ul className="absolute left-0 z-10 w-40 mt-2 bg-white border rounded shadow-md top-full">
-        {['계약서', '내용증명', '지급명령'].map((name) => (
+        {categoryNames.map((name) => (
           <li key={name}>
             <button
               onClick={() => onItemClick(name)}

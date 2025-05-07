@@ -5,7 +5,7 @@ stages:
   - deploy
 
 variables:
-  MATTERMOST_WEBHOOK: $MATTERMOST_WEBHOOK  # GitLab > CI/CD > Variables 에 설정한 webhook URL
+  MATTERMOST_WEBHOOK: $MATTERMOST_WEBHOOK
 
 before_script:
   - echo "GitLab CI/CD 시작!"
@@ -18,7 +18,13 @@ build_checkmate_fe:
     - fe
   script:
     - cd checkmate-fe
-    - docker build --build-arg FRONTEND_ENV="$FRONTEND_ENV" -t checkmate-fe .
+    - echo "$FRONTEND_ENV" > .env
+    - cat .env
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - checkmate-fe/dist
   after_script:
     - |
       if [ "$CI_JOB_STATUS" == "success" ]; then
@@ -39,7 +45,7 @@ deploy_checkmate_fe:
     - docker stop checkmate-fe-container || true
     - docker rm checkmate-fe-container || true
     - docker rmi checkmate-fe || true
-    - docker build -t checkmate-fe .
+    - docker build -t checkmate-fe .  # 이때 Dockerfile은 dist만 복사
     - docker run -d --name checkmate-fe-container -p 3000:80 checkmate-fe
   after_script:
     - |

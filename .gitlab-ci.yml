@@ -59,7 +59,7 @@ deploy_checkmate_be:
       docker run -d --name $DOCKER_IMAGE \
         -p 8080:8080 \
         --env-file .env \
-        -v $PWD/cloudfront_private_key.pem:/etc/cloudfront/private_key.pem \
+        -v $PWD/private_key.pem:/etc/cloudfront/private_key.pem \
         $DOCKER_IMAGE
   after_script:
     - |

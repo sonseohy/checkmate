@@ -45,9 +45,14 @@ public class CloudFrontService {
             log.debug("privateKeyPath='{}', exists={}, isFile={}, canRead={}",
                     privateKeyPath,
                     pemFile.exists(), pemFile.isFile(), pemFile.canRead());
-            if (!pemFile.exists() || !pemFile.canRead()) {
-                throw new IllegalStateException("Private key not found/readable: " + privateKeyPath);
+
+            if (!pemFile.exists() || !pemFile.isFile() || !pemFile.canRead()) {
+                throw new IllegalStateException("Private key not found/readable: " + privateKeyPath +
+                        " (exists=" + pemFile.exists() +
+                        ", isFile=" + pemFile.isFile() +
+                        ", canRead=" + pemFile.canRead() + ")");
             }
+
             String pem = Files.readString(pemFile.toPath(), StandardCharsets.US_ASCII);
 
             // 2) Strip BEGIN/END and whitespace, base64-decode

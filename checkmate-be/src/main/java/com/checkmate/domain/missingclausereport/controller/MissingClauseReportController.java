@@ -37,7 +37,7 @@ public class MissingClauseReportController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 	})
 	@GetMapping("/{aiAnalysisId}")
-	// @PreAuthorize("isAuthenticated()")
+	@PreAuthorize("isAuthenticated()")
 	public ApiResult<List<MissingResponseDto>> getMissingClauseReportByAiAnalysisId(
 		@PathVariable("aiAnalysisId") String aiAnalysisId) {
 		List<MissingResponseDto> data = missingClauseReportService.getMissingClauseReportByAiAnalysisId(aiAnalysisId);

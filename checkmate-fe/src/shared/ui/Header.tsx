@@ -23,6 +23,14 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const { data: mainCategories } = useMainCategories();
   const categoryNames = mainCategories?.map((cat) => cat.name) ?? [];
 
+  //로그인 여부 확인
+  const [isLogIn, setIsLogIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('access_token');
+    setIsLogIn(!!accessToken);
+  },[]);
+
   const handleWriteClick = (name: string) => {
     const slug = categoryNameToSlugMap[name];
     if (slug) {
@@ -81,12 +89,22 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           onItemClick={handleAnalyzeClick}
           categoryNames={categoryNames} // ✅ 추가
         />
-        <button
+        {isLogIn ? (
+          <button
+          onClick={() => navigate('/mypage')}
+          className="text-sm font-normal text-gray-700 hover:text-black"
+        >
+          마이페이지
+        </button>
+        ): (
+          <button
           onClick={showModal}
           className="text-sm font-normal text-gray-700 hover:text-black"
         >
           회원가입 / 로그인
         </button>
+        )}
+        
       </div>
 
       <button
@@ -113,6 +131,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           closeMobile={() => setMobileOpen(false)}
           showModal={showModal}
           categoryNames={categoryNames} // ✅ 모바일 메뉴도 전달
+          isLogIn={isLogIn} //로그인 상태 전달
         />
       )}
 

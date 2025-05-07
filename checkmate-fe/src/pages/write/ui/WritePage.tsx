@@ -1,10 +1,12 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { WritingProcess } from '@/widgets/write';
 import {
   RealEstateIntro,
   EmploymentIntro,
   RentalIntro,
 } from '@/features/write';
+import { useEffect } from 'react';
+import { navigateInvalidAccess } from '@/shared/utils/navigation';
 
 type Params = {
   template: 'real-estate' | 'employment' | 'rental';
@@ -30,15 +32,16 @@ const introMap = {
 
 const WritePage: React.FC = () => {
   const { template } = useParams<Params>();
+  const navigate = useNavigate();
   const cfg = template ? introMap[template] : undefined;
 
-  if (!cfg) {
-    return (
-      <div className="container py-16 mx-auto text-center text-red-500">
-        잘못된 경로입니다.
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!cfg) {
+      navigateInvalidAccess(navigate);
+    }
+  }, [cfg, navigate]);
+
+  if (!cfg) return null;
 
   const { title, Component: Intro, videoUrl } = cfg;
 

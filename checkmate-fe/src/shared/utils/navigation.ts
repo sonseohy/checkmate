@@ -10,3 +10,17 @@ export const navigateInvalidAccess = (navigate: NavigateFunction) => {
     },
   });
 };
+
+// 로그인 실패 시 에러 페이지로 이동하는 유틸 함수
+export const navigateLoginError = (
+  navigate: NavigateFunction,
+  message?: string,
+) => {
+  navigate('/error', {
+    state: {
+      title: '로그인에 실패했습니다',
+      description: message ?? '다시 시도해 주세요.',
+      type: 'invalid',
+    },
+  });
+};

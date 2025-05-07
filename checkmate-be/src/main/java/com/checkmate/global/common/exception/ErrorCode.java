@@ -32,6 +32,7 @@ public enum ErrorCode {
 
     CONTRACT_TITLE_REQUIRED("CONTRACT-001", HttpStatus.UNPROCESSABLE_ENTITY, "계약서명을 입력하지 않았습니다."),
     CONTRACT_NOT_FOUND("CONTRACT-002", HttpStatus.NOT_FOUND, "존재하지 않는 계약서입니다."),
+    CONTRACT_ACCESS_DENIED("CONTRACT-003", HttpStatus.UNAUTHORIZED, "해당 계약서에 대한 접근 권한이 없습니다."),
 
     COURTHOUSE_NOT_FOUND("COURT-001", HttpStatus.NOT_FOUND, "법원 정보를 찾을 수 없습니다."),
 

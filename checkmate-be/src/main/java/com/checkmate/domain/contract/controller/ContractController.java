@@ -2,7 +2,7 @@ package com.checkmate.domain.contract.controller;
 
 import com.checkmate.domain.contract.dto.request.ContractUploadsRequest;
 import com.checkmate.domain.contract.dto.response.ContractUploadResponse;
-import com.checkmate.domain.contract.dto.response.FileNumberResponse;
+import com.checkmate.domain.contract.dto.response.MyContractResponse;
 import com.checkmate.domain.contract.service.ContractService;
 import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.response.ApiResult;
@@ -16,8 +16,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/contract")
@@ -34,35 +35,19 @@ public class ContractController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description  = "업로드 성공 / 반환: 총 페이지 수",
-                    content      = @Content(
-                            mediaType = "application/json",
-                            schema    = @Schema(implementation = FileNumberResponse.class)
-                    )
+                    description  = "업로드 성공 / 반환: 총 페이지 수"
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description  = "잘못된 요청 (파일 없음, 크기 초과 등)",
-                    content      = @Content(
-                            mediaType = "application/json",
-                            schema    = @Schema(implementation = ErrorResponse.class)
-                    )
+                    description  = "잘못된 요청 (파일 없음, 크기 초과 등)"
             ),
             @ApiResponse(
                     responseCode = "415",
-                    description  = "지원하지 않는 파일 형식",
-                    content      = @Content(
-                            mediaType = "application/json",
-                            schema    = @Schema(implementation = ErrorResponse.class)
-                    )
+                    description  = "지원하지 않는 파일 형식"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description  = "서버 내부 오류",
-                    content      = @Content(
-                            mediaType = "application/json",
-                            schema    = @Schema(implementation = ErrorResponse.class)
-                    )
+                    description  = "서버 내부 오류"
             )
     })
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -73,7 +58,7 @@ public class ContractController {
             )
     )
     public ApiResult<ContractUploadResponse> uploadContract(
-            @Parameter(description = "계약 ID", required = true) @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Parameter(description = "유저 ID", required = true) @AuthenticationPrincipal CustomUserDetails userDetails,
             @ModelAttribute ContractUploadsRequest request) {
 
         ContractUploadResponse response = contractService.uploadContract(userDetails.getUserId(), request);
@@ -81,5 +66,33 @@ public class ContractController {
         return ApiResult.created(response);
 
     }
+
+    @Operation(summary = "내 계약서 조회", description = "내 계약서들을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "내 계약서 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping
+    public ApiResult<List<MyContractResponse>> getMyContracts(
+            @Parameter(description = "유저 ID", required = true) @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<MyContractResponse> respone = contractService.getMyContracts(userDetails.getUserId());
+
+        return ApiResult.ok(respone);
+    }
+
+    @Operation(summary = "내 계약서 삭제", description = "계약서를 삭제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "계약서 삭제 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @DeleteMapping("/{contractId}")
+    public ApiResult<?> deleteMyContract(
+            @Parameter(description = "유저 ID", required = true) @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Parameter(description = "계약 ID", required = true) @PathVariable Integer contractId) {
+        contractService.deleteMyContract(userDetails.getUserId(), contractId);
+        return ApiResult.noContent();
+    }
+
+
 
 }

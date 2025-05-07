@@ -1,5 +1,6 @@
 package com.checkmate.domain.contract.dto.response;
 
+import com.checkmate.domain.contract.entity.SourceType;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
@@ -9,18 +10,21 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class ContractUploadResponse {
+public class MyContractResponse {
 
     private Integer contractId;
 
+    private Integer categoryId;
+
     private String title;
 
-    private LocalDateTime createdAt;
+    private SourceType sourceType;
+
+    private LocalDateTime updatedAt;
 
 }

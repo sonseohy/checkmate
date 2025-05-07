@@ -46,15 +46,15 @@ public class Contract {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "process_status", length = 11)
-    private ProcessStatus processStatus;
+    private ProcessStatus processStatus = ProcessStatus.IN_PROGRESS;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "edit_status", length = 9, nullable = false)
-    private EditStatus editStatus;
+    private EditStatus editStatus = EditStatus.EDITING;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "source_type", length = 17, nullable = false)
-    private SourceType sourceType;
+    private SourceType sourceType = SourceType.USER_UPLOAD;
 
     @Column(name = "page_no")
     private Integer pageNo;
@@ -67,6 +67,7 @@ public class Contract {
     @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ContractFile> files = new ArrayList<>();
 

@@ -1,6 +1,7 @@
 package com.checkmate.domain.contract.service;
 
 import com.checkmate.domain.contract.dto.response.FileNumberResponse;
+import com.checkmate.domain.contract.dto.response.PdfData;
 import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.entity.FileCategory;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
@@ -183,5 +185,24 @@ public class ContractFileService {
     @Transactional
     public void deleteFileByAddress(String fileAddress) {
         s3Service.deleteFile(fileAddress);
+    }
+
+    @Transactional(readOnly = true)
+    public PdfData loadViewerPdf(int userId, Integer contractId) {
+
+        ContractFile file = contractFileRepository.findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
+                .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
+
+        if (!file.getContract().getUser().getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
+        }
+
+        byte[] pdfBytes = s3Service.downloadAndDecryptWithKeySplit(
+                file.getFileAddress(), file.getIv(), file.getEncryptedDataKey(), file.getId().longValue());
+
+        String filename    = "contract-" + contractId + ".pdf";
+        String contentType = MediaType.APPLICATION_PDF_VALUE;
+        return new PdfData(pdfBytes, filename, contentType);
+
     }
 }

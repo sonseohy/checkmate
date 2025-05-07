@@ -1,6 +1,7 @@
 package com.checkmate.domain.contract.controller;
 
 import com.checkmate.domain.contract.dto.request.ContractUploadsRequest;
+import com.checkmate.domain.contract.dto.response.ContractPdfUrlResponse;
 import com.checkmate.domain.contract.dto.response.ContractUploadResponse;
 import com.checkmate.domain.contract.dto.response.MyContractResponse;
 import com.checkmate.domain.contract.service.ContractService;
@@ -93,6 +94,18 @@ public class ContractController {
         return ApiResult.noContent();
     }
 
+    @Operation(summary = "내 계약서 PDF URL 조회", description = "계약서를 PDF URL를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "계약서 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/{contractId}")
+    public ApiResult<ContractPdfUrlResponse> getContractPdfUrl(
+            @Parameter(description = "유저 ID", required = true) @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Parameter(description = "계약 ID", required = true) @PathVariable Integer contractId) {
+        ContractPdfUrlResponse response = contractService.getContractPdfUrl(userDetails.getUserId(), contractId);
 
+        return ApiResult.ok(response);
+    }
 
 }

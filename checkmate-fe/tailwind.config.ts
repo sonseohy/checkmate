@@ -1,5 +1,8 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+// tailwind.config.ts
+import type { Config } from 'tailwindcss';
+
+const config: Config = {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
@@ -27,11 +30,9 @@ module.exports = {
           '100%': { backgroundPosition: '0% 0%' },
         },
       },
-      gradientColorStops: (theme) => ({
-        'checkmate-start': theme('colors.checkmate-blue-700'),
-        'checkmate-end': theme('colors.checkmate-blue-300'),
-      }),
     },
   },
   plugins: [],
 };
+
+export default config;

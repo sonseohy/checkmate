@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { uploadContract } from '@/features/analyze/services/UploadService';
-import UploadForm from '@/features/analyze/components/UploadForm';
-import { SubCategory } from '@/features/categories/model/types';
+import { uploadContract, UploadForm } from '@/features/analyze';
+import { SubCategory } from '@/features/categories';
 import {
   categoryIdToNameMap,
   categorySlugMap,

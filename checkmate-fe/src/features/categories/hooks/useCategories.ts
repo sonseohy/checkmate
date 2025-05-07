@@ -2,8 +2,7 @@
 //리액트쿼리가 로딩, 에러, 캐시 자동처리해줌
 
 import { useQuery } from '@tanstack/react-query';
-import { CategoryService } from '@/features/categories/services/CategoryService';
-import { Category, CategoryItem } from '@/features/categories/model/types';
+import { CategoryService, Category, CategoryItem } from '@/features/categories';
 
 // 대분류 카테고리 조회
 export const useMainCategories = () => {

@@ -1,8 +1,8 @@
-import { postContractUpload } from '@/features/analyze/api/AnalyzeApi';
 import {
   UploadResponse,
   UploadContractParams,
-} from '@/features/analyze/model/types';
+  postContractUpload,
+} from '@/features/analyze';
 
 export const uploadContract = async ({
   title,

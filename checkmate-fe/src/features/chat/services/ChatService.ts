@@ -1,4 +1,4 @@
-import { ChatMessage } from '@/features/chat/model/types';
+import { ChatMessage } from '@/features/chat';
 
 export class ChatService {
   static history: ChatMessage[] = [];

@@ -77,10 +77,7 @@ export const router = createBrowserRouter([
         path: 'analyze/:mainCategorySlug/upload',
         element: <AnalyzeUploadPage />,
       },
-      // {
-      //   path: 'analyze/:mainCategorySlug/review',
-      //   element: <AnalyzeReviewPage />,
-      // },
+
       {
         path: 'analyze/:mainCategorySlug/result',
         element: <AnalyzeResultPage />,

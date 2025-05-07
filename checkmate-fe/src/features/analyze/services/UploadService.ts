@@ -1,17 +1,19 @@
 import { postContractUpload } from '@/features/analyze/api/AnalyzeApi';
-import { UploadContractParams } from '@/features/analyze/model/types';
+import {
+  UploadResponse,
+  UploadContractParams,
+} from '@/features/analyze/model/types';
 
-export const uploadContract = async (params: UploadContractParams) => {
+export const uploadContract = async ({
+  title,
+  categoryId,
+  file,
+}: UploadContractParams): Promise<UploadResponse> => {
   const formData = new FormData();
-  formData.append('title', params.title);
-  formData.append('category_id', String(params.categoryId));
-  formData.append('file', params.file);
+  formData.append('title', title);
+  formData.append('categoryId', categoryId.toString());
+  formData.append('files', file);
 
-  const res = await postContractUpload(formData);
-  return res.data;
-};
-
-export const requestOCR = async (contractId: number) => {
-  const res = await getOcrResult(contractId);
-  return res.data;
+  const response = await postContractUpload(formData);
+  return response.data;
 };

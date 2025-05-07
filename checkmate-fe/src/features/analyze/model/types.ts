@@ -1,4 +1,9 @@
-// 계약서 업로드 API 요청
+export interface UploadResponse {
+  contractId: number;
+  title: string;
+  createdAt: string;
+}
+
 export interface UploadContractParams {
   title: string;
   categoryId: number;

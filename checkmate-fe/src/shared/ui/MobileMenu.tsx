@@ -11,6 +11,7 @@ interface MobileMenuProps {
   closeMobile: () => void;
   showModal: () => void;
   categoryNames: string[];
+  isLogIn: boolean;
 }
 
 const MobileMenu = ({
@@ -23,6 +24,7 @@ const MobileMenu = ({
   closeMobile,
   showModal,
   categoryNames,
+  isLogIn,
 }: MobileMenuProps) => (
   <div className="absolute left-0 z-40 w-full bg-white border-b shadow-md top-full md:hidden">
     <div className="flex flex-col p-4 space-y-2">
@@ -82,16 +84,28 @@ const MobileMenu = ({
         )}
       </div>
 
-      {/* 회원가입 / 로그인 */}
-      <button
-        onClick={() => {
-          showModal();
-          closeMobile();
-        }}
-        className="pt-4 text-center text-gray-700 border-t cursor-pointer hover:text-black"
-      >
-        회원가입 / 로그인
-      </button>
+      {/* 로그인 상태에 따라 버튼 변경 */}
+      {isLogIn ? (
+        <button
+          onClick={() => {
+            closeMobile();
+            window.location.href = '/mypage'; // 마이페이지로 리다이렉트
+          }}
+          className="pt-4 text-center text-gray-700 border-t cursor-pointer hover:text-black"
+        >
+          마이페이지
+        </button>
+      ) : (
+        <button
+          onClick={() => {
+            showModal();
+            closeMobile();
+          }}
+          className="pt-4 text-center text-gray-700 border-t cursor-pointer hover:text-black"
+        >
+          회원가입 / 로그인
+        </button>
+      )}
     </div>
   </div>
 );

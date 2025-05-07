@@ -35,9 +35,11 @@ deploy_checkmate_fe:
     - fe
   script:
     - echo "🚀 Docker 배포 시작"
+    - cd checkmate-fe
     - docker stop checkmate-fe-container || true
     - docker rm checkmate-fe-container || true
     - docker rmi checkmate-fe || true
+    - docker build -t checkmate-fe .
     - docker run -d --name checkmate-fe-container -p 3000:80 checkmate-fe
   after_script:
     - |

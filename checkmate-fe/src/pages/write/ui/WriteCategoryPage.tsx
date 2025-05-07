@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import CategorySelector from '@/widgets/common/CategorySelector';
-import { MidCategory, SubCategory } from '@/features/categories/model/types';
+import { MidCategory, SubCategory } from '@/features/categories';
 import { categorySlugMap } from '@/shared/constants/categorySlugMap';
 import { navigateInvalidAccess } from '@/shared/utils/navigation';
 

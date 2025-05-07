@@ -1,5 +1,4 @@
-import { CategoryApi } from '@/features/categories/api/CategoriesApi';
-import { Category } from '@/features/categories/model/types';
+import { CategoryApi, Category } from '@/features/categories';
 
 export const CategoryService = {
   // 대분류 조회

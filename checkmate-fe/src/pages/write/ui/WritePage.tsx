@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
-import WritingProcess from '@/widgets/write/WritingProcess';
+import { WritingProcess } from '@/widgets/write';
 import {
   RealEstateIntro,
   EmploymentIntro,

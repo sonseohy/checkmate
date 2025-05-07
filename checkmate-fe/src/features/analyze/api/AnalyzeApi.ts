@@ -1,8 +1,5 @@
 import { customAxios } from '@/shared/api';
 
-// api/ContractApi.ts
+// 업로드 api
 export const postContractUpload = (formData: FormData) =>
-  customAxios.post('/contracts/uploads', formData);
-
-export const getOcrResult = (contractId: number) =>
-  customAxios.get(`/ocr/${contractId}`);
+  customAxios.post('api/contract/uploads', formData);

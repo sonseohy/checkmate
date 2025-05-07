@@ -1,7 +1,4 @@
-import {
-  postContractUpload,
-  getOcrResult,
-} from '@/features/analyze/api/AnalyzeApi';
+import { postContractUpload } from '@/features/analyze/api/AnalyzeApi';
 import { UploadContractParams } from '@/features/analyze/model/types';
 
 export const uploadContract = async (params: UploadContractParams) => {

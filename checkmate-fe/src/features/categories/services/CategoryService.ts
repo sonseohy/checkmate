@@ -1,15 +1,15 @@
 import { CategoryApi } from '@/features/categories/api/CategoriesApi';
+import { Category } from '@/features/categories/model/types';
 
 export const CategoryService = {
-  // 대분류 카테고리 조회
-  async getMajorCategories() {
-    const response = await CategoryApi.getCategories();
-    return response.data;
+  // 대분류 조회
+  async getMajorCategories(): Promise<Category[]> {
+    const res = await CategoryApi.getCategories();
+    return res.data.data;
   },
-
-  // 중분류 및 소분류 조회
-  async getSubCategories(parentId: number) {
-    const response = await CategoryApi.getSubCategories(parentId);
-    return response.data;
+  // 중,소분류 조회
+  async getSubCategories(parentId: number): Promise<Category[]> {
+    const res = await CategoryApi.getSubCategories(parentId);
+    return res.data.data;
   },
 };

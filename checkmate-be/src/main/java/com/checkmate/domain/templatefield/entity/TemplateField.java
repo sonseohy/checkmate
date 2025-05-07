@@ -7,9 +7,7 @@ import lombok.*;
 @Entity
 @Table(name = "template_field")
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class TemplateField {
 
     @Id
@@ -40,5 +38,31 @@ public class TemplateField {
     @Column(name = "sequence_no", nullable = false)
     private Integer sequenceNo;
 
+    @Lob
+    @Column(name = "options", columnDefinition = "TEXT")
+    private String options;
+
+    @Column(name = "depends_on", length = 100)
+    private String dependsOn;
+
+    @Builder
+    public TemplateField(Integer id, Section section, String fieldKey, String label,
+                         InputType inputType, String description, Boolean isRequired,
+                         Integer sequenceNo, String options, String dependsOn) {
+        this.id = id;
+        this.section = section;
+        this.fieldKey = fieldKey;
+        this.label = label;
+        this.inputType = inputType;
+        this.description = description;
+        this.isRequired = isRequired;
+        this.sequenceNo = sequenceNo;
+        this.options = options;
+        this.dependsOn = dependsOn;
+    }
+
+    public void setSection(Section section) {
+        this.section = section;
+    }
 
 }

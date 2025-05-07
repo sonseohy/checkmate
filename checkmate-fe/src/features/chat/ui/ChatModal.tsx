@@ -67,8 +67,8 @@ export const ChatModal = ({ onClose }: ChatModalProps) => {
             <p
               className={`relative max-w-[75%] px-4 py-2 text-sm rounded-2xl whitespace-pre-wrap shadow-md ${
                 msg.role === 'user'
-                  ? 'bg-blue-600 text-white ml-auto after:content-[""] after:absolute after:bottom-0 after:right-[-8px] after:border-t-8 after:border-t-transparent after:border-l-8 after:border-l-blue-600 after:border-b-8 after:border-b-transparent'
-                  : 'bg-gray-200 text-gray-800 mr-auto before:content-[""] before:absolute before:bottom-0 before:left-[-8px] before:border-t-8 before:border-t-transparent before:border-r-8 before:border-r-gray-200 before:border-b-8 before:border-b-transparent'
+                  ? 'bg-blue-600 text-white ml-auto'
+                  : 'bg-gray-200 text-gray-800 mr-auto'
               }`}
             >
               {msg.content}

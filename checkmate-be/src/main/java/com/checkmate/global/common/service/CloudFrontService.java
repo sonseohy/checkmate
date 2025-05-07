@@ -42,6 +42,9 @@ public class CloudFrontService {
 
             // 1) Load PEM file
             File pemFile = new File(privateKeyPath);
+            log.debug("privateKeyPath='{}', exists={}, isFile={}, canRead={}",
+                    privateKeyPath,
+                    pemFile.exists(), pemFile.isFile(), pemFile.canRead());
             if (!pemFile.exists() || !pemFile.canRead()) {
                 throw new IllegalStateException("Private key not found/readable: " + privateKeyPath);
             }

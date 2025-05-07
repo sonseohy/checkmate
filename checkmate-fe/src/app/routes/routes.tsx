@@ -88,7 +88,7 @@ export const router = createBrowserRouter([
       // 404 페이지
       { path: '*', element: <NotFoundPage /> },
       //kakao 콜백 페이지
-      { path: 'kakao/login', element: <Auth /> },
+      { path: '/login', element: <Auth /> },
     ],
   },
 ]);

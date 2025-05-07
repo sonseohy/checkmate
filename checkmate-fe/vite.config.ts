@@ -14,6 +14,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, 
         globDirectory: 'dist',
         globPatterns: ['**/*.{js,wasm,css,html}'], // 캐싱할 파일 패턴
       },

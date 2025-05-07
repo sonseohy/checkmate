@@ -18,21 +18,15 @@ build_checkmate_fe:
     - fe
   script:
     - cd checkmate-fe
-    - echo "$FRONTEND_ENV" > .env
-    - cat .env
-    - npm ci
-    - npm run build
-  artifacts:
-    paths:
-      - checkmate-fe/dist
+    - docker build --build-arg FRONTEND_ENV="$FRONTEND_ENV" -t checkmate-fe .
   after_script:
     - |
       if [ "$CI_JOB_STATUS" == "success" ]; then
         curl -X POST -H 'Content-Type: application/json' \
-        -d "{\"text\": \"✅ [빌드 성공] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+        -d "{\"text\": \"✅ [프론트 빌드 성공] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
       else
         curl -X POST -H 'Content-Type: application/json' \
-        -d "{\"text\": \"❌ [빌드 실패] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+        -d "{\"text\": \"❌ [프론트 빌드 실패] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
       fi
 
 deploy_checkmate_fe:
@@ -41,19 +35,17 @@ deploy_checkmate_fe:
     - fe
   script:
     - echo "🚀 Docker 배포 시작"
-    - cd checkmate-fe
     - docker stop checkmate-fe-container || true
     - docker rm checkmate-fe-container || true
     - docker rmi checkmate-fe || true
-    - docker build -t checkmate-fe .
     - docker run -d --name checkmate-fe-container -p 3000:80 checkmate-fe
   after_script:
     - |
       if [ "$CI_JOB_STATUS" == "success" ]; then
         curl -X POST -H 'Content-Type: application/json' \
-        -d "{\"text\": \"✅ [배포 성공] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+        -d "{\"text\": \"✅ [프론트 배포 성공] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
       else
         curl -X POST -H 'Content-Type: application/json' \
-        -d "{\"text\": \"❌ [배포 실패] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+        -d "{\"text\": \"❌ [프론트 배포 실패] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
       fi
 

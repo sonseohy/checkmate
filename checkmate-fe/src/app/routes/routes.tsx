@@ -2,7 +2,6 @@ import { Suspense, lazy } from 'react';
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import { AppLayout } from '@/shared';
 
-
 //메인 페이지
 const MainPage = lazy(() =>
   import('@pages/main').then((module) => ({ default: module.MainPage })),
@@ -33,24 +32,26 @@ const AnalyzeCategoryPage = lazy(() =>
 const AnalyzeUploadPage = lazy(() =>
   import('@pages/analyze').then((m) => ({ default: m.AnalyzeUploadPage })),
 );
-const AnalyzeReviewPage = lazy(() =>
-  import('@pages/analyze').then((m) => ({ default: m.AnalyzeCorrectionPage })),
-);
+// const AnalyzeReviewPage = lazy(() =>
+//   import('@pages/analyze').then((m) => ({ default: m.AnalyzeCorrectionPage })),
+// );
 const AnalyzeResultPage = lazy(() =>
   import('@pages/analyze').then((m) => ({ default: m.AnalyzeResultPage })),
 );
 
-//404 페이지
-const NotFoundPage = lazy(() =>
-  import('@pages/notfound').then((module) => ({
-    default: module.NotFoundPage,
-  })),
+const ErrorPageWrapper = lazy(() =>
+  import('@pages/error').then((m) => ({ default: m.ErrorPageWrapper })),
 );
 
+const ErrorPage = lazy(() =>
+  import('@pages/error/ui/ErrorPage').then((m) => ({ default: m.default })),
+);
 // 카카오 로그인 콜백 페이지
 const Auth = lazy(() =>
- import('@features/auth/ui/Auth').then(module => ({ default: module.default }))
-  );
+  import('@features/auth/ui/Auth').then((module) => ({
+    default: module.default,
+  })),
+);
 
 export const router = createBrowserRouter([
   {
@@ -76,17 +77,17 @@ export const router = createBrowserRouter([
         path: 'analyze/:mainCategorySlug/upload',
         element: <AnalyzeUploadPage />,
       },
-      {
-        path: 'analyze/:mainCategorySlug/review',
-        element: <AnalyzeReviewPage />,
-      },
+      // {
+      //   path: 'analyze/:mainCategorySlug/review',
+      //   element: <AnalyzeReviewPage />,
+      // },
       {
         path: 'analyze/:mainCategorySlug/result',
         element: <AnalyzeResultPage />,
       },
 
-      // 404 페이지
-      { path: '*', element: <NotFoundPage /> },
+      { path: 'error', element: <ErrorPageWrapper /> },
+      { path: '*', element: <ErrorPage /> },
       //kakao 콜백 페이지
       { path: '/login', element: <Auth /> },
     ],

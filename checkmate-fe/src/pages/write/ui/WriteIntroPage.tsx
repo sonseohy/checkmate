@@ -1,10 +1,12 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import WritingProcess from '@/widgets/write/WritingProcess';
 import {
   RealEstateIntro,
   EmploymentIntro,
   RentalIntro,
 } from '@/features/write';
+import { navigateInvalidAccess } from '@/shared/utils/navigation';
+import { useEffect } from 'react';
 
 // slug 타입(url에 사용)
 type Slug = 'contract' | 'certification' | 'order';
@@ -34,16 +36,16 @@ const introMap: Record<
 const WriteIntroPage: React.FC = () => {
   // url에서 slug를 가져와서 introMap에서 해당하는 컴포넌트를 찾음
   const { mainCategorySlug } = useParams<{ mainCategorySlug: Slug }>();
+  const navigate = useNavigate();
   const cfg = mainCategorySlug ? introMap[mainCategorySlug] : undefined;
 
-  //유효하지않은 slug일경우 에러처리
-  if (!cfg) {
-    return (
-      <div className="container py-16 mx-auto text-center text-red-500">
-        잘못된 경로입니다.
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!cfg) {
+      navigateInvalidAccess(navigate);
+    }
+  }, [cfg, navigate]);
+
+  if (!cfg) return null;
 
   const { title, Component: Intro, videoUrl } = cfg;
 

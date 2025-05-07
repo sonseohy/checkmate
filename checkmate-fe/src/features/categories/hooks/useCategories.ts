@@ -1,26 +1,31 @@
+// CategoryService 호출해서 CategoryItem(types) 형태로 가공해서 컴포넌트에 쉽게 사용하도록 함
+//리액트쿼리가 로딩, 에러, 캐시 자동처리해줌
+
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchMainCategories,
-  fetchSubcategories,
-} from '../services/CategoryService';
-import { CategoryItem } from '../model/types';
+import { CategoryService } from '@/features/categories/services/CategoryService';
+import { Category, CategoryItem } from '@/features/categories/model/types';
 
 // 대분류 카테고리 조회
-// 리액트 쿼리로 자동 캐싱 + 로딩 + 에러처리
 export const useMainCategories = () => {
   return useQuery({
     queryKey: ['mainCategories'],
-    queryFn: fetchMainCategories,
+    queryFn: async (): Promise<CategoryItem[]> => {
+      const res: Category[] = await CategoryService.getMajorCategories();
+      return res.map((item: Category) => ({
+        id: item.category_id,
+        name: item.name,
+      }));
+    },
   });
 };
 
-// 중분류 카테고리 조회 (대분류 카테고리가 선택되었을때만 작동하는 훅)
+// 중분류 카테고리 조회
 export const useMidCategories = (mainId?: number) => {
   return useQuery<CategoryItem[]>({
     queryKey: ['midCategories', mainId],
     queryFn: async () => {
-      const res = await fetchSubcategories(mainId!);
-      return res.map((item) => ({
+      const res: Category[] = await CategoryService.getSubCategories(mainId!);
+      return res.map((item: Category) => ({
         id: item.category_id,
         name: item.name,
       }));
@@ -28,13 +33,14 @@ export const useMidCategories = (mainId?: number) => {
     enabled: !!mainId,
   });
 };
-// 소분류 카테고리 조회 (중분류 카테고리가 선택되었을때만 작동하는 훅)
+
+// 소분류 카테고리 조회
 export const useSubCategories = (midId?: number) => {
   return useQuery<CategoryItem[]>({
     queryKey: ['subCategories', midId],
     queryFn: async () => {
-      const res = await fetchSubcategories(midId!);
-      return res.map((item) => ({
+      const res: Category[] = await CategoryService.getSubCategories(midId!);
+      return res.map((item: Category) => ({
         id: item.category_id,
         name: item.name,
       }));

@@ -89,7 +89,7 @@ export const router = createBrowserRouter([
       { path: 'error', element: <ErrorPageWrapper /> },
       { path: '*', element: <ErrorPage /> },
       //kakao 콜백 페이지
-      { path: 'kakao/login', element: <Auth /> },
+      { path: '/login', element: <Auth /> },
     ],
   },
 ]);

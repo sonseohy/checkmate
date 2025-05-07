@@ -36,3 +36,6 @@ tmp/
 *.sln
 *.sw?
 *.pem
+# IntelliJ / WebStorm
+.idea/
+*.iml

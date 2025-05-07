@@ -51,7 +51,7 @@ export async function PostKakaoCallback(code: string) {
       provider_id: id.toString()  // provider_id 필드명 수정
     });
 
-    console.log('로그인 응답:', loginResponse.data);
+    console.log('로그인 응답:', loginResponse.data );
 
     // 5) 로그인 성공 여부 확인
     if (loginResponse.data.success) {

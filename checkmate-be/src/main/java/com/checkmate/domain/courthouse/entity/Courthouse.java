@@ -27,7 +27,7 @@ public class Courthouse {
 	@Column(nullable = false)
 	private String courthouseAddress;
 
-	@Column(nullable = false, length = 15)
+	@Column(nullable = false, length = 20)
 	private String courthousePhoneNumber;
 
 }

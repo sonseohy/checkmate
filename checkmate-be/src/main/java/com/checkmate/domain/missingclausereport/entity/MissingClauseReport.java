@@ -1,37 +1,30 @@
 package com.checkmate.domain.missingclausereport.entity;
 
-import com.checkmate.domain.aianalysisreport.entity.AiAnalysisReport;
-import com.checkmate.domain.clause.entity.Clause;
-import jakarta.persistence.*;
-import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "missing_clause_report")
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
+@Document("missing_clause_report")
 public class MissingClauseReport {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "missing_clause_report_id")
-    private Integer id;
+    private String missingClauseReportId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ai_analysis_id", nullable = false)
-    private AiAnalysisReport analysisReport;
+    private String aiAnalysisReportId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "clause_id", nullable = false)
-    private Clause clause;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "importance", length = 6, nullable = false)
     private Importance importance;
 
-    @Lob
-    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
 }

@@ -1,7 +1,12 @@
 package com.checkmate.domain.riskclausereport.repository;
 
-import com.checkmate.domain.riskclausereport.entity.RiskClauseReport;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
-public interface RiskClauseReportRepository extends JpaRepository<RiskClauseReport, Integer> {
+import com.checkmate.domain.riskclausereport.entity.RiskClauseReport;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface RiskClauseReportRepository extends MongoRepository<RiskClauseReport, String> {
+	List<RiskClauseReport> findAllByAiAnalysisReportId(String analysisId);
 }

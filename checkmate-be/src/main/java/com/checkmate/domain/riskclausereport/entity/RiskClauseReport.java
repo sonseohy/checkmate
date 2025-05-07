@@ -1,36 +1,33 @@
 package com.checkmate.domain.riskclausereport.entity;
 
-import com.checkmate.domain.aianalysisreport.entity.AiAnalysisReport;
-import com.checkmate.domain.clause.entity.Clause;
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.*;
 
-@Entity
-@Table(name = "risk_clause_report")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
+@Document(collection = "risk_clause_report")
 public class RiskClauseReport {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "risk_clause_report_id")
-    private Integer id;
+    private String riskClauseReportId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ai_analysis_id", nullable = false)
-    private AiAnalysisReport analysisReport;
+    @Indexed
+    private String  aiAnalysisReportId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "clause_id", nullable = false)
-    private Clause clause;
-
-    @Column(name = "risk_level", nullable = false)
     private Integer riskLevel;
 
-    @Lob
-    @Column(name = "description", columnDefinition = "TEXT")
+    private String originalText;
+
     private String description;
+
+    private LocalDateTime createdAt;
 
 }

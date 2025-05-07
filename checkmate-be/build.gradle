@@ -62,6 +62,12 @@ dependencies {
     implementation 'org.bytedeco:javacv:1.5.11'
     implementation "org.bytedeco:opencv-platform:4.10.0-1.5.11"
 
+    implementation platform('software.amazon.awssdk:bom:2.20.162')
+    implementation 'software.amazon.awssdk:s3'
+
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.539')
+    implementation 'com.amazonaws:aws-java-sdk-cloudfront'
+
 }
 
 tasks.named('test') {

@@ -5,30 +5,36 @@ import { useNavigate } from "react-router-dom";
 export default function Auth() {
   const navigate = useNavigate();
   const [isProcessed, setIsProcessed] = useState<boolean>(false); // 상태 추가
-
-  useEffect(() => {
-    if (isProcessed) {
-      navigate("/"); // 상태가 true로 변경되면 리다이렉트
-    }
-  }, [isProcessed, navigate]); // isProcessed가 변경되면 이 effect가 실행됨
+  const [error, setError] = useState<string | null>(null); // 오류 처리 추가
 
   useEffect(() => {
     const code = new URL(window.location.href).searchParams.get("code");
-    if (!code) return;
+    if (!code || isProcessed) return; // 이미 처리된 경우 다시 처리하지 않도록
 
-    PostKakaoCallback(code)
-      .then(res => {
-        console.log("[Auth] callback 성공:", res);
-        setIsProcessed(true);  // 처리 완료 후 상태 업데이트
-      })
-      .catch((err) => {
-        console.error("카카오 콜백 처리 실패:", err);
-      });
-  }, [navigate]);  // 상태가 변경되면 다시 실행되지 않도록 의존성 배열에 추가
+    setIsProcessed(true); 
+    
+    const processCallback = async () => {
+      try {
+        const res = await PostKakaoCallback(code);
+        if (res) {
+          navigate("/"); // 리다이렉트
+        } else {
+          setError("카카오 콜백 처리에 실패했습니다.");
+        }
+      } catch (err) {
+        setError("카카오 콜백 처리 중 오류가 발생했습니다.");
+        console.error(err);
+      }finally {
+        setIsProcessed(false);  // 호출이 끝나면 isProcessed를 false로 돌려놓기
+      }
+    };
+
+    processCallback();
+  }, [ navigate]); // isProcessed, navigate 상태에 따라 한 번만 호출되도록 의존성 관리
 
   return (
     <div className="h-screen flex items-center justify-center">
-      <p>로그인 처리 중입니다…</p>
+      {error ? <p className="text-red-500">{error}</p> : <p>로그인 처리 중입니다…</p>}
     </div>
   );
 }

@@ -11,6 +11,7 @@ const REST_API = import.meta.env.VITE_REST_API;
 const redirectUri = import.meta.env.VITE_REDIRECT_URL;
 const kakaoURL = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API}&redirect_uri=${redirectUri}&response_type=code`;
 
+
 export default function KakaoLoginModal({ onClose }: KakaoLoginModalProps) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 

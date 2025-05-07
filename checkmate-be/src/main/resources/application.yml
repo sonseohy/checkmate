@@ -13,7 +13,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  servlet:
+    multipart:
+      max-request-size: 100MB
+      max-file-size: 100MB
 
 springdoc:
   paths-to-match:

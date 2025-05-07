@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import {
   fetchMainCategories,
   fetchSubcategories,
-} from '../services/CategoryService';
-import { CategoryItem } from '../model/types';
+} from '@/features/categories/services/CategoryService';
+import { CategoryItem } from '@/features/categories/model/types';
 
 // 대분류 카테고리 조회
 // 리액트 쿼리로 자동 캐싱 + 로딩 + 에러처리

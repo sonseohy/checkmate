@@ -1,5 +1,8 @@
-import { postContractUpload, getOcrResult } from '../api/AnalyzeApi';
-import { UploadContractParams } from '../model/types';
+import {
+  postContractUpload,
+  getOcrResult,
+} from '@/features/analyze/api/AnalyzeApi';
+import { UploadContractParams } from '@/features/analyze/model/types';
 
 export const uploadContract = async (params: UploadContractParams) => {
   const formData = new FormData();

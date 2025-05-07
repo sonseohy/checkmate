@@ -1,4 +1,7 @@
 import { Header, HeaderProps } from '@/shared/ui/Header';
+import { ChatbotButton } from '@/shared/ui/ChatbotButton';
+import { ChatModal } from '@/features/chat/ui/ChatModal';
+import { useState } from 'react';
 
 export interface AppLayoutProps {
   children: React.ReactNode;
@@ -15,6 +18,8 @@ export const AppLayout = ({
     headerProps.className ?? ''
   }`.trim();
 
+  const [showChat, setShowChat] = useState(false);
+
   return (
     <div className="flex flex-col h-screen">
       <Header
@@ -26,6 +31,10 @@ export const AppLayout = ({
       >
         {children}
       </main>
+
+      {/* 챗봇 버튼 및 모달 */}
+      <ChatbotButton onClick={() => setShowChat(true)} isVisible={!showChat} />
+      {showChat && <ChatModal onClose={() => setShowChat(false)} />}
     </div>
   );
 };

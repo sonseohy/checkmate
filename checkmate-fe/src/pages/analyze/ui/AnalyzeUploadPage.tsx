@@ -1,15 +1,16 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Upload } from 'lucide-react';
 import {
   uploadContract,
   requestOCR,
 } from '@/features/analyze/services/UploadService';
-import { Upload } from 'lucide-react';
+import { SubCategory } from '@/features/categories/model/types';
 import {
   categoryIdToNameMap,
   categorySlugMap,
 } from '@/shared/constants/categorySlugMap';
-import { SubCategory } from '@/features/categories/model/types';
+import { navigateInvalidAccess } from '@/shared/utils/navigation';
 
 const ALLOWED_TYPES = [
   'image/jpeg',
@@ -32,13 +33,15 @@ const AnalyzeUploadPage: React.FC = () => {
 
   const [files, setFiles] = useState<File[]>([]);
 
-  if (!mainCategorySlug || !selectedSub || !categoryId) {
-    return (
-      <div className="py-16 text-center text-red-500">
-        잘못된 접근입니다. 카테고리를 다시 선택해주세요.
-      </div>
-    );
-  }
+  // 잘못된 접근 시 에러 페이지로 이동
+  useEffect(() => {
+    if (!mainCategorySlug || !selectedSub || !categoryId) {
+      navigateInvalidAccess(navigate);
+    }
+  }, [mainCategorySlug, selectedSub, categoryId, navigate]);
+
+  // 유효성 검사 중이면 렌더링하지 않음
+  if (!mainCategorySlug || !selectedSub || !categoryId) return null;
 
   const onNext = async () => {
     if (files.length === 0) {
@@ -68,7 +71,6 @@ const AnalyzeUploadPage: React.FC = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files ?? []);
-
     const filteredFiles = selectedFiles.filter((file) =>
       ALLOWED_TYPES.includes(file.type),
     );
@@ -96,7 +98,6 @@ const AnalyzeUploadPage: React.FC = () => {
       </h1>
 
       <div className="max-w-md mx-auto">
-        {/* 업로드 박스 */}
         <div className="p-6 mb-6 border-2 border-dashed rounded-lg">
           <label
             htmlFor="file-upload"
@@ -114,7 +115,6 @@ const AnalyzeUploadPage: React.FC = () => {
             onChange={handleFileChange}
           />
 
-          {/* 선택된 파일 목록 */}
           {files.length > 0 && (
             <div className="mt-4 text-sm text-left">
               <p className="mb-2 font-semibold">{`선택된 파일 (${files.length}개)`}</p>
@@ -135,7 +135,6 @@ const AnalyzeUploadPage: React.FC = () => {
           )}
         </div>
 
-        {/* 다음 버튼 */}
         <button
           onClick={onNext}
           className="w-full px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"

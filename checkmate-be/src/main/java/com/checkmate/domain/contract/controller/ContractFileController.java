@@ -6,6 +6,8 @@ import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.service.S3Service;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,8 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 @RestController
@@ -29,42 +31,30 @@ public class ContractFileController {
     private final S3Service s3Service;
 
     @GetMapping("/{contractId}/download")
-    public ResponseEntity<StreamingResponseBody> downloadPdf(
+    public ResponseEntity<Resource> downloadPdf(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable int contractId) {
+            @PathVariable int contractId) throws Exception {
 
         ContractFile file = contractFileService.findViewerFile(
                 userDetails.getUserId(), contractId);
 
-        String key    = file.getFileAddress()
-                .replace("https://"+/*cloudFrontDomain*/""+"/", "");
-        byte[] iv     = file.getIv();
-        byte[] shareA = file.getEncryptedDataKey();
-        long   fileId = file.getId();
+        String key = file.getFileAddress()
+                .replaceFirst("https://[^/]+/", "");
 
-        StreamingResponseBody body = out -> {
-            try {
-                s3Service.streamDecryptToOutput(key, iv, shareA, fileId, out);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        };
+        InputStream decrypted = s3Service.getDecryptedStream(
+                key, file.getIv(), file.getEncryptedDataKey(), file.getId());
+
+        InputStreamResource resource = new InputStreamResource(decrypted);
 
         String filename = file.getContract().getTitle() + ".pdf";
-        System.out.println("filename: "+filename);
-
-        String fallback = "contract-" + contractId + ".pdf";
-        ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
-                .filename(fallback)
+        ContentDisposition cd = ContentDisposition.builder("attachment")
                 .filename(filename, StandardCharsets.UTF_8)
                 .build();
-        System.out.println("마지막");
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+                .header(HttpHeaders.CONTENT_DISPOSITION, cd.toString())
                 .contentType(MediaType.APPLICATION_PDF)
-                .body(body);
-
+                .body(resource);
     }
 
 }

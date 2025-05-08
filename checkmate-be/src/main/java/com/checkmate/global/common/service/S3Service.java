@@ -237,36 +237,39 @@ public class S3Service {
     }
 
     /**
-     * S3 암호문 → AES-GCM 복호화 스트리밍
+     * S3에서 암호화된 객체를 가져와 AES-GCM 복호화 후 CipherInputStream을 반환
      */
-    public void streamDecryptToOutput(
+    public InputStream getDecryptedStream(
             String key,
             byte[] iv,
             byte[] shareA,
-            long fileId,
-            OutputStream out
+            long fileId
     ) throws Exception {
-        try (ResponseInputStream<GetObjectResponse> s3is =
-                     s3Client.getObject(GetObjectRequest.builder()
-                             .bucket(bucketName)
-                             .key(key)
-                             .build())) {
+        // 1) S3에서 암호문 스트림 가져오기
+        ResponseInputStream<GetObjectResponse> s3is = s3Client.getObject(
+                GetObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .build()
+        );
 
-            byte[] shareB = keyShareMongo.loadShareB(fileId);
-            byte[] dek    = new byte[shareA.length];
-            for (int i = 0; i < shareA.length; i++) {
-                dek[i] = (byte)(shareA[i] ^ shareB[i]);
-            }
-
-            Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-            cipher.init(Cipher.DECRYPT_MODE,
-                    new SecretKeySpec(dek, "AES"),
-                    new GCMParameterSpec(TAG_BITS, iv));
-
-            try (CipherInputStream cis = new CipherInputStream(s3is, cipher)) {
-                cis.transferTo(out);
-            }
+        // 2) MongoDB에서 shareB 조회 및 DEK 복원
+        byte[] shareB = keyShareMongo.loadShareB(fileId);
+        byte[] dek = new byte[shareA.length];
+        for (int i = 0; i < shareA.length; i++) {
+            dek[i] = (byte)(shareA[i] ^ shareB[i]);
         }
+
+        // 3) Cipher 초기화
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(
+                Cipher.DECRYPT_MODE,
+                new SecretKeySpec(dek, "AES"),
+                new GCMParameterSpec(TAG_BITS, iv)
+        );
+
+        // 4) CipherInputStream으로 래핑하여 반환
+        return new CipherInputStream(s3is, cipher);
     }
 
     // ----------------------------------------------------
@@ -358,6 +361,16 @@ public class S3Service {
         String name  = fileUrl.replace(filePrefix, "")
                 .substring(fileUrl.lastIndexOf("/") + 1);
         return new CustomMultipartFile(bytes, name, contentType);
+    }
+
+    public long getObjectContentLength(String key) {
+        HeadObjectResponse head = s3Client.headObject(
+                HeadObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .build()
+        );
+        return head.contentLength();
     }
 
 }

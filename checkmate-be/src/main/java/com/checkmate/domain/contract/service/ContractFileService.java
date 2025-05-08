@@ -1,7 +1,7 @@
 package com.checkmate.domain.contract.service;
 
 import com.checkmate.domain.contract.dto.response.FileNumberResponse;
-import com.checkmate.domain.contract.dto.response.PdfData;
+import com.checkmate.domain.contract.dto.response.PdfMetadata;
 import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.entity.FileCategory;
@@ -191,24 +191,6 @@ public class ContractFileService {
     }
 
     @Transactional(readOnly = true)
-    public PdfData loadViewerPdf(int userId, Integer contractId) {
-
-        ContractFile file = contractFileRepository.findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
-                .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
-
-        if (!file.getContract().getUser().getUserId().equals(userId)) {
-            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
-        }
-
-        byte[] pdfBytes = s3Service.downloadAndDecryptWithKeySplit(
-                file.getFileAddress(), file.getIv(), file.getEncryptedDataKey(), file.getId().longValue());
-
-        String filename    = "contract-" + contractId + ".pdf";
-        String contentType = MediaType.APPLICATION_PDF_VALUE;
-        return new PdfData(pdfBytes, filename, contentType);
-
-    }
-
     public ContractFile  findViewerFile(int userId, int contractId) {
         User user = userService.findUserById(userId);
         ContractFile file = contractFileRepository.findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
@@ -220,5 +202,36 @@ public class ContractFileService {
 
         return file;
 
+    }
+
+    @Transactional(readOnly = true)
+    public PdfMetadata loadViewerPdfMetadata(int userId, int contractId) {
+        User user = userService.findUserById(userId);
+
+        ContractFile file = contractFileRepository
+                .findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
+                .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
+
+        if (!file.getContract().getUser().getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
+        }
+
+        String key = file.getFileAddress()
+                .split("\\?")[0]
+                .replaceFirst("https://[^/]+/", "");
+        long contentLength = s3Service.getObjectContentLength(key);
+
+        String filename    = file.getContract().getTitle() + ".pdf";
+        String contentType = MediaType.APPLICATION_PDF_VALUE;
+
+        return new PdfMetadata(
+                file.getFileAddress(),
+                file.getIv(),
+                file.getEncryptedDataKey(),
+                file.getId(),
+                filename,
+                contentType,
+                contentLength
+        );
     }
 }

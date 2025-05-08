@@ -16,6 +16,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
@@ -23,6 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.SecureRandom;
 import java.util.UUID;
 
@@ -233,7 +235,40 @@ public class S3Service {
             throw new RuntimeException("분할 복호화 실패", e);
         }
     }
-    
+
+    /**
+     * S3 암호문 → AES-GCM 복호화 스트리밍
+     */
+    public void streamDecryptToOutput(
+            String key,
+            byte[] iv,
+            byte[] shareA,
+            long fileId,
+            OutputStream out
+    ) throws Exception {
+        try (ResponseInputStream<GetObjectResponse> s3is =
+                     s3Client.getObject(GetObjectRequest.builder()
+                             .bucket(bucketName)
+                             .key(key)
+                             .build())) {
+
+            byte[] shareB = keyShareMongo.loadShareB(fileId);
+            byte[] dek    = new byte[shareA.length];
+            for (int i = 0; i < shareA.length; i++) {
+                dek[i] = (byte)(shareA[i] ^ shareB[i]);
+            }
+
+            Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+            cipher.init(Cipher.DECRYPT_MODE,
+                    new SecretKeySpec(dek, "AES"),
+                    new GCMParameterSpec(TAG_BITS, iv));
+
+            try (CipherInputStream cis = new CipherInputStream(s3is, cipher)) {
+                cis.transferTo(out);
+            }
+        }
+    }
+
     // ----------------------------------------------------
     // 2. 기존 메서드 (암호화 없이 업로드/다운로드 등)
     // ----------------------------------------------------

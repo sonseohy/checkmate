@@ -6,6 +6,8 @@ import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.entity.FileCategory;
 import com.checkmate.domain.contract.repository.ContractFileRepository;
+import com.checkmate.domain.user.entity.User;
+import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 import com.checkmate.global.common.service.*;
@@ -43,6 +45,7 @@ public class ContractFileService {
     private final ImagePreprocessingService imgPreprocess;
     private final PdfProcessingService pdfProcessing;
     private final MeterRegistry meterRegistry;
+    private final UserService userService;
 
     @Transactional
     public FileNumberResponse uploadContractFiles(
@@ -203,6 +206,19 @@ public class ContractFileService {
         String filename    = "contract-" + contractId + ".pdf";
         String contentType = MediaType.APPLICATION_PDF_VALUE;
         return new PdfData(pdfBytes, filename, contentType);
+
+    }
+
+    public ContractFile  findViewerFile(int userId, int contractId) {
+        User user = userService.findUserById(userId);
+        ContractFile file = contractFileRepository.findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
+                .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
+
+        if (!file.getContract().getUser().getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
+        }
+
+        return file;
 
     }
 }

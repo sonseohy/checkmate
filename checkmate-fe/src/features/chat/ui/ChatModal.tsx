@@ -1,7 +1,6 @@
 import Modal from 'react-modal';
 import { useEffect, useRef, useState } from 'react';
-import { ChatMessage } from '@/features/chat/model/types';
-import { sendChatMessage } from '@/features/chat/api/ChatApi';
+import { ChatMessage, sendChatMessage } from '@/features/chat';
 
 Modal.setAppElement('#root');
 

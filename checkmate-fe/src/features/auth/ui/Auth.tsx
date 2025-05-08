@@ -9,7 +9,14 @@ export default function Auth() {
 
   useEffect(() => {
     const code = new URL(window.location.href).searchParams.get("code");
-    if (!code || isProcessed) return; // 이미 처리된 경우 다시 처리하지 않도록
+    if (window.location.pathname !== '/login') return;
+    
+    if (!code || isProcessed) {
+      console.log('콜백페이지입니다')
+      navigate("/", { replace: true });
+      return;
+    }
+
 
     setIsProcessed(true);
 

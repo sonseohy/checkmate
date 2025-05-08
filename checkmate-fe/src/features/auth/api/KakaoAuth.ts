@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { customAxios } from '@/shared/api/client/customAxios';
+import { getAccessToken } from '@/shared';
+import Swal from 'sweetalert2';
+import { NavigateFunction } from "react-router-dom";
 
+//카카오 로그인
 export async function PostKakaoCallback(code: string) {
   const params = new URLSearchParams();
   params.append('grant_type', 'authorization_code');
@@ -75,3 +79,30 @@ export async function PostKakaoCallback(code: string) {
     return profileRes ? profileRes.data : null;  // profileRes가 없으면 null 반환
   }
 }
+
+//카카오 로그아웃
+export const postLogout = async(navigate: NavigateFunction) => {
+  const access_token = getAccessToken();
+
+  try {
+    const response = await customAxios.post('/api/auth/logout',null,{
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`
+      }
+    });
+    Swal.fire({
+      title: "로그아웃",
+      text: "로그아웃이 완료되었습니다.",
+      icon: 'success',
+      confirmButtonText: "확인", 
+    })
+    // 로컬 토큰 완전 삭제
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    navigate('/');
+    return response.data;
+  } catch(error) {
+    console.error('로그아웃 실패:' , error);
+  } 
+};

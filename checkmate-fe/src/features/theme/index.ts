@@ -1,1 +1,1 @@
-export { default as themeSlice } from './model/themeSlice';
+export { default as themeReducer } from './model/themeSlice';

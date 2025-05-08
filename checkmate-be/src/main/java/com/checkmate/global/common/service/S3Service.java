@@ -191,8 +191,14 @@ public class S3Service {
             Long fileId
     ) {
         try {
-            // S3 다운로드
-            String key = fileUrl.replace(filePrefix, "");
+
+            // 1) fileUrl 에 붙은 쿼리 삭제
+            String urlNoQuery = fileUrl.split("\\?")[0];
+
+            // 2) prefix 제거
+            String key = urlNoQuery.replace(filePrefix, "");
+
+            // 3) S3에서 암호문 가져오기
             ResponseBytes<GetObjectResponse> resp = s3Client.getObjectAsBytes(
                     GetObjectRequest.builder()
                             .bucket(bucketName)
@@ -200,8 +206,16 @@ public class S3Service {
                             .build());
             byte[] ciphertext = resp.asByteArray();
 
+            log.debug("IV length={}, shareA length={}, ciphertext length={}",
+                    iv.length, shareA.length, ciphertext.length);
+
             // MongoDB에서 shareB 로드
             byte[] shareB = keyShareMongo.loadShareB(fileId);
+            if (shareB.length != shareA.length) {
+                throw new RuntimeException(
+                        "shareA/ shareB 길이가 다릅니다: "
+                                + shareA.length + " vs " + shareB.length);
+            }
 
             // DEK 복원
             byte[] dekBytes = new byte[shareA.length];
@@ -219,7 +233,7 @@ public class S3Service {
             throw new RuntimeException("분할 복호화 실패", e);
         }
     }
-
+    
     // ----------------------------------------------------
     // 2. 기존 메서드 (암호화 없이 업로드/다운로드 등)
     // ----------------------------------------------------
@@ -310,4 +324,5 @@ public class S3Service {
                 .substring(fileUrl.lastIndexOf("/") + 1);
         return new CustomMultipartFile(bytes, name, contentType);
     }
+
 }

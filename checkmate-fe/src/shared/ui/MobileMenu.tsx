@@ -45,8 +45,11 @@ const MobileMenu = ({
             {categoryNames.map((name) => (
               <li key={name}>
                 <button
-                  onClick={() => handleWriteClick(name)}
-                  className="block py-1 text-left hover:bg-gray-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleWriteClick(name);
+                  }}
+                  className="block w-full px-4 py-2 text-left hover:bg-sky-500 hover:text-white"
                 >
                   {name}
                 </button>
@@ -73,8 +76,11 @@ const MobileMenu = ({
             {categoryNames.map((name) => (
               <li key={name}>
                 <button
-                  onClick={() => handleAnalyzeClick(name)}
-                  className="block py-1 text-left hover:bg-gray-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleWriteClick(name);
+                  }}
+                  className="block w-full px-4 py-2 text-left hover:bg-sky-500 hover:text-white"
                 >
                   {name}
                 </button>

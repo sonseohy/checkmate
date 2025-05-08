@@ -15,6 +15,12 @@ const AnalyzeCategoryPage: React.FC = () => {
   const mainCategoryId =
     categorySlugMap[mainCategorySlug as keyof typeof categorySlugMap];
 
+  /* 🔽 slug 가 바뀌면 단계 선택값을 리셋 */
+  useEffect(() => {
+    setSelectedMid(null);
+    setSelectedSub(null);
+  }, [mainCategoryId]);
+
   // ✅ 유효하지 않은 slug일 경우 에러 페이지로 이동
   useEffect(() => {
     if (!mainCategoryId) {

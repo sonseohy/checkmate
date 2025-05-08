@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
     setIsLogIn(!!accessToken);
-  },[]);
+  }, []);
 
   const handleWriteClick = (name: string) => {
     const slug = categoryNameToSlugMap[name];
@@ -91,20 +91,19 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         />
         {isLogIn ? (
           <button
-          onClick={() => navigate('/mypage')}
-          className="text-sm font-normal text-gray-700 hover:text-black"
-        >
-          마이페이지
-        </button>
-        ): (
+            onClick={() => navigate('/mypage')}
+            className="text-sm font-normal text-gray-700 hover:text-black"
+          >
+            마이페이지
+          </button>
+        ) : (
           <button
-          onClick={showModal}
-          className="text-sm font-normal text-gray-700 hover:text-black"
-        >
-          회원가입 / 로그인
-        </button>
+            onClick={showModal}
+            className="text-sm font-normal text-gray-700 hover:text-black"
+          >
+            회원가입 / 로그인
+          </button>
         )}
-        
       </div>
 
       <button

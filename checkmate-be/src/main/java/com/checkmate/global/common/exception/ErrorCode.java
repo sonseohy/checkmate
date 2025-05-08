@@ -36,7 +36,9 @@ public enum ErrorCode {
 
     COURTHOUSE_NOT_FOUND("COURT-001", HttpStatus.NOT_FOUND, "법원 정보를 찾을 수 없습니다."),
 
-    AI_ANALYSIS_REPORT_NOT_FOUND("ANALYSIS-001", HttpStatus.NOT_FOUND, "AI 분석 리포트를 찾을 수 없습니다.");
+    AI_ANALYSIS_REPORT_NOT_FOUND("ANALYSIS-001", HttpStatus.NOT_FOUND, "AI 분석 리포트를 찾을 수 없습니다."),
+
+    TEMPLATE_NOT_FOUND("TEMPLATE-001", HttpStatus.NOT_FOUND, "존재하지 않는 템플릿입니다.");
 
 
     private final String code;

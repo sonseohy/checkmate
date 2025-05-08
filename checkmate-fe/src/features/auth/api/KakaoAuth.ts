@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { customAxios } from '@/shared/api/client/customAxios';
-import { getAccessToken } from '@/entities/user';
 import Swal from 'sweetalert2';
 import { NavigateFunction } from "react-router-dom";
 import { logout, loginSuccess } from "@/features/auth/slices/authSlice"; 
@@ -25,10 +24,8 @@ export async function PostKakaoCallback(code: string, dispatch: AppDispatch) {
       },
     });
 
-    console.log(tokenRes.data); // 성공 시 데이터 출력
-
-    // 2) 액세스 토큰 추출 (refresh_token을 제거)
-    const { access_token } = tokenRes.data; // const { access_token, refresh_token } = tokenRes.data; 
+    // 2) 토큰 추출 
+    const { access_token } = tokenRes.data; 
 
     // 3) 카카오 유저 프로필 조회
     profileRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
@@ -91,15 +88,10 @@ export async function PostKakaoCallback(code: string, dispatch: AppDispatch) {
 
 // 로그아웃
 export const postLogout = async(navigate: NavigateFunction, dispatch: AppDispatch) => {
-  const access_token = getAccessToken();
+
 
   try {
-    const response = await customAxios.post('/api/auth/logout',null,{
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${access_token}`
-      }
-    });
+    const response = await customAxios.post('/api/auth/logout');
 
     //로그아웃 시 리덕스 상태 초기화
     dispatch(logout());

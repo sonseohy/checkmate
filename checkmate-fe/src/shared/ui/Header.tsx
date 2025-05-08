@@ -7,8 +7,10 @@ import HeaderDropdown from './HeaderDropdown';
 import { KakaoLoginModal } from '@/features/main';
 import { Menu, X } from 'lucide-react';
 import { useMainCategories } from '@/features/categories/hooks/useCategories';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/app/redux/store';
+import { loginSuccess, logout } from '@/features/auth/slices/authSlice';
+import { useUserInfo } from '@/features/auth';
 
 export interface HeaderProps {
   className?: string;
@@ -16,6 +18,8 @@ export interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useUserInfo();
   const [writeOpen, setWriteOpen] = useState<boolean>(false);
   const [analyzeOpen, setAnalyzeOpen] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
@@ -28,13 +32,18 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   //리덕스에서 상태 가져오기
   const isLogIn = useSelector((state: RootState) => state.auth.isAuthenticated);
 
-  //로그인 여부 확인
-  // const [isLogIn, setIsLogIn] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   const accessToken = localStorage.getItem('access_token');
-  //   setIsLogIn(!!accessToken);
-  // },[]);
+  useEffect(() => {
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken && user) {
+      // `access_token`과 `user`가 있으면 로그인 상태로 설정
+      dispatch(loginSuccess(user)); // 사용자 정보 설정
+    } else {
+      // `access_token`이 없으면 로그아웃 상태로 설정
+      dispatch(logout());
+    }
+  }, [dispatch, user]);
+
 
   const handleWriteClick = (name: string) => {
     const slug = categoryNameToSlugMap[name];

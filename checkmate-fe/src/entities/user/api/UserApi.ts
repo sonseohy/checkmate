@@ -6,6 +6,11 @@ export const getAccessToken = () => {
     return localStorage.getItem('access_token');
 };
 
+//로컬 스토리지에서 refresh_token 가져오기
+export const getRepreshAccessToken = () => {
+    return localStorage.getItem('refresh_token');
+};
+
 //사용자 정보 가져오기
 export const getUserInfo = async() => {
     try {

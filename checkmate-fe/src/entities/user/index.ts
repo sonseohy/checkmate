@@ -1,3 +1,4 @@
 
-export { getAccessToken } from "./api/UserApi";
-export { getUserInfo } from "./api/UserApi";
+export { getAccessToken, 
+         getRepreshAccessToken, 
+         getUserInfo } from "./api/UserApi";

@@ -15,6 +15,12 @@ const WriteCategoryPage: React.FC = () => {
   const mainCategoryId =
     categorySlugMap[mainCategorySlug as keyof typeof categorySlugMap];
 
+  /* 🔽 slug 가 바뀌면 단계 선택값을 리셋 */
+  useEffect(() => {
+    setSelectedMid(null);
+    setSelectedSub(null);
+  }, [mainCategoryId]);
+
   useEffect(() => {
     if (!mainCategoryId) {
       navigateInvalidAccess(navigate);

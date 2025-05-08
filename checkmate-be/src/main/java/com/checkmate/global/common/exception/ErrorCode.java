@@ -36,8 +36,9 @@ public enum ErrorCode {
 
     COURTHOUSE_NOT_FOUND("COURT-001", HttpStatus.NOT_FOUND, "법원 정보를 찾을 수 없습니다."),
 
-    AI_ANALYSIS_REPORT_NOT_FOUND("ANALYSIS-001", HttpStatus.NOT_FOUND, "AI 분석 리포트를 찾을 수 없습니다.");
+    AI_ANALYSIS_REPORT_NOT_FOUND("ANALYSIS-001", HttpStatus.NOT_FOUND, "AI 분석 리포트를 찾을 수 없습니다."),
 
+    AI_ANALYSIS_API_ERROR("ANALYSIS-002", HttpStatus.INTERNAL_SERVER_ERROR, "AI 분석 서비스에 연결할 수 없습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

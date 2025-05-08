@@ -12,7 +12,7 @@ export const customAxios = axios.create({
 // 요청(request) 인터셉터: 요청 보내기 전에 토큰 자동 추가
 customAxios.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken'); // 또는 sessionStorage, 쿠키 등에서 꺼내오기
+    const token = localStorage.getItem('access_token'); // 또는 sessionStorage, 쿠키 등에서 꺼내오기
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`; // Bearer 토큰 추가
     }

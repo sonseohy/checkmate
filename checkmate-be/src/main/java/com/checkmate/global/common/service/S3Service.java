@@ -37,6 +37,9 @@ public class S3Service {
 
     @Value("${aws.s3.bucket}")
     private String bucketName;
+
+    @Value("${aws.cloudfront.domain}")
+    private String cloudFrontDomain;
     private String filePrefix;
 
     public static final String ORIGINAL_PREFIX = "original/";
@@ -48,7 +51,7 @@ public class S3Service {
 
     @PostConstruct
     public void init() {
-        this.filePrefix = "https://" + bucketName + ".s3.ap-northeast-2.amazonaws.com/";
+        this.filePrefix = "https://" + cloudFrontDomain + "/";
     }
 
     // ----------------------------------------------------
@@ -221,46 +224,41 @@ public class S3Service {
     // 2. 기존 메서드 (암호화 없이 업로드/다운로드 등)
     // ----------------------------------------------------
 
+    /** MultipartFile → S3 업로드 */
     public String uploadFile(MultipartFile file, String prefix) {
         String ext  = StringUtils.getFilenameExtension(file.getOriginalFilename());
-        String uuid = UUID.randomUUID().toString();
-        String key  = prefix + uuid + System.currentTimeMillis() + "." + ext;
+        String key  = prefix + UUID.randomUUID() + System.currentTimeMillis() + "." + ext;
         PutObjectRequest req = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
                 .contentType(file.getContentType())
                 .build();
         try (InputStream in = file.getInputStream()) {
-            PutObjectResponse resp = s3Client.putObject(req,
-                    RequestBody.fromInputStream(in, file.getSize()));
-            if (!resp.sdkHttpResponse().isSuccessful()) {
-                throw new RuntimeException("파일 업로드 실패");
-            }
+            s3Client.putObject(req, RequestBody.fromInputStream(in, file.getSize()));
             return filePrefix + key;
         } catch (IOException e) {
-            throw new RuntimeException("파일 IO 에러", e);
+            throw new RuntimeException("파일 업로드 실패", e);
         }
     }
 
+    /** byte[] → S3 업로드 */
     public String uploadBytes(byte[] bytes, String fileName, String contentType, String prefix) {
-        String uuid      = UUID.randomUUID().toString();
         String extension = fileName.contains(".")
                 ? fileName.substring(fileName.lastIndexOf("."))
                 : "";
-        String key = prefix + uuid + System.currentTimeMillis() + extension;
-        PutObjectRequest req = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .contentType(contentType)
-                .build();
-        PutObjectResponse resp = s3Client.putObject(req,
-                RequestBody.fromBytes(bytes));
-        if (!resp.sdkHttpResponse().isSuccessful()) {
-            throw new RuntimeException("파일 업로드 실패");
-        }
+        String key = prefix + UUID.randomUUID() + System.currentTimeMillis() + extension;
+        s3Client.putObject(
+                PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .contentType(contentType)
+                        .build(),
+                RequestBody.fromBytes(bytes)
+        );
         return filePrefix + key;
     }
 
+    /** AES 없이 다운로드 (단순 복호화) */
     public byte[] downloadAndDecrypt(String fileUrl, byte[] iv) {
         String key = fileUrl.replace(filePrefix, "");
         ResponseBytes<GetObjectResponse> resp = s3Client.getObjectAsBytes(
@@ -271,6 +269,7 @@ public class S3Service {
         return aesService.decrypt(resp.asByteArray(), iv);
     }
 
+    /** 파일 삭제 */
     public void deleteFile(String fileUrl) {
         String key = fileUrl.replace(filePrefix, "");
         try {
@@ -283,15 +282,16 @@ public class S3Service {
         }
     }
 
+    /** 전체 바이트로 다운로드 */
     public byte[] getFileAsBytes(String fileUrl) {
         String key = fileUrl.replace(filePrefix, "");
         try (ResponseInputStream<GetObjectResponse> s3obj =
-                     s3Client.getObject(GetObjectRequest.builder()
-                             .bucket(bucketName)
-                             .key(key)
-                             .build());
+                     s3Client.getObject(
+                             GetObjectRequest.builder()
+                                     .bucket(bucketName)
+                                     .key(key)
+                                     .build());
              ByteArrayOutputStream buf = new ByteArrayOutputStream()) {
-
             byte[] tmp = new byte[1024];
             int    r;
             while ((r = s3obj.read(tmp)) != -1) {
@@ -303,6 +303,7 @@ public class S3Service {
         }
     }
 
+    /** MultipartFile 형태로 변환 */
     public MultipartFile getFileAsMultipartFile(String fileUrl, String contentType) {
         byte[] bytes = getFileAsBytes(fileUrl);
         String name  = fileUrl.replace(filePrefix, "")

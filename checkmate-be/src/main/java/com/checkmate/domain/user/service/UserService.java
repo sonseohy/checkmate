@@ -10,6 +10,7 @@ import com.checkmate.domain.user.entity.User;
 import com.checkmate.domain.user.repository.UserRepository;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
+import com.checkmate.global.util.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +28,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final TokenService tokenService;
+    private final EncryptionUtil encryptionUtil;
 
     /**
      * 사용자 ID를 기반으로 {@link UserDetails}를 반환합니다. Spring Security 인증 과정에 사용됩니다.
@@ -69,6 +71,7 @@ public class UserService implements UserDetailsService {
      *
      * <p>
      * 이 메서드는 사용자 ID를 기반으로 사용자 프로필 정보를 조회하여 응답 DTO를 반환합니다.
+     * 전화번호 필드는 복호화하여 제공합니다.
      * </p>
      *
      * @param userId 사용자 ID
@@ -77,7 +80,17 @@ public class UserService implements UserDetailsService {
     public UserGetResponse getUser(int userId) {
         User user = findUserById(userId);
 
-        return userMapper.mapToUserGetResponse(user);
+        // 일반적인 매핑 먼저 수행
+        UserGetResponse response = userMapper.mapToUserGetResponse(user);
+
+        // 복호화된 전화번호로 새 응답 객체 생성
+        return new UserGetResponse(
+                response.userId(),
+                response.name(),
+                response.birth(),
+                response.email(),
+                decryptPhoneIfNeeded(response.phone())
+        );
     }
 
     /**
@@ -85,6 +98,7 @@ public class UserService implements UserDetailsService {
      *
      * <p>
      * 이 메서드는 사용자 정보를 수정하며, 주어진 요청 DTO를 기반으로 사용자의 프로필을 업데이트합니다.
+     * 전화번호 필드는 복호화하여 제공합니다.
      * </p>
      *
      * @param userId 사용자 ID
@@ -96,7 +110,51 @@ public class UserService implements UserDetailsService {
 
         userMapper.updateUserFromRequest(userUpdateRequest, user);
 
-        return userMapper.mapToUserUpdateResponse(user);
+        // 일반적인 매핑 먼저 수행
+        UserUpdateResponse response = userMapper.mapToUserUpdateResponse(user);
+
+        // 복호화된 전화번호로 새 응답 객체 생성
+        return new UserUpdateResponse(
+                response.userId(),
+                response.name(),
+                response.birth(),
+                response.email(),
+                decryptPhoneIfNeeded(response.phone())
+        );
+    }
+
+    /**
+     * 전화번호가 암호화되어 있는 경우 복호화합니다.
+     *
+     * @param phoneNumber 전화번호 (암호화되었을 수 있음)
+     * @return 복호화된 전화번호
+     */
+    private String decryptPhoneIfNeeded(String phoneNumber) {
+        if (phoneNumber == null) {
+            return null;
+        }
+
+        try {
+           if (isEncrypted(phoneNumber)) {
+                return encryptionUtil.decrypt(phoneNumber);
+            }
+            return phoneNumber;
+        } catch (Exception e) {
+            log.error("Error decrypting phone number: {}", e.getMessage());
+            return phoneNumber;
+        }
+    }
+
+    /**
+     * 주어진 텍스트가 암호화되어 있는지 확인합니다.
+     * Spring Security의 TextEncryptor는 16진수 문자로 된 암호화 형식을 사용합니다.
+     *
+     * @param text 확인할 텍스트
+     * @return 암호화되어 있으면 true, 아니면 false
+     */
+    private boolean isEncrypted(String text) {
+
+        return text.matches("^[0-9a-f]+$") && text.length() > 16;
     }
 
     /**

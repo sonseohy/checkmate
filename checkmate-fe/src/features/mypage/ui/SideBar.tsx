@@ -5,6 +5,7 @@ import {LuLayoutGrid,
         LuMap, 
         LuUserCog, 
         LuLogOut } from "react-icons/lu";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 interface SideBarProps {
@@ -15,6 +16,7 @@ interface SideBarProps {
 
 export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const menu = [
     {icon: LuLayoutGrid, label: "대시보드" },
@@ -26,7 +28,7 @@ export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
 
   const handleisLogout = async () => {
     // postLogout 함수에 navigate 전달
-    await postLogout(navigate); // navigate를 전달하여 로그아웃 후 리다이렉트
+    await postLogout(navigate, dispatch); // navigate를 전달하여 로그아웃 후 리다이렉트
   };
 
 

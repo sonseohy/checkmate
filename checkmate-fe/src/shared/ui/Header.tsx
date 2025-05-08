@@ -7,6 +7,8 @@ import HeaderDropdown from './HeaderDropdown';
 import { KakaoLoginModal } from '@/features/main';
 import { Menu, X } from 'lucide-react';
 import { useMainCategories } from '@/features/categories/hooks/useCategories';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/redux/store';
 
 export interface HeaderProps {
   className?: string;
@@ -14,22 +16,25 @@ export interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const navigate = useNavigate();
-  const [writeOpen, setWriteOpen] = useState(false);
-  const [analyzeOpen, setAnalyzeOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [writeOpen, setWriteOpen] = useState<boolean>(false);
+  const [analyzeOpen, setAnalyzeOpen] = useState<boolean>(false);
+  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
 
   // ✅ 대분류 카테고리 목록 가져오기
   const { data: mainCategories } = useMainCategories();
   const categoryNames = mainCategories?.map((cat) => cat.name) ?? [];
 
-  //로그인 여부 확인
-  const [isLogIn, setIsLogIn] = useState<boolean>(false);
+  //리덕스에서 상태 가져오기
+  const isLogIn = useSelector((state: RootState) => state.auth.isAuthenticated);
 
-  useEffect(() => {
-    const accessToken = localStorage.getItem('access_token');
-    setIsLogIn(!!accessToken);
-  },[]);
+  //로그인 여부 확인
+  // const [isLogIn, setIsLogIn] = useState<boolean>(false);
+
+  // useEffect(() => {
+  //   const accessToken = localStorage.getItem('access_token');
+  //   setIsLogIn(!!accessToken);
+  // },[]);
 
   const handleWriteClick = (name: string) => {
     const slug = categoryNameToSlugMap[name];

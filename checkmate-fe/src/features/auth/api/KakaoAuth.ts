@@ -1,11 +1,14 @@
 import axios from 'axios';
 import { customAxios } from '@/shared/api/client/customAxios';
-import { getAccessToken } from '@/shared';
+import { getAccessToken } from '@/entities/user';
 import Swal from 'sweetalert2';
 import { NavigateFunction } from "react-router-dom";
+import { logout, loginSuccess } from "@/features/auth/slices/authSlice"; 
+import { AppDispatch } from "@/app/redux/store"; 
+import { UserInfo } from '@/features/auth';
 
 //카카오 로그인
-export async function PostKakaoCallback(code: string) {
+export async function PostKakaoCallback(code: string, dispatch: AppDispatch) {
   const params = new URLSearchParams();
   params.append('grant_type', 'authorization_code');
   params.append('client_id', import.meta.env.VITE_REST_API);
@@ -25,14 +28,12 @@ export async function PostKakaoCallback(code: string) {
     console.log(tokenRes.data); // 성공 시 데이터 출력
 
     // 2) 액세스 토큰 추출 (refresh_token을 제거)
-    const { access_token } = tokenRes.data; // refresh_token은 사용하지 않음
+    const { access_token } = tokenRes.data; // const { access_token, refresh_token } = tokenRes.data; 
 
     // 3) 카카오 유저 프로필 조회
     profileRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-
-    console.log("카카오 프로필 데이터:", profileRes.data);
 
     const { id, kakao_account } = profileRes.data;
     const { name, email, birthyear = '', birthday = '', phone_number } = kakao_account;
@@ -48,14 +49,12 @@ export async function PostKakaoCallback(code: string) {
     // 4) 백엔드 /api/auth/login에 필요한 필드 전달
     const loginResponse = await customAxios.post('/api/auth/login', {
       name,
-      email,                   // @NotBlank @Email
-      birthyear,               // '' 또는 'YYYY'
-      birthday,                // '' 또는 'MMDD'
-      phone_number: phoneNumber,  // 백엔드에서 요구하는 전화번호 형식
-      provider_id: id.toString()  // provider_id 필드명 수정
+      email,          
+      birthyear,           
+      birthday,              
+      phone_number: phoneNumber,  
+      provider_id: id.toString()  
     });
-
-    console.log('로그인 응답:', loginResponse.data);
 
     if (loginResponse.data.success) {
 
@@ -63,10 +62,20 @@ export async function PostKakaoCallback(code: string) {
       localStorage.setItem('access_token', loginResponse.data.data.access_token);
       localStorage.setItem('refresh_token', loginResponse.data.data.refresh_token);
 
-      return loginResponse.data;  // 로그인 성공 시 데이터 반환
+      const userInfo: UserInfo = {
+        user_id: id, 
+        name,
+        birth: `${birthyear}-${birthday}`, 
+        email,
+        phone: phoneNumber, 
+      };
+
+      dispatch(loginSuccess(userInfo)); 
+
+      return loginResponse.data;  
     } else {
       console.error("로그인 실패:", loginResponse.data.error.message);
-      return null;  // 로그인 실패 시 null 반환
+      return null;  
     }
 
   } catch (error) {
@@ -80,8 +89,8 @@ export async function PostKakaoCallback(code: string) {
   }
 }
 
-//카카오 로그아웃
-export const postLogout = async(navigate: NavigateFunction) => {
+// 로그아웃
+export const postLogout = async(navigate: NavigateFunction, dispatch: AppDispatch) => {
   const access_token = getAccessToken();
 
   try {
@@ -91,6 +100,10 @@ export const postLogout = async(navigate: NavigateFunction) => {
         Authorization: `Bearer ${access_token}`
       }
     });
+
+    //로그아웃 시 리덕스 상태 초기화
+    dispatch(logout());
+
     Swal.fire({
       title: "로그아웃",
       text: "로그아웃이 완료되었습니다.",
@@ -101,6 +114,7 @@ export const postLogout = async(navigate: NavigateFunction) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     navigate('/');
+
     return response.data;
   } catch(error) {
     console.error('로그아웃 실패:' , error);

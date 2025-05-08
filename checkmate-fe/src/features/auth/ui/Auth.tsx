@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { PostKakaoCallback } from "@/features/auth";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from 'react-redux'; 
 
 export default function Auth() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [isProcessed, setIsProcessed] = useState<boolean>(false); // 상태 추가
+  const [isProcessed, setIsProcessed] = useState<boolean>(false); 
   const [error, setError] = useState<string | null>(null); // 오류 처리 추가
 
   useEffect(() => {
@@ -12,7 +14,6 @@ export default function Auth() {
     if (window.location.pathname !== '/login') return;
     
     if (!code || isProcessed) {
-      console.log('콜백페이지입니다')
       navigate("/", { replace: true });
       return;
     }
@@ -22,7 +23,7 @@ export default function Auth() {
 
     const processCallback = async () => {
       try {
-        const res = await PostKakaoCallback(code);
+        const res = await PostKakaoCallback(code, dispatch);
         if (res) {
           navigate("/"); // 리다이렉트
         } else {
@@ -37,7 +38,7 @@ export default function Auth() {
     };
 
     processCallback();
-  }, [navigate]); // isProcessed, navigate 상태에 따라 한 번만 호출되도록 의존성 관리
+  }, [navigate, isProcessed, dispatch]); // isProcessed, navigate 상태에 따라 한 번만 호출되도록 의존성 관리
 
   useEffect(() => {
     if (error) {
@@ -47,7 +48,7 @@ export default function Auth() {
 
   return (
     <div className="h-screen flex items-center justify-center">
-      {!error && <p>로그인 처리 중입니다…</p>} {/* 기본 메시지 */}
+     
     </div>
   );
 }

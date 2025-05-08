@@ -19,6 +19,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -98,7 +100,7 @@ public class UserService implements UserDetailsService {
      *
      * <p>
      * 이 메서드는 사용자 정보를 수정하며, 주어진 요청 DTO를 기반으로 사용자의 프로필을 업데이트합니다.
-     * 전화번호 필드는 복호화하여 제공합니다.
+     * 업데이트된 필드만 응답에 포함됩니다.
      * </p>
      *
      * @param userId 사용자 ID
@@ -108,19 +110,29 @@ public class UserService implements UserDetailsService {
     public UserUpdateResponse updateUser(int userId, UserUpdateRequest userUpdateRequest) {
         User user = findUserById(userId);
 
+        // 업데이트된 필드를 추적하기 위한 맵
+        Map<String, Object> updatedFields = new HashMap<>();
+
+        // 변경된 필드만 맵에 추가
+        if (userUpdateRequest.birth() != null && !userUpdateRequest.birth().equals(user.getBirth())) {
+            updatedFields.put("birth", userUpdateRequest.birth());
+        }
+
+        if (userUpdateRequest.phone() != null) {
+            String decryptedCurrentPhone = decryptPhoneIfNeeded(user.getPhone());
+            if (!userUpdateRequest.phone().equals(decryptedCurrentPhone)) {
+                // 전화번호가 변경되었으면 맵에 추가 (복호화된 값으로)
+                updatedFields.put("phone", userUpdateRequest.phone());
+            }
+        }
+
+        // 여기에 다른 필드들도 필요에 따라 추가
+
+        // 실제 사용자 엔티티 업데이트
         userMapper.updateUserFromRequest(userUpdateRequest, user);
 
-        // 일반적인 매핑 먼저 수행
-        UserUpdateResponse response = userMapper.mapToUserUpdateResponse(user);
-
-        // 복호화된 전화번호로 새 응답 객체 생성
-        return new UserUpdateResponse(
-                response.userId(),
-                response.name(),
-                response.birth(),
-                response.email(),
-                decryptPhoneIfNeeded(response.phone())
-        );
+        // 수정된 필드만 포함하는 응답 생성
+        return new UserUpdateResponse(updatedFields);
     }
 
     /**

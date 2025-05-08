@@ -7,5 +7,5 @@ export interface UploadResponse {
 export interface UploadContractParams {
   title: string;
   categoryId: number;
-  file: File;
+  files: File[];
 }

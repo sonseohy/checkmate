@@ -36,15 +36,15 @@ const AnalyzeUploadPage: React.FC = () => {
     }
 
     try {
-      for (const file of files) {
-        await uploadContract({
-          title: mainCategoryName,
-          categoryId,
-          file,
-        });
-      }
+      await uploadContract({
+        title: mainCategoryName,
+        categoryId,
+        files,
+      });
 
-      navigate(`/analyze/${mainCategorySlug}/review`);
+      console.log('업로드 성공');
+
+      navigate(`/analyze/${mainCategorySlug}/result`);
     } catch (error) {
       console.error(error);
       alert('업로드에 실패했습니다.');

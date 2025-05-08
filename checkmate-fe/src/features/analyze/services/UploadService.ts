@@ -7,12 +7,12 @@ import {
 export const uploadContract = async ({
   title,
   categoryId,
-  file,
+  files,
 }: UploadContractParams): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append('title', title);
   formData.append('categoryId', categoryId.toString());
-  formData.append('files', file);
+  files.forEach((file) => formData.append('files', file)); // ← 'files'가 서버 기대명
 
   const response = await postContractUpload(formData);
   return response.data;

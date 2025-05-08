@@ -20,7 +20,6 @@ const MobileMenu = ({
   toggleWrite,
   toggleAnalyze,
   handleWriteClick,
-  handleAnalyzeClick,
   closeMobile,
   showModal,
   categoryNames,

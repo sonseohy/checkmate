@@ -9,7 +9,7 @@ import {
 import {
   categoryIdToNameMap,
   categoryIdToSlugMap,
-} from '@/shared/constants/categorySlugMap';
+} from '@/shared';
 
 interface Props {
   mode: 'write' | 'analyze';
@@ -49,7 +49,7 @@ const CategorySelector: React.FC<Props> = ({
   useEffect(() => {
     if (selectedSub && userSelectedSub.current) {
       const path =
-        mode === 'write' ? `/write/${slug}/intro` : `/analyze/${slug}/upload`;
+        mode === 'write' ? `/write/${slug}/${selectedSub.id}` : `/analyze/${slug}/upload`;
 
       navigate(path, { state: { selectedMid, selectedSub } });
       userSelectedSub.current = false;

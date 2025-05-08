@@ -69,6 +69,8 @@ public class AiAnalysisReportService {
 				Contract contract = contractRepository.findById(contractId)
 					.orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 
+				// TODO: OCR 부분 기능 구현 끝나면 다시 수정 필요
+				// TODO: OCR 저장 기능도 추가해야 할 가능성 있음
 				// // 2. OCR 결과에서 텍스트 가져오기
 				// List<OcrResult> ocrResults = ocrResultRepository.findByContractIdOrderByPageNo(contractId);
 				// if (ocrResults.isEmpty()) {

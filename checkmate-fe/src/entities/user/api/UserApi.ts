@@ -30,19 +30,9 @@ export const getUserInfo = async() => {
 };
 
 //사용자 정보 수정
-export const updateUserInfo = async(params: { birth: string; phone: string; }, onclose: () => void) => {
+export const updateUserInfo = async(params: { birth: string; phone: string; }) => {
     try {
         const response = await customAxios.put('api/users', params );
-        if (response.data.success) {
-            Swal.fire({
-                title: "수정 완료",
-                text: "회원 정보가 성공적으로 수정되었습니다.",
-                icon: "success",
-                confirmButtonText: '확인',
-            }).then(() => {
-                onclose();
-            })
-        }
         return response.data;
     } catch (error) {
         console.log('회원 정보 수정 실패:', error)
@@ -52,9 +42,10 @@ export const updateUserInfo = async(params: { birth: string; phone: string; }, o
 // 회원 탈퇴
 
 export const deleteUserInfo = async() => {
+
     try {
         const response = await customAxios.delete('api/users');
-        if (response.status === 204 || response.status === 200 ) {
+        if (response.data !== null) {
             Swal.fire({
                 title: "회원 탈퇴 성공",
                 text: 'checkmate를 이용해 주셔서 감사합니다.',

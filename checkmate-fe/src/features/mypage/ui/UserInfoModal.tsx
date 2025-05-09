@@ -1,6 +1,7 @@
 import { updateUserInfo } from "@/entities/user/api/UserApi";
 import { useUserInfo } from "@/features/auth";
 import { ModalContent } from "@/shared";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import Swal from "sweetalert2";
 
@@ -10,9 +11,36 @@ interface UserInfoModalProps {
 
 const UserInfoModal:React.FC<UserInfoModalProps> = ({ onClose }) => {
     const user = useUserInfo();
+    const queryClient = useQueryClient();
+
     // 상태 관리 ( 생년월일 , 전화번호 )
     const [birth, setBirth] = useState<string>(user?.birth || "");
     const [phone, setPhone] = useState<string>(user?.phone || "");
+
+    const mutation = useMutation({
+        mutationFn: (params: { birth: string; phone: string }) =>
+          updateUserInfo(params),
+        onSuccess: () => {
+          // v4 에선 filter 객체 형태로 호출
+          queryClient.invalidateQueries({ queryKey: ["userInfo"] });
+    
+          Swal.fire({
+            title: "수정 완료",
+            text: "회원 정보가 성공적으로 수정되었습니다.",
+            icon: "success",
+            confirmButtonText: "확인",
+          }).then(onClose);
+        },
+        onError: (err) => {
+          console.error("회원 정보 수정 실패:", err);
+          Swal.fire({
+            title: "오류",
+            text: "회원 정보 수정 중 문제가 발생했습니다.",
+            icon: "error",
+            confirmButtonText: "확인",
+          });
+        },
+      });
 
     const handleBirthChange = (e:React.ChangeEvent<HTMLInputElement>) => {
         setBirth(e.target.value);
@@ -43,9 +71,8 @@ const UserInfoModal:React.FC<UserInfoModalProps> = ({ onClose }) => {
             return;
         }
 
-        const params = { birth, phone };
 
-        updateUserInfo(params,  onClose)
+        mutation.mutate({ birth, phone });
     };
 
 

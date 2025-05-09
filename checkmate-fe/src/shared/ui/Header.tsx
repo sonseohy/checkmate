@@ -10,7 +10,8 @@ import { useMainCategories } from '@/features/categories/hooks/useCategories';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/app/redux/store';
 import { loginSuccess, logout } from '@/features/auth/slices/authSlice';
-import { useUserInfo } from '@/features/auth';
+import { postLogout, useUserInfo } from '@/features/auth';
+
 
 export interface HeaderProps {
   className?: string;
@@ -37,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     const accessToken = localStorage.getItem('access_token');
     if (accessToken && user) {
       // `access_token`과 `user`가 있으면 로그인 상태로 설정
-      dispatch(loginSuccess(user)); // 사용자 정보 설정
+      dispatch(loginSuccess(user));
     } else {
       // `access_token`이 없으면 로그아웃 상태로 설정
       dispatch(logout());
@@ -63,6 +64,14 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     }
   };
 
+  // 로그아웃
+   const handleisLogout = async () => {
+      // postLogout 함수에 navigate 전달
+      await postLogout(navigate, dispatch); // navigate를 전달하여 로그아웃 후 리다이렉트
+    };
+  
+
+  //회원가입/로그인 모달
   const showModal = () => {
     setModalIsOpen(!modalIsOpen);
   };
@@ -110,12 +119,21 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           categoryNames={categoryNames} // ✅ 추가
         />
         {isLogIn ? (
-          <button
-            onClick={() => navigate('/mypage')}
-            className="text-sm font-normal text-gray-700 hover:text-black"
-          >
-            마이페이지
-          </button>
+          <>
+            <button
+              onClick={() => navigate('/mypage')}
+              className="text-sm font-normal text-gray-700 hover:text-black"
+            >
+              마이페이지
+            </button>
+            <button
+              onClick={handleisLogout}
+              className="text-sm font-normal text-gray-700 hover:text-black"
+            >
+              로그아웃
+            </button>
+          </>
+          
         ) : (
           <button
             onClick={showModal}

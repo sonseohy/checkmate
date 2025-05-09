@@ -19,6 +19,7 @@ export default function UserInfo() {
         setModalIsOpen(!modalIsOpen)
     };
 
+    //회원 탈퇴 함수
     const handleDeleteAccount = async () => {
         const confirm = await Swal.fire({
             title: '정말로 회원 탈퇴를 하시겠습니까?',

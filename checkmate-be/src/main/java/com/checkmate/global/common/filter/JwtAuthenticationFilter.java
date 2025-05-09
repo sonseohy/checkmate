@@ -39,7 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/v3/api-docs",
             "/webjars",
             "/api/categories",
-            "/api/news"
+            "/api/news",
+            "/api/chatbot"
     };
 
     /**

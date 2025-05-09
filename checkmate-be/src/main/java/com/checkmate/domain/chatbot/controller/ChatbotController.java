@@ -3,7 +3,6 @@ package com.checkmate.domain.chatbot.controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.checkmate.domain.chatbot.dto.request.ChatbotRequestDto;
@@ -21,13 +20,16 @@ public class ChatbotController {
 	private final OpenAIService openAIService;
 
 	/**
-	 * 세션 기반 채팅 응답
+	 * chatbot 기능
+	 *
+	 * @param request 요청 DTO
+	 * @return gpt 응답 내용
 	 */
 	@PostMapping
 	public Mono<ApiResult<ChatbotResponseDto>> chatWithSession(
 		@RequestBody ChatbotRequestDto request) {
 
-		return openAIService.generateResponseWithSession(request.message(), request.sessionId())
+		return openAIService.generateResponse(request.message())
 			.map(ApiResult::ok);
 	}
 }

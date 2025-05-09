@@ -8,8 +8,8 @@ import lombok.Builder;
 public record ImprovementResponseDto (String improvementReportId, String aiAnalysisReportId, String description) {
 	public static ImprovementResponseDto fromEntity(ImprovementReport improvementReport) {
 		return ImprovementResponseDto.builder()
-			.improvementReportId(improvementReport.getImprovementReportId())
-			.aiAnalysisReportId(improvementReport.getAiAnalysisReportId())
+			.improvementReportId(improvementReport.getId().toHexString())
+			.aiAnalysisReportId(improvementReport.getAiAnalysisReportId().toHexString())
 			.description(improvementReport.getDescription())
 			.build();
 	}

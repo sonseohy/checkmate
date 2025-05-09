@@ -38,7 +38,9 @@ public enum ErrorCode {
 
     AI_ANALYSIS_REPORT_NOT_FOUND("ANALYSIS-001", HttpStatus.NOT_FOUND, "AI 분석 리포트를 찾을 수 없습니다."),
 
-    TEMPLATE_NOT_FOUND("TEMPLATE-001", HttpStatus.NOT_FOUND, "존재하지 않는 템플릿입니다.");
+    TEMPLATE_NOT_FOUND("TEMPLATE-001", HttpStatus.NOT_FOUND, "존재하지 않는 템플릿입니다."),
+
+    INVALID_ID_FORMAT("MONGO-001", HttpStatus.BAD_REQUEST, "잘못된 ID 포멧입니다.");
 
 
     private final String code;

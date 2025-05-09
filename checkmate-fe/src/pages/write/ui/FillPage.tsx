@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useLocation } from 'react-router-dom';
 import { MidCategory, SubCategory } from '@/features/categories';
 import { useChecklist, ChecklistModal } from '@/features/write';
@@ -18,7 +18,7 @@ const FillPage: React.FC = () => {
   const subName = state?.selectedSub?.name ?? '계약서';
   const midCategoryId = state?.selectedMid?.id;
 
-  const { data: checklist = [], isLoading } = useChecklist(midCategoryId);
+  const { data: checklist = [] } = useChecklist(midCategoryId);
 
   // 새로 작성하는 경우에만 모달 자동 표시
   const [showModal, setShowModal] = useState(state?.isNew ?? true);

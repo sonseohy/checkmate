@@ -1,5 +1,5 @@
 package com.checkmate.domain.templatefield.entity;
 
 public enum InputType {
-    TEXT, RADIO, CHECKBOX, DATE, SELECT
+    TEXT, RADIO, CHECKBOX, DATE, SELECT, NUMBER
 }

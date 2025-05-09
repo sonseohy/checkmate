@@ -25,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
 
-  // ✅ 대분류 카테고리 목록 가져오기
+  // 대분류 카테고리 목록 가져오기
   const { data: mainCategories } = useMainCategories();
   const categoryNames = mainCategories?.map((cat) => cat.name) ?? [];
 
@@ -83,12 +83,6 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       </Link>
 
       <div className="items-center hidden gap-8 text-sm font-semibold text-black md:flex">
-        <button
-          onClick={() => navigate('/intro/write')}
-          className="text-sm font-normal text-gray-700 hover:text-black"
-        >
-          계약서 작성 가이드
-        </button>
         <HeaderDropdown
           open={writeOpen}
           title="계약서 작성"

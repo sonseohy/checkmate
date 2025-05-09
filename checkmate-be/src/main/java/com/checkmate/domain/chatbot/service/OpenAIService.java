@@ -1,36 +1,24 @@
 package com.checkmate.domain.chatbot.service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.StreamingChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import com.checkmate.domain.chatbot.dto.request.OpenAIRequestDto;
-import com.checkmate.domain.chatbot.dto.response.ChatbotResponseDto;
-import com.checkmate.domain.chatbot.dto.response.OpenAIResponseDto;
-import com.checkmate.domain.chatbot.entity.Message;
-
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class OpenAIService {
-	private final WebClient openaiWebClient;
-
-	@Value("${openai.model}")
-	private String model;
-
-	@Value("${openai.temperature:0.7}")
-	private Double temperature;
-
-	public OpenAIService(@Qualifier("openaiWebClient") WebClient openaiWebClient) {
-		this.openaiWebClient = openaiWebClient;
-	}
+	private final StreamingChatModel streamingChatModel;
 
 	/**
 	 * 응답 생성
@@ -38,52 +26,27 @@ public class OpenAIService {
 	 * @param userMessage 유저가 보낸 메세지
 	 * @return openai api로 요청 보내기
 	 */
-	public Mono<ChatbotResponseDto> generateResponse(String userMessage) {
-		List<Message> messages = new ArrayList<>();
-		messages.add(Message.builder()
-			.role("system")
-			.content("""
-                    당신은 법률 전문 AI입니다. 답변을 제공할 때는 일반인들도 쉽게 이해할 수 있도록 답변해주세요.
-                    답변은 한국어로 해주시고, 되도록이면 간결하게 답변해주세요.""")
-			.build());
-		messages.add(Message.builder()
-			.role("user")
-			.content(userMessage)
-			.build());
+	public Flux<String> generateStreamResponse(String userMessage) {
+		// 시스템 프롬프트 템플릿 생성
+		PromptTemplate systemPromptTemplate = PromptTemplate.builder()
+			.template("당신은 {role} 전문 AI입니다. 답변은 {style} 제공하세요.")
+			.variables(Map.of(
+				"role", "법률",
+				"style", "간결하고 일반인도 이해하기 쉽게"
+			))
+			.build();
 
-		// API 요청 생성
-		OpenAIRequestDto requestDto = new OpenAIRequestDto(
-			model,
-			messages,
-			temperature);
+		// 시스템 메시지 생성
+		SystemMessage systemMessage = new SystemMessage(systemPromptTemplate.render());
 
-		return callOpenAI(requestDto)
-			.map(response -> ChatbotResponseDto.builder()
-				.response(response)
-				.build());
-	}
+		// 사용자 메시지
+		UserMessage userMsg = new UserMessage(userMessage);
 
-	/**
-	 * OpenAI API 호출 공통 메서드
-	 *
-	 * @param requestDto openai api로 보낼 정보들
-	 * @return 응답 메세지
-	 */
-	private Mono<String> callOpenAI(OpenAIRequestDto requestDto) {
-		return openaiWebClient.post()
-			.contentType(MediaType.APPLICATION_JSON)
-			.bodyValue(requestDto)
-			.retrieve()
-			.bodyToMono(OpenAIResponseDto.class)
-			.map(response -> {
-				if (response.choices() != null && !response.choices().isEmpty()) {
-					return response.choices().get(0).getMessage().getContent();
-				}
-				return "응답을 처리하는 중 오류가 발생했습니다.";
-			})
-			.onErrorResume(e -> {
-				log.info("OpenAI API 호출 중 오류: {}", e.getMessage());
-				return Mono.just("서비스에 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-			});
+		// 프롬프트 구성
+		Prompt prompt = new Prompt(List.of(systemMessage, userMsg));
+
+		// 스트리밍 응답 생성
+		return streamingChatModel.stream(prompt)
+			.mapNotNull(response -> response.getResult().getOutput().getText());
 	}
 }

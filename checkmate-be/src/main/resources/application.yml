@@ -51,6 +51,3 @@ logging:
   level:
     root: INFO
     com.checkmate: DEBUG
-
-fastapi:
-  baseUrl: http://localhost:8000

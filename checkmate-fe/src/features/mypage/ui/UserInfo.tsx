@@ -1,15 +1,42 @@
 import { useUserInfo } from "@/features/auth";
 import { useState } from "react";
 import UserInfoModal from "./UserInfoModal";
+import Swal from "sweetalert2";
+import { deleteUserInfo } from "@/entities/user";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import { logout } from '@/features/auth/slices/authSlice';
 
 //회원 정보
 export default function UserInfo() {
     const user = useUserInfo();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [ modalIsOpen, setModalIsOpen ] = useState<boolean>(false);
 
     //회원 정보 수정 모달
     const showModal = () => {
         setModalIsOpen(!modalIsOpen)
+    };
+
+    const handleDeleteAccount = async () => {
+        const confirm = await Swal.fire({
+            title: '정말로 회원 탈퇴를 하시겠습니까?',
+            text: '탈퇴 후에는 모든 정보가 삭제됩니다.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '예, 탈퇴합니다.',
+            cancelButtonText: '취소'
+        });
+
+        if (confirm.isConfirmed) {
+
+            const success = await deleteUserInfo();
+            if(success) {
+                dispatch(logout());
+                navigate("/")
+            };
+        }
     };
 
     return (
@@ -65,8 +92,15 @@ export default function UserInfo() {
                             <button 
                                 className="ml-20 hover:text-[#3B82F6]"
                                 onClick={showModal}
-                                >회원 정보 수정</button> | 
-                            <button className="ml-1">회원 탈퇴</button>  
+                            >
+                                회원 정보 수정
+                            </button> | 
+                            <button 
+                                className="ml-1"
+                                onClick={handleDeleteAccount}
+                            >
+                                회원 탈퇴
+                            </button>  
                         </div>
                     </div>
                 </div>

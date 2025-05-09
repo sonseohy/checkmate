@@ -13,6 +13,13 @@ export const getRepreshAccessToken = () => {
 
 //사용자 정보 가져오기
 export const getUserInfo = async() => {
+    const accessToken = getAccessToken();
+
+    if(!accessToken) {
+        console.log('로그인되지 않았습니다')
+        console.log(accessToken)
+        return null;
+    }
     try {
         const response = await customAxios.get('api/users');
         return response.data.data;
@@ -40,4 +47,29 @@ export const updateUserInfo = async(params: { birth: string; phone: string; }, o
     } catch (error) {
         console.log('회원 정보 수정 실패:', error)
     }
-}
+};
+
+// 회원 탈퇴
+
+export const deleteUserInfo = async() => {
+    try {
+        const response = await customAxios.delete('api/users');
+        if (response.status === 204 || response.status === 200 ) {
+            Swal.fire({
+                title: "회원 탈퇴 성공",
+                text: 'checkmate를 이용해 주셔서 감사합니다.',
+                icon: "success",
+                confirmButtonText: "확인"
+            });
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            return true;
+        } else {
+            console.log('실패')
+            return false;
+        }
+    } catch(error) {
+        console.log('회원 탈퇴 실패:', error);
+        return false;
+    }
+};

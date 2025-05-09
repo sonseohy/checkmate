@@ -3,7 +3,6 @@ package com.checkmate.domain.contract.controller;
 import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.service.ContractFileService;
 import com.checkmate.domain.user.dto.CustomUserDetails;
-import com.checkmate.global.common.response.ApiResult;
 import com.checkmate.global.common.service.S3Service;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

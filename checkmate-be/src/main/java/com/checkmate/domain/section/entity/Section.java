@@ -1,7 +1,7 @@
 package com.checkmate.domain.section.entity;
 
-import com.checkmate.domain.template.entity.Template;
 import com.checkmate.domain.templatefield.entity.TemplateField;
+import com.checkmate.domain.templatesection.entity.TemplateSection;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,10 +19,6 @@ public class Section {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", nullable = false)
-    private Template template;
-
     @Column(name = "name", length = 30, nullable = false)
     private String name;
 
@@ -37,7 +33,11 @@ public class Section {
     private String description;
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("sequenceNo ASC")
     private List<TemplateField> fields = new ArrayList<>();
+
+    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TemplateSection> templateSections = new ArrayList<>();
 
     public void addField(TemplateField field) {
         fields.add(field);

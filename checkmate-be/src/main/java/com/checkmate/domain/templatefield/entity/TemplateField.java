@@ -40,5 +40,10 @@ public class TemplateField {
     @Column(name = "sequence_no", nullable = false)
     private Integer sequenceNo;
 
+    @Lob
+    @Column(name = "options", columnDefinition = "TEXT")
+    private String options;
 
+    @Column(name = "depends_on", length = 100)
+    private String dependsOn;
 }

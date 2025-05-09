@@ -19,7 +19,7 @@ public record AiAnalysisReportResponseDto (String aiAnalysisReportId, Integer co
 										   LocalDateTime createdAt) {
 	public static AiAnalysisReportResponseDto fromEntity(CompleteAiAnalysisReport report) {
 		return AiAnalysisReportResponseDto.builder()
-			.aiAnalysisReportId(report.getAiAnalysisReportId())
+			.aiAnalysisReportId(report.getId().toHexString())
 			.contractId(report.getContractId())
 			.improvements(report.getImprovements().stream()
 				.map(ImprovementResponseDto::fromEntity)

@@ -1,7 +1,6 @@
 package com.checkmate.domain.contract.service;
 
 import com.checkmate.domain.contract.dto.request.ContractUploadsRequest;
-import com.checkmate.domain.contract.dto.response.ContractPdfUrlResponse;
 import com.checkmate.domain.contract.dto.response.ContractUploadResponse;
 import com.checkmate.domain.contract.dto.response.FileNumberResponse;
 import com.checkmate.domain.contract.dto.response.MyContractResponse;
@@ -93,25 +92,5 @@ public class ContractService {
         });
 
         contractRepository.deleteById(contractId);
-    }
-
-    @Transactional(readOnly = true)
-    public ContractPdfUrlResponse    getContractPdfUrl(int userId, Integer contractId) {
-
-        User user = userService.findUserById(userId);
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
-
-        if (!contract.getUser().getUserId().equals(userId)) {
-            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
-        }
-
-        String path      = "/api/files/" + contractId + "/pdf/signed-url";
-        String signedUrl = cloudFrontService.generateSignedUrl(path);
-
-        return ContractPdfUrlResponse.builder()
-                .contractId(contractId)
-                .fileAddress(signedUrl)
-                .build();
     }
 }

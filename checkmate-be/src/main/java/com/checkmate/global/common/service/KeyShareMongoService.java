@@ -3,6 +3,8 @@ package com.checkmate.global.common.service;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,7 +21,8 @@ public class KeyShareMongoService {
 
     /** shareB를 조회 */
     public byte[] loadShareB(Long fileId) {
-        Document doc = mongo.findById(fileId, Document.class, "keyShare");
+        Query query = Query.query(Criteria.where("fileId").is(fileId));
+        Document doc = mongo.findOne(query, Document.class, "keyShare");
         if (doc == null) throw new RuntimeException("키 조각 B 미존재: " + fileId);
         return doc.get("shareB", org.bson.types.Binary.class).getData();
     }

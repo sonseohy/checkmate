@@ -1,6 +1,7 @@
 package com.checkmate.domain.contract.controller;
 
 import com.checkmate.domain.contract.dto.request.ContractUploadsRequest;
+import com.checkmate.domain.contract.dto.response.ContractFilesResponse;
 import com.checkmate.domain.contract.dto.response.ContractUploadResponse;
 import com.checkmate.domain.contract.dto.response.MyContractResponse;
 import com.checkmate.domain.contract.dto.response.PdfMetadata;
@@ -134,6 +135,20 @@ public class ContractController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, cd.toString())
                 .contentType(MediaType.parseMediaType(meta.getContentType()))
                 .body(resource);
+    }
+
+    @Operation(summary = "계약서 관련 파일 목록 조회", description = "계약서 관련 파일 목록을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음")
+    })
+    @GetMapping("/{contractId}/files")
+    public ApiResult<List<ContractFilesResponse>> listContractFiles(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable int contractId ) {
+        List<ContractFilesResponse> response = contractFileService.listContractFiles(userDetails.getUserId(), contractId);
+        return ApiResult.ok(response);
     }
 
 }

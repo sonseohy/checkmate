@@ -10,9 +10,6 @@ import com.checkmate.domain.templatefield.repository.TemplateFieldRepository;
 import com.checkmate.domain.templatesection.entity.TemplateSection;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +28,6 @@ public class TemplateService {
     private final TemplateRepository templateRepository;
     private final SectionRepository sectionRepository;
     private final TemplateFieldRepository templateFieldRepository;
-    private final ObjectMapper objectMapper;  // JSON 파싱용
 
     public TemplateResponseDto getTemplate(Integer templateId) {
         // 1. 템플릿 조회
@@ -110,6 +106,7 @@ public class TemplateService {
 
     private TemplateResponseDto.FieldDto mapFieldToDto(TemplateField field) {
         return TemplateResponseDto.FieldDto.builder()
+                .id(field.getId())
                 .fieldKey(field.getFieldKey())
                 .label(field.getLabel())
                 .description(field.getDescription())
@@ -119,18 +116,5 @@ public class TemplateService {
                 .options(field.getOptions())
                 .dependsOn(field.getDependsOn())
                 .build();
-    }
-
-    private List<String> parseOptions(String optionsJson) {
-        if (optionsJson == null || optionsJson.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        try {
-            return objectMapper.readValue(optionsJson, new TypeReference<List<String>>() {});
-        } catch (JsonProcessingException e) {
-            log.error("옵션 파싱 중 오류 발생: {}", optionsJson, e);
-            return Collections.emptyList();
-        }
     }
 }

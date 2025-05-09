@@ -1,9 +1,12 @@
 //사이드 바
+import { postLogout } from "@/features/auth";
 import {LuLayoutGrid, 
         LuFolder, 
         LuMap, 
         LuUserCog, 
         LuLogOut } from "react-icons/lu";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 interface SideBarProps {
   onMenuClick: (label:string) => void;
@@ -12,6 +15,8 @@ interface SideBarProps {
 
 
 export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const menu = [
     {icon: LuLayoutGrid, label: "대시보드" },
@@ -19,7 +24,13 @@ export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
     {icon: LuMap, label: "주변 법원" },
     {icon: LuUserCog, label: "회원 정보"},
     {icon: LuLogOut, label: "로그아웃" },
-  ]
+  ];
+
+  const handleisLogout = async () => {
+    // postLogout 함수에 navigate 전달
+    await postLogout(navigate, dispatch); // navigate를 전달하여 로그아웃 후 리다이렉트
+  };
+
 
 
   return (
@@ -37,7 +48,7 @@ export default function SideBar({ onMenuClick, selectedMenu }: SideBarProps ) {
             <button
               key={label}
               className="flex flex-row items-center gap-5 mb-5"
-              onClick={()=> onMenuClick(label)}
+              onClick={()=> (label === "로그아웃" ? handleisLogout() : onMenuClick(label))}
             >
               <Icon 
                 size={40} 

@@ -1,8 +1,13 @@
 
 export { default as SideBar } from "./ui/SideBar";
+
+//대시보드
 export { default as Dashboard } from "./ui/Dashboard";
 export { PieDonutChart } from "./ui/PieDonutChart";
+
+//회원 정보
 export { default as UserInfo } from "./ui/UserInfo";
+export {default as UserInfoModal } from "./ui/UserInfoModal";
 
 //법원 위치
 export { default as CourtLocator } from "./ui/courtlocation/CourtLocator";

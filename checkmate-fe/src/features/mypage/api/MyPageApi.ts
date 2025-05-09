@@ -17,4 +17,5 @@ export async function searchPlace(keyword: string): Promise<LatLng> {
   );
   const doc = res.data.documents[0];
   return { lat: parseFloat(doc.y), lng: parseFloat(doc.x) };
-}
+};
+

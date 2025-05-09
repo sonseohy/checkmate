@@ -2,6 +2,8 @@ package com.checkmate.domain.template.entity;
 
 import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contractcategory.entity.ContractCategory;
+import com.checkmate.domain.section.entity.Section;
+import com.checkmate.domain.templatesection.entity.TemplateSection;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,7 +25,7 @@ public class Template {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private ContractCategory category;
 
@@ -38,7 +40,34 @@ public class Template {
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TemplateSection> templateSections = new ArrayList<>();
+
     @OneToMany(mappedBy = "template",
             fetch = FetchType.LAZY)
     private List<Contract> contracts = new ArrayList<>();
+
+    public Template(Integer id, ContractCategory category, String name, Integer version) {
+        this.id = id;
+        this.category = category;
+        this.name = name;
+        this.version = version;
+    }
+    // 섹션 추가 메소드
+    public void addSection(Section section, Integer templateSectionNo, Boolean isRequiredInTemplate) {
+        // 기존 생성자 사용
+        TemplateSection templateSection = new TemplateSection(this, section, templateSectionNo);
+
+        // isRequiredInTemplate 값이 null이 아니면 설정
+        if (isRequiredInTemplate != null) {
+            templateSection.setIsRequiredInTemplate(isRequiredInTemplate);
+        }
+
+        this.templateSections.add(templateSection);
+    }
+
+    // 섹션 제거 메소드
+    public void removeSection(Section section) {
+        this.templateSections.removeIf(ts -> ts.getSection().equals(section));
+    }
 }

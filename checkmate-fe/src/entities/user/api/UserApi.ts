@@ -16,8 +16,7 @@ export const getUserInfo = async() => {
     const accessToken = getAccessToken();
 
     if(!accessToken) {
-        console.log('로그인되지 않았습니다')
-        console.log(accessToken)
+
         return null;
     }
     try {

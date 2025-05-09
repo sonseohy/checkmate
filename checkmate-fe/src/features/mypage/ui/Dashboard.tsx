@@ -31,25 +31,15 @@ export default function Dashboard() {
     return (
         <div>
             <div className="text-3xl font-bold">
-                최근 활동
-                <span className="ml-1 text-[#60A5FA]"> 2 </span>
+                대시보드
             </div>
             
             {/* 활동에 대한 그래프 */}
-            <div className={`flex ${isMobile ? 'flex-col justify-center' : 'flex-row gap-10 ml-30'} items-center `}>
-                <div className={`${isMobile ? 'w-full mb-5' : 'w-150'}`}>
+            <div className={`flex ${isMobile ? 'flex-col justify-center' : 'flex-row gap-10 ml-10'} items-center `}>
+                <div className={` rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.2)  ${isMobile ? 'w-full mb-5' : 'w-100'}`}>
                     <PieDonutChart />
                 </div>
-                <div className={`flex-1 p-5 font-semibold text-2xl rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.2)] ${isMobile ? 'w-full' : 'max-w-150 min-h-100'}`}>
-                    '김싸피'님의 계약서 현황입니다
-                    <br />
-                    분석: 5개
-                    <br />
-                    작성: 4개
-                </div>
-            </div>
-
-            {/* 계약서 리스트=> 캐러셀 구현 예정 */}
+                {/* 계약서 리스트=> 캐러셀 구현 예정 */}
             <div className="flex flex-row gap-5 mt-5">
                 {data.contracts.map((contract) => (
                     <div key={contract.contract_id} 
@@ -64,6 +54,7 @@ export default function Dashboard() {
                     <p>{contract.created_at}</p> 
                     </div>
                 )) }
+            </div>
             </div>
         </div>
     );

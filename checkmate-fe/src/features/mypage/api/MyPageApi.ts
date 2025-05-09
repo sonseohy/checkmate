@@ -19,3 +19,13 @@ export async function searchPlace(keyword: string): Promise<LatLng> {
   return { lat: parseFloat(doc.y), lng: parseFloat(doc.x) };
 };
 
+//내 계약서 리스트
+export const contractList = async() => {
+  try {
+    const response = await customAxios.get('/api/contract');
+    return response.data;
+  } catch(error) {
+    console.error("계약서 리스트 불러오기 실패:", error);
+  }
+};
+  

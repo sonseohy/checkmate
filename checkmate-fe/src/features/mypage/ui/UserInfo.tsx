@@ -6,10 +6,12 @@ import { deleteUserInfo } from "@/entities/user";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import { logout } from '@/features/auth/slices/authSlice';
+import { useMobile } from "@/shared";
 
 //회원 정보
 export default function UserInfo() {
     const user = useUserInfo();
+    const isMobile = useMobile();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [ modalIsOpen, setModalIsOpen ] = useState<boolean>(false);
@@ -46,7 +48,7 @@ export default function UserInfo() {
                 회원 정보  
             </div>
             <div className="mt-5 p-10 w-200 bg-white rounded-xl shadow-[0px_5px_15px_rgba(0,_0,_0,_0.1)]">
-                <div className="flex flex-row gap-15 mb-3">
+                <div className={`flex mb-3 ${isMobile? 'flex-col gap-2': 'flex-row  gap-15' }`}>
                     <div className="text-xl font-semibold">
                         로그인 정보
                     </div>
@@ -58,7 +60,7 @@ export default function UserInfo() {
                     <div className="text-xl font-semibold">
                         기본 정보
                     </div>
-                    <div>
+                    <div >
                         <div className="flex flex-row gap-11 mb-4">
                             <span className="text-lg font-medium">
                                 이름 

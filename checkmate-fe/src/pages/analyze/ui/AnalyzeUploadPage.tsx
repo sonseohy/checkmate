@@ -7,6 +7,7 @@ import {
   categorySlugMap,
 } from '@/shared/constants/categorySlugMap';
 import { navigateInvalidAccess } from '@/shared/utils/navigation';
+import Swal from 'sweetalert2'; // ★ 추가
 
 const AnalyzeUploadPage: React.FC = () => {
   const { mainCategorySlug } = useParams<{ mainCategorySlug: string }>();
@@ -31,7 +32,12 @@ const AnalyzeUploadPage: React.FC = () => {
 
   const onNext = async () => {
     if (files.length === 0) {
-      alert('파일을 선택해주세요.');
+      Swal.fire({
+        icon: 'warning',
+        title: '업로드 오류',
+        text: '파일을 선택해주세요.',
+        confirmButtonText: '확인',
+      });
       return;
     }
 
@@ -43,11 +49,15 @@ const AnalyzeUploadPage: React.FC = () => {
       });
 
       console.log('업로드 성공');
-
       navigate(`/analyze/${mainCategorySlug}/result`);
     } catch (error) {
       console.error(error);
-      alert('업로드에 실패했습니다.');
+      Swal.fire({
+        icon: 'error',
+        title: '업로드 실패',
+        text: '업로드에 실패했습니다. 다시 시도해주세요.',
+        confirmButtonText: '확인',
+      });
     }
   };
 

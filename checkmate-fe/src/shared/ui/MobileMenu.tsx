@@ -12,6 +12,7 @@ interface MobileMenuProps {
   showModal: () => void;
   categoryNames: string[];
   isLogIn: boolean;
+  showGuide: () => void;
 }
 
 const MobileMenu = ({
@@ -24,9 +25,18 @@ const MobileMenu = ({
   showModal,
   categoryNames,
   isLogIn,
+  showGuide,
 }: MobileMenuProps) => (
   <div className="absolute left-0 z-40 w-full bg-white border-b shadow-md top-full md:hidden">
     <div className="flex flex-col p-4 space-y-2">
+      {/* 계약서 작성 가이드 */}
+      <button
+        onClick={showGuide}
+        className="flex justify-between w-full py-2 text-left hover:text-blue-600"
+      >
+        계약서 작성 가이드
+      </button>
+
       {/* 작성 메뉴 */}
       <div>
         <button

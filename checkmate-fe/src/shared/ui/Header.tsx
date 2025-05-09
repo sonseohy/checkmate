@@ -69,6 +69,12 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       </Link>
 
       <div className="items-center hidden gap-8 text-sm font-semibold text-black md:flex">
+        <button
+          onClick={() => navigate('/intro/write')}
+          className="text-sm font-normal text-gray-700 hover:text-black"
+        >
+          계약서 작성 가이드
+        </button>
         <HeaderDropdown
           open={writeOpen}
           title="계약서 작성"
@@ -131,6 +137,10 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           showModal={showModal}
           categoryNames={categoryNames} // ✅ 모바일 메뉴도 전달
           isLogIn={isLogIn} //로그인 상태 전달
+          showGuide={() => {
+            setMobileOpen(false);
+            navigate('/intro/write');
+          }}
         />
       )}
 

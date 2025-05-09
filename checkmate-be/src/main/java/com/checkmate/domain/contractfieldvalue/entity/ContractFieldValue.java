@@ -4,6 +4,11 @@ import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.templatefield.entity.TemplateField;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contract_field_value")
@@ -11,6 +16,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class ContractFieldValue {
 
     @Id
@@ -29,4 +35,11 @@ public class ContractFieldValue {
     @Column(name = "value", columnDefinition = "TEXT")
     private String value;
 
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", columnDefinition = "DATETIME(6)")
+    private LocalDateTime updatedAt;
 }

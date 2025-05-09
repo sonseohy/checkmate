@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { ChecklistItem } from "@/features/write";
-import { LuCheck } from "react-icons/lu";
+import { LuCheck, LuChevronDown, LuChevronUp } from "react-icons/lu";
 
 interface ChecklistModalProps {
     checklist: ChecklistItem[];
@@ -7,28 +8,59 @@ interface ChecklistModalProps {
   }
 
   const ChecklistModal: React.FC<ChecklistModalProps> = ({ checklist, onClose }) => {
+    const [openItems, setOpenItems] = useState<Record<number, boolean>>({});
+
+    const toggleItem = (id: number) => {
+      setOpenItems((prev) => ({
+        ...prev,
+        [id]: !prev[id],
+      }));
+    };
+
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50">
         <div className="relative max-w-md w-full p-6 bg-white rounded-lg shadow-xl space-y-4">
-          {/* 상단 타이틀만 */}
+          {/* 상단 타이틀 */}
           <div className="flex justify-center border-b pb-2">
             <h2 className="text-2xl font-bold text-blue-700">CHECK LIST</h2>
           </div>
   
-          {/* 내용 */}
+          {/* 리스트 본문 */}
           {checklist.length === 0 ? (
             <p className="text-center text-gray-500">등록된 체크리스트가 없습니다.</p>
           ) : (
-            <ul className="space-y-2">
-              {checklist.map((item) => (
-                <li
-                  key={item.checkListId}
-                  className="flex items-start gap-2 text-sm text-gray-700 bg-gray-100 rounded px-3 py-2"
-                >
-                  <LuCheck className="mt-1 text-blue-600 shrink-0" />
-                  <span>{item.checkListDetail}</span>
-                </li>
-              ))}
+            <ul className="space-y-2 max-h-96 overflow-y-auto pr-1">
+              {checklist.map((item) => {
+                const isOpen = openItems[item.checkListId];
+  
+                return (
+                  <li
+                    key={item.checkListId}
+                    className="bg-gray-100 rounded px-3 py-2 text-sm text-gray-700"
+                  >
+                    <button
+                      onClick={() => toggleItem(item.checkListId)}
+                      className="flex items-center justify-between w-full font-semibold text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <LuCheck className="text-blue-600 shrink-0" />
+                        {item.title}
+                      </div>
+                      {isOpen ? (
+                        <LuChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <LuChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+  
+                    {isOpen && (
+                      <div className="mt-2 px-1 text-sm text-gray-700 whitespace-pre-line transition-all duration-300">
+                        {item.checkListDetail}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
   

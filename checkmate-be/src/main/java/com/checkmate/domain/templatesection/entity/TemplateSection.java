@@ -30,10 +30,14 @@ public class TemplateSection {
     @Column(name = "is_required_in_template", nullable = false)
     private Boolean isRequiredInTemplate = true;
 
-    public TemplateSection(Template template, Section section, Integer templateSectionNo) {
+    @Column(name = "clause_type", length = 100, nullable = false)
+    private String clauseType;
+
+    public TemplateSection(Template template, Section section, Integer templateSectionNo, String clauseType) {
         this.template = template;
         this.section = section;
         this.templateSectionNo = templateSectionNo;
         this.isRequiredInTemplate = true;
+        this.clauseType = clauseType;
     }
 }

@@ -65,11 +65,13 @@ export const router = createBrowserRouter([
     children: [
       { index: true, path: '/', element: <MainPage /> },
       { path: 'mypage', element: <MyPage /> },
-
+      
+      // 계약서 작성 가이드
+      { path: 'intro/write', element: <WriteIntroPage /> },
+      
       // 계약서 작성 플로우
       { path: 'write/:mainCategorySlug', element: <WriteCategoryPage /> },
-      { path: 'write/:mainCategorySlug/intro', element: <WriteIntroPage /> },
-      { path: 'write/:mainCategorySlug/fill', element: <WriteFillPage /> },
+      { path: 'write/:mainCategorySlug/:categoryId', element: <WriteFillPage /> },
 
       // 계약서 분석 플로우
       { path: 'analyze/:mainCategorySlug', element: <AnalyzeCategoryPage /> },

@@ -1,77 +1,26 @@
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { WritingProcess } from '@/widgets/write';
-import {
-  RealEstateIntro,
-  EmploymentIntro,
-  RentalIntro,
-} from '@/features/write';
-import { navigateInvalidAccess } from '@/shared/utils/navigation';
-import { useEffect } from 'react';
-import { MidCategory, SubCategory } from '@/features/categories';
-
-// slug 타입
-type Slug = 'contract' | 'certification' | 'order' | 'etc';
-
-const introMap: Record<
-  Slug,
-  { fallbackTitle: string; Component: React.FC; videoUrl: string }
-> = {
-  contract: {
-    fallbackTitle: '계약서 자동 작성',
-    Component: RealEstateIntro,
-    videoUrl: 'https://www.youtube.com/embed/REAL_ESTATE_ID',
-  },
-  certification: {
-    fallbackTitle: '내용 증명 자동 작성',
-    Component: EmploymentIntro,
-    videoUrl: 'https://www.youtube.com/embed/EMPLOYMENT_ID',
-  },
-  order: {
-    fallbackTitle: '지급 명령 자동 작성',
-    Component: RentalIntro,
-    videoUrl: 'https://www.youtube.com/embed/RENTAL_ID',
-  },
-  etc: {
-    fallbackTitle: '기타 자동 작성',
-    Component: RentalIntro,
-    videoUrl: 'https://www.youtube.com/embed/RENTAL_ID',
-  },
-};
 
 const WriteIntroPage: React.FC = () => {
-  /* ───── URL & Router state ───── */
-  const { mainCategorySlug } = useParams<{ mainCategorySlug: Slug }>();
-  const navigate = useNavigate();
-  const { state } = useLocation() as {
-    state?: {
-      selectedMid?: MidCategory;
-      selectedSub?: SubCategory;
-    };
-  };
-
-  const cfg = mainCategorySlug ? introMap[mainCategorySlug] : undefined;
-
-  /* 잘못된 접근 가드 */
-  useEffect(() => {
-    if (!cfg) navigateInvalidAccess(navigate);
-  }, [cfg, navigate]);
-
-  if (!cfg) return null;
-
-  /* ───── 동적 타이틀 ───── */
-  const subName = state?.selectedSub?.name; // ex) "근로계약"
-  const title = subName
-    ? `${subName} 자동 작성` // 원하는 형태
-    : cfg.fallbackTitle; // 기존 매핑값
-
-  const { Component: Intro, videoUrl } = cfg;
+  const title = '계약서 자동 작성';
+  const videoUrl = 'https://www.youtube.com/embed/REAL_ESTATE_ID'; // 실제 영상 URL로 교체하세요
 
   return (
     <div className="container py-16 mx-auto space-y-16">
       {/* 섹션 1 : 템플릿 소개 */}
       <section className="px-4 text-center">
         <h1 className="mb-6 text-3xl font-bold">{title}</h1>
-        <Intro />
+        <div className="space-y-4 text-gray-700">
+          <p>
+            계약서 자동 작성 페이지입니다.<br />
+            계약 정보, 당사자 정보, 조건을 입력하시면<br />
+            표준 양식에 맞춰 계약서를 완성할 수 있습니다.
+          </p>
+          <ul className="space-y-1 text-gray-600 list-disc list-inside">
+            <li>계약 당사자 정보 입력</li>
+            <li>계약 기간 및 조건 설정</li>
+            <li>특약 사항 추가 가능</li>
+          </ul>
+        </div>
       </section>
 
       {/* 섹션 2 : 공통 기능 소개 */}
@@ -89,16 +38,6 @@ const WriteIntroPage: React.FC = () => {
           />
         </div>
       </section>
-
-      {/* 작성 시작 버튼 */}
-      <div className="text-center">
-        <Link
-          to={`/write/${mainCategorySlug}/fill`}
-          className="inline-block px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
-        >
-          {subName ?? '계약서'} 작성 시작하기
-        </Link>
-      </div>
     </div>
   );
 };

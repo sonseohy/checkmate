@@ -1,29 +1,29 @@
-import { useParams } from "react-router-dom"
-
-type Params = {
-  template: "real-estate" | "employment" | "rental"
-  subtype:  string
-}
+import { useParams, useLocation } from 'react-router-dom';
+import { MidCategory, SubCategory } from '@/features/categories';
 
 const FillPage: React.FC = () => {
-  const { template, subtype } = useParams<Params>()
+  const { categoryId } = useParams<{ categoryId: string }>();
+  const numericCategoryId = Number(categoryId);
+
+  const { state } = useLocation() as {
+    state?: {
+      selectedMid?: MidCategory;
+      selectedSub?: SubCategory;
+    };
+  };
+
+  const subName = state?.selectedSub?.name ?? '계약서';
 
   return (
     <div className="container py-16 mx-auto space-y-6">
-      <h1 className="text-2xl font-bold">
-        {template === "employment"
-          ? `근로계약서 작성 (${subtype})`
-          : template === "real-estate"
-          ? `부동산매매 계약서 작성 (${subtype})`
-          : `임대차 계약서 작성 (${subtype})`}
-      </h1>
+      <h1 className="text-2xl font-bold">{subName} 작성 페이지</h1>
 
-      {/* TODO: 여기에 실제 각 템플릿·서브타입별 입력 폼을 구현하세요 */}
       <p className="text-gray-600">
         여기서 계약서 내용을 입력하고, 저장/내보내기 기능을 넣습니다.
+        (categoryId: {numericCategoryId})
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default FillPage
+export default FillPage;

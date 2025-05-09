@@ -11,13 +11,13 @@
 
 #### 1. 개요
 
-- 서비스 명 : 
+- 서비스 명 : CHECKMATE(체크메이트)
 - 한 줄 소개 : SSAFY 12기 2학기 자율 프로젝트
 - 기간 : 2025.04.14 ~ 2025.05.25 (42일)
 
 #### 2. 기획 배경
 
-- 목적 : 
+- 목적 : 계약서에 대한 지식이 많지 않은 사회 초년생들이 불공정한 계약을 하지 않도록 돕기 위한 서비스
 
 <br/>
 
@@ -30,6 +30,10 @@
 ### <code>[ 기술 스택 ]</code>
 
 ### Frontend
+<img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=white"/>
+<img src="https://img.shields.io/badge/Typescript-3178C6?style=for-the-badge&logo=Typescript&logoColor=white"/>
+<img src="https://img.shields.io/badge/Tailwind CSS-06B6D4?style=for-the-badge&logo=Tailwind CSS&logoColor=white"/>
+
 
 ### Backend
 <img src="https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=spring boot&logoColor=white">

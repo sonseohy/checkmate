@@ -1,29 +1,46 @@
-import { useParams } from "react-router-dom"
-
-type Params = {
-  template: "real-estate" | "employment" | "rental"
-  subtype:  string
-}
+import { useState } from 'react'
+import { useParams, useLocation } from 'react-router-dom';
+import { MidCategory, SubCategory } from '@/features/categories';
+import { useChecklist, ChecklistModal } from '@/features/write';
 
 const FillPage: React.FC = () => {
-  const { template, subtype } = useParams<Params>()
+  const { categoryId } = useParams<{ categoryId: string }>();
+  const numericCategoryId = Number(categoryId);
+
+  const { state } = useLocation() as {
+    state?: {
+      selectedMid?: MidCategory;
+      selectedSub?: SubCategory;
+      isNew?: boolean; 
+    };
+  };
+
+  const subName = state?.selectedSub?.name ?? '계약서';
+  const midCategoryId = state?.selectedMid?.id;
+
+  const { data: checklist = [] } = useChecklist(midCategoryId);
+
+  // 새로 작성하는 경우에만 모달 자동 표시
+  const [showModal, setShowModal] = useState(state?.isNew ?? true);
 
   return (
     <div className="container py-16 mx-auto space-y-6">
-      <h1 className="text-2xl font-bold">
-        {template === "employment"
-          ? `근로계약서 작성 (${subtype})`
-          : template === "real-estate"
-          ? `부동산매매 계약서 작성 (${subtype})`
-          : `임대차 계약서 작성 (${subtype})`}
-      </h1>
+      <h1 className="text-2xl font-bold">{subName} 작성 페이지</h1>
 
-      {/* TODO: 여기에 실제 각 템플릿·서브타입별 입력 폼을 구현하세요 */}
+      {/* 체크리스트 모달: 새로 작성 시 자동 표시 */}
+      {showModal && (
+        <ChecklistModal
+          checklist={checklist}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+
       <p className="text-gray-600">
         여기서 계약서 내용을 입력하고, 저장/내보내기 기능을 넣습니다.
+        (categoryId: {numericCategoryId})
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default FillPage
+export default FillPage;

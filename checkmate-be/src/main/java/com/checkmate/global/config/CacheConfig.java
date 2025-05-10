@@ -17,16 +17,14 @@ public class CacheConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
-        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
-
-        RedisCacheConfiguration newsConfig = RedisCacheConfiguration.defaultCacheConfig()
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(new GenericJackson2JsonRedisSerializer()))
                 .entryTtl(Duration.ofHours(1))
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer)
-                );
+                .disableCachingNullValues();
 
         return RedisCacheManager.builder(factory)
-                .withCacheConfiguration("news", newsConfig)
+                .cacheDefaults(config)
                 .build();
     }
 }

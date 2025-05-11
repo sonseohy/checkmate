@@ -1,47 +1,44 @@
 package com.checkmate.domain.naverNews.service;
 
-import com.checkmate.domain.naverNews.client.NaverSearchClient;
 import com.checkmate.domain.naverNews.dto.response.NewsResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.checkmate.global.config.NaverApiConfig;
+import com.checkmate.global.config.WebClientConfig;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class NewsService {
 
-    private final NaverSearchClient client;
-    private final ObjectMapper mapper;
+    private final NaverApiConfig naverApiConfig;
+    private final WebClientConfig webClient;
+    private static final String CACHE_NAME = "contractNews";
 
-    public NewsService(NaverSearchClient client, ObjectMapper mapper) {
-        this.client = client;
-        this.mapper = mapper;
+    @Cacheable(value = CACHE_NAME, key = "'contractNews'", unless = "#result == null || #result.items.isEmpty()")
+    public NewsResponse getContractNews() {
+
+        URI uri = UriComponentsBuilder.
+                fromUriString(naverApiConfig.newsUrl)
+                .queryParam("query", "계약")
+                .queryParam("display", 20)
+                .queryParam("start", 1)
+                .queryParam("sort", "sim")
+                .build()
+                .encode()
+                .toUri();
+
+        return webClient.naverWebClient()
+                .get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(NewsResponse.class)
+                .block();
     }
 
-    @Cacheable(value = "news")
-    public NewsResponse getContractNews(int start, int display) throws Exception {
-        String json = client.searchNews(start, display);
-        NewsResponse response = mapper.readValue(json, NewsResponse.class);
-
-        for (NewsResponse.Item item : response.getItems()) {
-            String noHtml = item.getDescription().replaceAll("<(/)?b>", "");
-            String decoded = URLDecoder.decode(noHtml, StandardCharsets.UTF_8);
-
-            String noUrls = decoded.replaceAll("https?://\\S+\\s?", "")
-                    .replaceAll("www\\.\\S+\\s?", "");
-
-            String cleaned = noUrls.replaceAll("[^가-힣a-zA-Z0-9\\s\\.,]", "")
-                    .trim();
-
-            if (cleaned.isEmpty()) {
-                cleaned = "(본문 스니펫 없음)";
-            }
-
-            item.setDescription(cleaned);
-        }
-
-        return response;
-    }
 }

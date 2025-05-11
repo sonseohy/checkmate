@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { MidCategory, SubCategory } from '@/features/categories';
 import { useChecklist, ChecklistModal, useTemplate, TemplateField } from '@/features/write';

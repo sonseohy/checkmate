@@ -7,7 +7,8 @@ import {
   categorySlugMap,
 } from '@/shared/constants/categorySlugMap';
 import { navigateInvalidAccess } from '@/shared/utils/navigation';
-import Swal from 'sweetalert2'; // ★ 추가
+import Swal from 'sweetalert2';
+import Spinner from '@/shared/ui/Spinner';
 
 const AnalyzeUploadPage: React.FC = () => {
   const { mainCategorySlug } = useParams<{ mainCategorySlug: string }>();
@@ -21,7 +22,9 @@ const AnalyzeUploadPage: React.FC = () => {
   const mainCategoryName = categoryIdToNameMap[mainCategoryId];
 
   const [files, setFiles] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
+  /* 잘못된 경로 접근 방지 */
   useEffect(() => {
     if (!mainCategorySlug || !selectedSub || !categoryId) {
       navigateInvalidAccess(navigate);
@@ -30,6 +33,7 @@ const AnalyzeUploadPage: React.FC = () => {
 
   if (!mainCategorySlug || !selectedSub || !categoryId) return null;
 
+  /* 업로드 → 결과 페이지 이동 */
   const onNext = async () => {
     if (files.length === 0) {
       Swal.fire({
@@ -42,13 +46,13 @@ const AnalyzeUploadPage: React.FC = () => {
     }
 
     try {
+      setIsLoading(true);
       await uploadContract({
         title: mainCategoryName,
         categoryId,
         files,
       });
 
-      console.log('업로드 성공');
       navigate(`/analyze/${mainCategorySlug}/result`);
     } catch (error) {
       console.error(error);
@@ -58,26 +62,38 @@ const AnalyzeUploadPage: React.FC = () => {
         text: '업로드에 실패했습니다. 다시 시도해주세요.',
         confirmButtonText: '확인',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <section className="container px-2 py-12 mx-auto text-center">
-      <h1 className="mb-6 text-2xl font-bold">
-        {mainCategoryName} 파일을 업로드 해주세요
-      </h1>
+    <>
+      {/* 로딩 오버레이 */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <Spinner />
+        </div>
+      )}
 
-      <div className="max-w-md mx-auto">
-        <UploadForm files={files} setFiles={setFiles} />
+      <section className="container px-2 py-12 mx-auto text-center">
+        <h1 className="mb-6 text-2xl font-bold">
+          {mainCategoryName} 파일을 업로드 해주세요
+        </h1>
 
-        <button
-          onClick={onNext}
-          className="w-full px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
-        >
-          다음
-        </button>
-      </div>
-    </section>
+        <div className="max-w-md mx-auto">
+          <UploadForm files={files} setFiles={setFiles} />
+
+          <button
+            onClick={onNext}
+            disabled={isLoading}
+            className="w-full px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-60"
+          >
+            {isLoading ? <Spinner /> : '다음'}
+          </button>
+        </div>
+      </section>
+    </>
   );
 };
 

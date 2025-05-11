@@ -20,7 +20,7 @@ export const TemplateCardList: React.FC<TemplateCardListProps> = ({
 
   return (
     // ① base = grid-cols-2 ② md↑ = flex 절대배치
-    <div className="grid grid-cols-2 gap-4 mt-8  md:relative md:flex md:flex-nowrap md:items-end md:h-80 md:gap-8 md:w-full md:justify-center">
+    <div className="grid grid-cols-2 gap-4 mt-8 md:relative md:flex md:flex-nowrap md:items-end md:h-80 md:gap-8 md:w-full md:justify-center">
       {templates.map(({ title, icon }, i) => (
         <motion.div
           key={title}
@@ -30,7 +30,7 @@ export const TemplateCardList: React.FC<TemplateCardListProps> = ({
           whileInView="animate"
           viewport={{ once: true, amount: 0.5 }}
           /* 모바일: w-full → grid 셀 전체 차지 / md↑: w-72 + absolute */
-          className="flex flex-col items-center justify-center w-full p-4 shadow-lg cursor-pointer  h-60 bg-blue-50 rounded-2xl sm:p-6 sm:h-72 md:w-72 md:h-80 md:p-8 md:absolute"
+          className="flex flex-col items-center justify-center w-full p-4 shadow-lg cursor-pointer h-60 bg-blue-50 rounded-2xl sm:p-6 sm:h-72 md:w-72 md:h-80 md:p-8 md:absolute"
           style={{ zIndex: i === 1 ? 20 : 10 }}
           whileHover={
             variants === desktopCardVariants

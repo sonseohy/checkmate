@@ -1,7 +1,7 @@
 import { Header, HeaderProps } from '@/shared/ui/Header';
 import { ChatbotButton } from '@/shared/ui/ChatbotButton';
-import { ChatModal } from '@/features/chat/ui/ChatModal';
 import { useState } from 'react';
+import { ChatModal } from '@/features/chat';
 
 export interface AppLayoutProps {
   children: React.ReactNode;

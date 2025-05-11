@@ -40,7 +40,7 @@ export default function MyPage() {
                 <div className="flex-shrink-0  z-4">
                     <SideBar onMenuClick={handleMenuClick} selectedMenu={selectedMenu}/>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 bg-[#F3F4F6]">
 
                     <div className="h-px bg-gray-200 " />
                     {/* 컴포넌트 */}

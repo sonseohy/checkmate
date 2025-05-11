@@ -1,11 +1,12 @@
 import { customAxios } from "@/shared/api";
+import axios from "axios";
 import { LatLng } from "@/features/mypage";
 
 // 법원 데이터
 
 //카카오맵에서 위도/경도 불러오기
 export async function searchPlace(keyword: string): Promise<LatLng> {
-  const res = await customAxios.get(
+  const res = await axios.get(
     'https://dapi.kakao.com/v2/local/search/keyword.json',
     {
       params: {

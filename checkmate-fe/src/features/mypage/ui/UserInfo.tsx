@@ -47,7 +47,7 @@ export default function UserInfo() {
              <div className="text-3xl font-bold">
                 회원 정보  
             </div>
-            <div className="mt-5 p-10 w-200 bg-white rounded-xl shadow-[0px_5px_15px_rgba(0,_0,_0,_0.1)]">
+            <div className={`mt-5 p-10 bg-white rounded-xl shadow-[0px_5px_15px_rgba(0,_0,_0,_0.1)] *:${ isMobile? 'w-50':' w-200'}`}>
                 <div className={`flex mb-3 ${isMobile? 'flex-col gap-2': 'flex-row  gap-15' }`}>
                     <div className="text-xl font-semibold">
                         로그인 정보
@@ -56,7 +56,7 @@ export default function UserInfo() {
                       {user?.email}
                     </div>
                 </div>
-                <div className="flex flex-row gap-20 mb-3">
+                <div className={`flex mb-3 ${isMobile? 'flex-col gap-2': 'flex-row  gap-15' }`}>
                     <div className="text-xl font-semibold">
                         기본 정보
                     </div>

@@ -4,8 +4,6 @@ import "slick-carousel/slick/slick-theme.css";
 import "./slick-slider.css";
 import { Contract } from "@/features/mypage";
 import { useNavigate } from "react-router-dom";
-import { getContractDetail } from "@/features/detail";
-
 
 
 interface ContractCarouselProps {
@@ -17,12 +15,7 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
 
   //계약서 상세조회 api 호출 및 페이지 이동
   const handleContractDetail = async(contractId:number) => {
-    try {
-      await  getContractDetail(contractId); 
-      navigate(`detail/${contractId}`);
-    } catch(error) {
-      console.error("계약서 상세조회 실패: ", error)
-    }
+    navigate(`/detail/${contractId}`);
   };
 
   console.log(contractList)
@@ -40,11 +33,8 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
     <div className=" overflow-x-hidden  max-w-[1150px] h-[400px]">
       <Slider {...setting}> 
         {contractList.map((contract) => (
-           <div key={contract.contract_id} >
-            <div 
-              onClick={() => handleContractDetail(52)}
-              className="bg-white rounded-2xl shadow p-5 w-[300px] h-[200px]"
-            >
+           <div key={contract.contract_id} onClick={() => handleContractDetail(contract.contract_id)}>
+            <div className="bg-white rounded-2xl shadow p-5 w-[300px] h-[200px]" >
               <span className={`inline-block rounded-md px-3 py-1 text-sm font-medium text-white ${
                 contract.source_type === 'USER_UPLOAD' ? 'bg-[#B4C7FF]' : 'bg-[#FFB4B5]'
               }`}>

@@ -41,7 +41,8 @@ public class SecurityConfig {
             "/api/categories/**",
             "/api/questions/**",
             "/api/courthouses/**",
-            "/api/news"
+            "/api/news",
+            "/api/chatbot"
     };
 
     private final JwtUtil jwtUtil;

@@ -4,12 +4,31 @@ import { MidCategory, SubCategory } from '@/features/categories';
 import { useChecklist, ChecklistModal, useTemplate, TemplateField } from '@/features/write';
 import { LuTag } from 'react-icons/lu';
 
-const renderInputField = (field: TemplateField) => {
+const renderInputField = (
+  field: TemplateField,
+  dependsOnStates: Record<string, any>,
+  setDependsOnStates: React.Dispatch<React.SetStateAction<Record<string, any>>>
+) => {
+  const isDisabled = (() => {
+    if (!field.dependsOn || field.inputType === 'RADIO') return false;
+  
+    if (field.dependsOn.includes('!=')) {
+      const [key, notExpected] = field.dependsOn.split('!=');
+      return dependsOnStates[key] === notExpected;
+    }
+  
+    const [key, expected] = field.dependsOn.split('=');
+    return dependsOnStates[key] !== expected;
+  })();
+
   const commonProps = {
     id: field.fieldKey,
     name: field.fieldKey,
     required: field.required,
-    className: 'w-full p-2 border rounded-md',
+    className: `w-full p-2 rounded-md border ${
+      isDisabled ? 'bg-gray-50 text-gray-400 border-gray-300' : 'bg-white border-gray-400'
+    }`,
+    disabled: isDisabled,
   };
 
   switch (field.inputType) {
@@ -25,19 +44,41 @@ const renderInputField = (field: TemplateField) => {
         : typeof field.options === 'string'
         ? JSON.parse(field.options)
         : [];
-    
       return (
         <div className="space-x-4">
           {radioOptions.map((opt: string) => (
             <label key={opt} className="inline-flex items-center">
-              <input type="radio" value={opt} {...commonProps} className="mr-1" />
+              <input
+                type="radio"
+                name={field.fieldKey}
+                value={opt}
+                checked={dependsOnStates[field.fieldKey] === opt}
+                onChange={() =>
+                  setDependsOnStates((prev) => ({ ...prev, [field.fieldKey]: opt }))
+                }
+                className="mr-1"
+              />
               {opt}
             </label>
           ))}
         </div>
       );
-    case 'CHECKBOX':
-      return <input type="checkbox" {...commonProps} className="w-5 h-5" />;
+      case 'CHECKBOX':
+        return (
+          <input
+            type="checkbox"
+            id={field.fieldKey}
+            name={field.fieldKey}
+            className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            checked={dependsOnStates[field.fieldKey] === '1'}
+            onChange={() =>
+              setDependsOnStates((prev) => ({
+                ...prev,
+                [field.fieldKey]: prev[field.fieldKey] === '1' ? '0' : '1',
+              }))
+            }
+          />
+        );
     default:
       return <input type="text" {...commonProps} />;
   }
@@ -63,6 +104,9 @@ const FillPage: React.FC = () => {
   const templateName = template?.template.name ?? '';
   const sections = template?.sections ?? [];
 
+  const [tooltipField, setTooltipField] = useState<number | null>(null);
+  const [dependsOnStates, setDependsOnStates] = useState<Record<string, any>>({});
+
   return (
     <div className="container py-16 mx-auto">
       <h1 className="mb-8 text-3xl font-bold text-center">{templateName} 작성</h1>
@@ -73,26 +117,42 @@ const FillPage: React.FC = () => {
 
       <form className="space-y-10 max-w-3xl mx-auto px-4 sm:px-6">
         {sections.map((section) => (
-          <section key={section.id} className="p-4 bg-[#F6F6F6] rounded-2xl shadow-xl">
-            <div className="flex items-center gap-2 mb-4">
+          <section key={section.id} className="p-6 bg-[#F6F6F6] rounded-2xl shadow-xl relative">
+            <div className="flex items-center gap-2 mb-4 relative">
               <h2 className="text-xl font-bold">{section.name}</h2>
               {section.description && (
-                <span
-                  className="relative group text-gray-500 cursor-pointer"
-                  title={section.description}
-                >
-                  <LuTag className="w-4 h-4" />
-                </span>
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="text-gray-500 cursor-pointer"
+                    onClick={() =>
+                      setTooltipField((prev) => (prev === section.id ? null : section.id))
+                    }
+                  >
+                    <LuTag className="w-4 h-4" />
+                  </button>
+                  {tooltipField === section.id && (
+                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-2 text-sm bg-white border border-gray-300 rounded shadow z-10 whitespace-nowrap">
+                      {section.description}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
             <div className="grid gap-4">
               {section.fields.map((field) => (
-                <div key={field.fieldKey} className="space-y-1">
-                  <label htmlFor={field.fieldKey} className="font-medium">
+                <div key={field.fieldKey} className={field.inputType === 'CHECKBOX' ? 'flex items-center' : 'space-y-1'}>
+                  <label 
+                    htmlFor={field.fieldKey} 
+                    className={`${field.inputType === 'CHECKBOX' ? 'order-2' : 'block'} font-medium`}
+                  >
                     {field.label}
                   </label>
-                  {renderInputField(field)}
+                  {field.inputType === 'CHECKBOX' ? 
+                    <div className="order-1 mr-1">{renderInputField(field, dependsOnStates, setDependsOnStates)}</div> : 
+                    renderInputField(field, dependsOnStates, setDependsOnStates)
+                  }
                 </div>
               ))}
             </div>

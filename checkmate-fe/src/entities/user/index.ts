@@ -2,4 +2,5 @@
 export { getAccessToken, 
          getRepreshAccessToken, 
          getUserInfo, 
-         deleteUserInfo } from "./api/UserApi";
+         deleteUserInfo, 
+         updateUserInfo } from "./api/UserApi";

@@ -62,7 +62,7 @@ export default function SideBar({ onMenuClick }: SideBarProps) {
           </div>
         </div>
       ) : (
-        <div className="relative flex flex-col h-screen bg-white px-6">
+        <div className="relative flex flex-col h-screen bg-white mr-5 ml-10">
           <div className="absolute inset-y-0 right-2 w-px" />
           <div className="mt-5">
             {menu.map(({ icon: Icon, label }) => (

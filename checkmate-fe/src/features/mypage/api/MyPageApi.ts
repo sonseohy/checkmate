@@ -1,6 +1,6 @@
 import { customAxios } from "@/shared/api";
 import axios from "axios";
-import { LatLng } from "@/features/mypage";
+import { ContractListData, LatLng } from "@/features/mypage";
 
 // 법원 데이터
 
@@ -21,12 +21,13 @@ export async function searchPlace(keyword: string): Promise<LatLng> {
 };
 
 //내 계약서 리스트
-export const contractList = async() => {
+export const contractList = async():Promise<ContractListData> => {
   try {
     const response = await customAxios.get('/api/contract');
-    return response.data;
+    return { contracts: response.data.data };
   } catch(error) {
     console.error("계약서 리스트 불러오기 실패:", error);
+    return { contracts: [] }; 
   }
 };
   

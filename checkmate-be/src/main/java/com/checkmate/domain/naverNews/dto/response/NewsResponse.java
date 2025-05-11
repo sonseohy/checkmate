@@ -1,13 +1,11 @@
 package com.checkmate.domain.naverNews.dto.response;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class NewsResponse {
     private String lastBuildDate;
     private int total;
@@ -16,12 +14,13 @@ public class NewsResponse {
     private List<Item> items;
 
     @Data
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Item {
         private String title;
+        @JsonProperty("originallink")
         private String originalLink;
         private String link;
         private String description;
+        @JsonProperty("pubDate")
         private String pubDate;
     }
 }

@@ -7,15 +7,19 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class ContractPdfUrlResponse {
+public class ContractFilesResponse {
 
-    private Integer contractId;
-
+    private Integer fileId;
+    private String fileType;
     private String fileAddress;
+    private LocalDateTime uploadAt;
+
 
 }

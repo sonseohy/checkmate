@@ -40,7 +40,9 @@ public class SecurityConfig {
             "/api/auth/**",
             "/api/categories/**",
             "/api/questions/**",
-            "/api/courthouses/**"
+            "/api/courthouses/**",
+            "/api/news",
+            "/api/chatbot"
     };
 
     private final JwtUtil jwtUtil;

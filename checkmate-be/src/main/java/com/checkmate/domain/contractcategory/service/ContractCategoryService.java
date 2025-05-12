@@ -42,7 +42,7 @@ public class ContractCategoryService {
             throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
         }
 
-        return categoryRepository.findAllByParent_Id(parentId).stream()
+        return categoryRepository.findAllByParent_IdOrderByNameAsc(parentId).stream()
                 .map(category -> SubCategoryResponse.builder()
                         .categoryId(category.getId())
                         .parentId(category.getParent().getId())

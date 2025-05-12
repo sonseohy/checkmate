@@ -1,7 +1,6 @@
 package com.checkmate.domain.contract.service;
 
 import com.checkmate.domain.contract.dto.request.ContractUploadsRequest;
-import com.checkmate.domain.contract.dto.response.ContractPdfUrlResponse;
 import com.checkmate.domain.contract.dto.response.ContractUploadResponse;
 import com.checkmate.domain.contract.dto.response.FileNumberResponse;
 import com.checkmate.domain.contract.dto.response.MyContractResponse;
@@ -13,7 +12,6 @@ import com.checkmate.domain.user.entity.User;
 import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
-import com.checkmate.global.common.service.CloudFrontService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +29,6 @@ public class ContractService {
     private final ContractCategoryService categoryService;
     private final ContractFileService contractFileService;
     private final ContractRepository contractRepository;
-    private final CloudFrontService cloudFrontService;
 
     @Transactional
     public ContractUploadResponse uploadContract(Integer userId, ContractUploadsRequest request) {
@@ -49,6 +46,7 @@ public class ContractService {
         contract = contractRepository.save(contract);
 
         FileNumberResponse response = contractFileService.uploadContractFiles(contract, request.getFiles());
+        contract.setPageNo(response.getPageNo());
 
 
         return ContractUploadResponse.builder()
@@ -95,23 +93,4 @@ public class ContractService {
         contractRepository.deleteById(contractId);
     }
 
-    @Transactional(readOnly = true)
-    public ContractPdfUrlResponse    getContractPdfUrl(int userId, Integer contractId) {
-
-        User user = userService.findUserById(userId);
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
-
-        if (!contract.getUser().getUserId().equals(userId)) {
-            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
-        }
-
-        String path      = "/api/files/" + contractId + "/pdf/signed-url";
-        String signedUrl = cloudFrontService.generateSignedUrl(path);
-
-        return ContractPdfUrlResponse.builder()
-                .contractId(contractId)
-                .fileAddress(signedUrl)
-                .build();
-    }
 }

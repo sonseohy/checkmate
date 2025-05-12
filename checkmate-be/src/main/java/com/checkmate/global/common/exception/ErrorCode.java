@@ -46,8 +46,9 @@ public enum ErrorCode {
     INVALID_FIELD_VALUE("FIELD-002", HttpStatus.BAD_REQUEST, "유효하지 않은 필드 값입니다."),
     MISSING_REQUIRED_FIELD("FIELD-003", HttpStatus.BAD_REQUEST, "필수 필드가 누락되었습니다."),
     DEPENDENCY_NOT_SATISFIED("FIELD-004", HttpStatus.BAD_REQUEST, "의존성 조건을 만족하지 않는 필드입니다."),
-    MAPPING_NOT_FOUND("FIELD-005", HttpStatus.NOT_FOUND, "필드-카테고리 매핑을 찾을 수 없습니다.");
+    MAPPING_NOT_FOUND("FIELD-005", HttpStatus.NOT_FOUND, "필드-카테고리 매핑을 찾을 수 없습니다."),
 
+    INVALID_ID_FORMAT("MONGO-001", HttpStatus.BAD_REQUEST, "잘못된 ID 포멧입니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

@@ -1,11 +1,15 @@
 package com.checkmate.domain.contract.service;
 
+import com.checkmate.domain.contract.dto.response.ContractFilesResponse;
 import com.checkmate.domain.contract.dto.response.FileNumberResponse;
-import com.checkmate.domain.contract.dto.response.PdfData;
+import com.checkmate.domain.contract.dto.response.PdfMetadata;
 import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.entity.FileCategory;
 import com.checkmate.domain.contract.repository.ContractFileRepository;
+import com.checkmate.domain.contract.repository.ContractRepository;
+import com.checkmate.domain.user.entity.User;
+import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 import com.checkmate.global.common.service.*;
@@ -29,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +48,8 @@ public class ContractFileService {
     private final ImagePreprocessingService imgPreprocess;
     private final PdfProcessingService pdfProcessing;
     private final MeterRegistry meterRegistry;
+    private final UserService userService;
+    private final ContractRepository contractRepository;
 
     @Transactional
     public FileNumberResponse uploadContractFiles(
@@ -188,8 +195,8 @@ public class ContractFileService {
     }
 
     @Transactional(readOnly = true)
-    public PdfData loadViewerPdf(int userId, Integer contractId) {
-
+    public ContractFile  findViewerFile(int userId, int contractId) {
+        User user = userService.findUserById(userId);
         ContractFile file = contractFileRepository.findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
                 .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
 
@@ -197,12 +204,59 @@ public class ContractFileService {
             throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
         }
 
-        byte[] pdfBytes = s3Service.downloadAndDecryptWithKeySplit(
-                file.getFileAddress(), file.getIv(), file.getEncryptedDataKey(), file.getId().longValue());
+        return file;
 
-        String filename    = "contract-" + contractId + ".pdf";
+    }
+
+    @Transactional(readOnly = true)
+    public PdfMetadata loadViewerPdfMetadata(int userId, int contractId) {
+        User user = userService.findUserById(userId);
+
+        ContractFile file = contractFileRepository
+                .findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
+                .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
+
+        if (!file.getContract().getUser().getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
+        }
+
+        String key = file.getFileAddress()
+                .split("\\?")[0]
+                .replaceFirst("https://[^/]+/", "");
+        long contentLength = s3Service.getObjectContentLength(key);
+
+        String filename    = file.getContract().getTitle() + ".pdf";
         String contentType = MediaType.APPLICATION_PDF_VALUE;
-        return new PdfData(pdfBytes, filename, contentType);
 
+        return new PdfMetadata(
+                file.getFileAddress(),
+                file.getIv(),
+                file.getEncryptedDataKey(),
+                file.getId(),
+                filename,
+                contentType,
+                contentLength
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<ContractFilesResponse> listContractFiles(int userId, int contractId) {
+        User user = userService.findUserById(userId);
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        if(!contract.getUser().getUserId().equals(userId)){
+            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
+        }
+
+        return contract.getFiles().stream()
+                .filter(file -> file.getFileType().equals(FileCategory.ASSET))
+                .map(file -> ContractFilesResponse.builder()
+                        .fileId(file.getId())
+                        .fileType(file.getFileType())
+                        .fileAddress(file.getFileAddress())
+                        .uploadAt(file.getUploadAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

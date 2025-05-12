@@ -16,6 +16,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
@@ -23,6 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.SecureRandom;
 import java.util.UUID;
 
@@ -191,8 +193,14 @@ public class S3Service {
             Long fileId
     ) {
         try {
-            // S3 다운로드
-            String key = fileUrl.replace(filePrefix, "");
+
+            // 1) fileUrl 에 붙은 쿼리 삭제
+            String urlNoQuery = fileUrl.split("\\?")[0];
+
+            // 2) prefix 제거
+            String key = urlNoQuery.replace(filePrefix, "");
+
+            // 3) S3에서 암호문 가져오기
             ResponseBytes<GetObjectResponse> resp = s3Client.getObjectAsBytes(
                     GetObjectRequest.builder()
                             .bucket(bucketName)
@@ -200,8 +208,16 @@ public class S3Service {
                             .build());
             byte[] ciphertext = resp.asByteArray();
 
+            log.debug("IV length={}, shareA length={}, ciphertext length={}",
+                    iv.length, shareA.length, ciphertext.length);
+
             // MongoDB에서 shareB 로드
             byte[] shareB = keyShareMongo.loadShareB(fileId);
+            if (shareB.length != shareA.length) {
+                throw new RuntimeException(
+                        "shareA/ shareB 길이가 다릅니다: "
+                                + shareA.length + " vs " + shareB.length);
+            }
 
             // DEK 복원
             byte[] dekBytes = new byte[shareA.length];
@@ -218,6 +234,42 @@ public class S3Service {
         } catch (Exception e) {
             throw new RuntimeException("분할 복호화 실패", e);
         }
+    }
+
+    /**
+     * S3에서 암호화된 객체를 가져와 AES-GCM 복호화 후 CipherInputStream을 반환
+     */
+    public InputStream getDecryptedStream(
+            String key,
+            byte[] iv,
+            byte[] shareA,
+            long fileId
+    ) throws Exception {
+        // 1) S3에서 암호문 스트림 가져오기
+        ResponseInputStream<GetObjectResponse> s3is = s3Client.getObject(
+                GetObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .build()
+        );
+
+        // 2) MongoDB에서 shareB 조회 및 DEK 복원
+        byte[] shareB = keyShareMongo.loadShareB(fileId);
+        byte[] dek = new byte[shareA.length];
+        for (int i = 0; i < shareA.length; i++) {
+            dek[i] = (byte)(shareA[i] ^ shareB[i]);
+        }
+
+        // 3) Cipher 초기화
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(
+                Cipher.DECRYPT_MODE,
+                new SecretKeySpec(dek, "AES"),
+                new GCMParameterSpec(TAG_BITS, iv)
+        );
+
+        // 4) CipherInputStream으로 래핑하여 반환
+        return new CipherInputStream(s3is, cipher);
     }
 
     // ----------------------------------------------------
@@ -310,4 +362,15 @@ public class S3Service {
                 .substring(fileUrl.lastIndexOf("/") + 1);
         return new CustomMultipartFile(bytes, name, contentType);
     }
+
+    public long getObjectContentLength(String key) {
+        HeadObjectResponse head = s3Client.headObject(
+                HeadObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .build()
+        );
+        return head.contentLength();
+    }
+
 }

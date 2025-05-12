@@ -26,6 +26,9 @@ public class CheckList {
     @JoinColumn(name = "contract_category_id", nullable = false)
     private ContractCategory category;
 
+    @Column(name = "title", length = 100, nullable = false)
+    private String title;
+
     @Lob
     @Column(name = "check_list_detail", nullable = false, columnDefinition = "TEXT")
     private String checkListDetail;

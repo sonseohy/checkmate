@@ -10,8 +10,8 @@ public record MissingResponseDto(String missingClauseReportId, String aiAnalysis
 								 Importance importance, String description) {
 	public static MissingResponseDto fromEntity(MissingClauseReport missingClauseReport) {
 		return MissingResponseDto.builder()
-			.missingClauseReportId(missingClauseReport.getMissingClauseReportId())
-			.aiAnalysisReportId(missingClauseReport.getAiAnalysisReportId())
+			.missingClauseReportId(missingClauseReport.getId().toHexString())
+			.aiAnalysisReportId(missingClauseReport.getAiAnalysisReportId().toHexString())
 			.importance(missingClauseReport.getImportance())
 			.description(missingClauseReport.getDescription())
 			.build();

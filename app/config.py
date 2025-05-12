@@ -34,4 +34,7 @@ class Settings:
     UPSTAGE_OCR_API_URL = os.getenv("UPSTAGE_OCR_API_URL")
     UPSTAGE_OCR_API_KEY = os.getenv("UPSTAGE_OCR_API_KEY")
 
+    # OPENAI
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 settings = Settings()

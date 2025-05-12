@@ -6,8 +6,9 @@ from pydantic import BaseModel
 from app.services.decryption import DecryptionService
 from app.services.ocr_engine import OcrEngine
 from app.services.postprocessing import postprocessing_pipeline
-from app.db.mysql import get_mysql
+from app.db.mysql import get_mysql, MySQLManager
 from app.db.mongo import get_mongo
+from app.services.summarization import generate_summary
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ class OcrRequest(BaseModel):
 async def ocr_endpoint(
     req: OcrRequest,
     bg: BackgroundTasks,
-    mysql=Depends(get_mysql),
+    mysql: MySQLManager = Depends(get_mysql),
     mongo=Depends(get_mongo),
 ):
     service = DecryptionService(mysql, mongo)
@@ -31,29 +32,27 @@ async def ocr_endpoint(
             logger.info(f"[{cid}] 복호화 시작")
             pdf_bytes = await service.decrypt(cid)
             logger.info(f"[{cid}] PDF 복호화 완료, OCR 시작")
-            result    = await engine.recognize(pdf_bytes)
-            logger.info(f"[{cid}] OCR 완료, 결과 크기: {len(json.dumps(result))} bytes")
+            ocr_res   = await engine.recognize(pdf_bytes)
+            logger.info(f"[{cid}] OCR 완료, 결과 크기: {len(json.dumps(ocr_res))} bytes")
         except Exception as e:
             logger.error(f"[{cid}] OCR 에러: {e}")
             return
 
-        out_dir = Path("ocr_outputs")
-        out_dir.mkdir(exist_ok=True)
-        raw_path = out_dir / f"{cid}.json"
-        with raw_path.open("w", encoding="utf-8") as f:
-            json.dump(result, f, ensure_ascii=False, indent=2)
-        logger.info(f"[{cid}] 원본 OCR 결과 저장: {raw_path}")
-
         # 후처리 파이프라인
+        logger.info(f"[{cid}] 후처리 파이프라인 실행")
+        pages   = postprocessing_pipeline(ocr_res, cid)
+        await mysql.insert_ocr_results(pages)
+        logger.info(f"[{req.contract_id}] OCR 결과 {len(pages)}건 DB 저장 완료")
+
+        analysis_id = await mongo.insert_ai_analysis_report(cid)
+        all_text = "\n\n".join(p["cleaned_markdown"] for p in pages)
+
         try:
-            logger.info(f"[{cid}] 후처리 파이프라인 실행")
-            analysis = postprocessing_pipeline(result, cid)
-            analysis_path = out_dir / f"{cid}_analysis.json"
-            with analysis_path.open("w", encoding="utf-8") as f:
-                json.dump(analysis, f, ensure_ascii=False, indent=2)
-            logger.info(f"[{cid}] 후처리 결과 저장: {analysis_path}")
+            summary = await generate_summary(all_text)
+            inserted_mongo_id = await mongo.insert_summary_report(str(analysis_id), summary)
+            logger.info(f"[{cid}] SummaryReport MongoDB 저장 완료 _id={inserted_mongo_id}")                      
         except Exception as e:
-            logger.error(f"[{cid}] 후처리 에러: {e}")
+            logger.error(f"[{cid}] AI 요약 실패: {e}", exc_info=True)
 
     bg.add_task(task)
     return {"status": "accepted", "detail": "백그라운드에서 OCR 작업을 시작했습니다."}

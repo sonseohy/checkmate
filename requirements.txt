@@ -16,5 +16,6 @@ transformers
 tf-keras
 torch
 nltk
+openai
 git+https://github.com/haven-jeon/PyKoSpacing.git#egg=pykospacing
 git+https://github.com/ssut/py-hanspell.git#egg=py-hanspell

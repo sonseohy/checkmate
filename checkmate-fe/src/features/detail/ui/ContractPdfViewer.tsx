@@ -29,6 +29,7 @@ const ContractPdfViewer: React.FC = () => {
 
     }
   };
+
   
   //줌 
   const [scale, setScale] = useState(1.0)

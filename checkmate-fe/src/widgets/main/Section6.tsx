@@ -1,4 +1,3 @@
-import React from 'react';
 import { NewsCarousel } from '@/features/news';
 
 const Section6: React.FC = () => (

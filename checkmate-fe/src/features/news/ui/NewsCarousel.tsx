@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import {
   useNews,

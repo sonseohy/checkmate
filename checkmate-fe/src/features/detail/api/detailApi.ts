@@ -12,3 +12,22 @@ export const getContractDetail = async (contractId: number): Promise<Blob> => {
     throw error;  
   }
 };
+
+// 계약서 다운로드 
+export const getContractownload = async (contractId:number) => {
+  try {
+    const response = await customAxios.get(`/api/files/${contractId}/download`, {
+      responseType: 'blob'
+    });
+    const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download', '제목을 입력하세요.pdf');
+    document.body.appendChild(link);
+    link.click();
+
+  } catch(error) {
+    console.error('계약서 다운로드 실패:', error);
+  }
+};

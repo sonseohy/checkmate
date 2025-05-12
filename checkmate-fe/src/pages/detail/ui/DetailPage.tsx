@@ -2,7 +2,7 @@ import { ContractPdfViewer } from "@/features/detail";
 
 const DetailPage = () => {
     return (
-        <div className="flex flex-row ">
+        <div className="flex flex-row">
             <div className="w-3/4 bg-[#F3F4F6]">
                 <ContractPdfViewer />
             </div>

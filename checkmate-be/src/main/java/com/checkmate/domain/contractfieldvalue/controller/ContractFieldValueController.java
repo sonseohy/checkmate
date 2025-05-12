@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/contract")
@@ -42,5 +44,28 @@ public class ContractFieldValueController {
 
         List<ContractFieldValueResponseDto> responses = contractFieldValueService.saveFieldValues(contractId, request);
         return ApiResult.ok(responses);
+    }
+
+    @Operation(summary = "계약서 필드값 초기화",
+            description = "계약서의 모든 필드값을 초기화(삭제)합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "필드값 초기화 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
+            @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content),
+            @ApiResponse(responseCode = "404", description = "계약서 없음", content = @Content)
+    })
+    @DeleteMapping("/{contractId}/inputs")
+    public ApiResult<Map<String, Object>> resetFieldValues(
+            @Parameter(description = "계약서 ID", required = true)
+            @PathVariable Integer contractId) {
+
+        int deletedCount = contractFieldValueService.deleteAllFieldValues(contractId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("contractId", contractId);
+        response.put("deletedCount", deletedCount);
+        response.put("message", "계약서 필드값이 성공적으로 초기화되었습니다.");
+
+        return ApiResult.ok(response);
     }
 }

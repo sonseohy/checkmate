@@ -193,7 +193,7 @@ public class ContractFieldValueService {
         List<TemplateSection> templateSections = templateSectionRepository.findAll().stream()
                 .filter(ts -> ts.getTemplate().getId().equals(templateId) &&
                         ts.getSection().getId().equals(sectionId))
-                .collect(Collectors.toList());
+                .toList();
 
         if (templateSections.isEmpty()) {
             throw new CustomException(ErrorCode.SECTION_NOT_FOUND);
@@ -478,5 +478,26 @@ public class ContractFieldValueService {
         }
 
         return renderedText;
+    }
+
+    /**
+     * 계약서의 모든 필드값 삭제
+     * @param contractId 계약서 ID
+     * @return 삭제된 필드값 개수
+     */
+    @Transactional
+    public int deleteAllFieldValues(Integer contractId) {
+        // 계약서 존재 확인
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        List<ContractFieldValue> fieldValues = contractFieldValueRepository.findByContractId(contractId);
+
+        int count = fieldValues.size();
+        contractFieldValueRepository.deleteAll(fieldValues);
+
+        log.info("계약서 ID {}의 모든 필드값 {} 개가 삭제되었습니다.", contractId, count);
+
+        return count;
     }
 }

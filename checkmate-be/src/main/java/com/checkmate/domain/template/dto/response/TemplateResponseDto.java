@@ -8,8 +8,15 @@ import java.util.List;
 @Getter
 @Builder
 public class TemplateResponseDto {
+    private ContractDto contract;
     private TemplateDto template;
     private List<SectionDto> sections;
+
+    @Getter
+    @Builder
+    public static class ContractDto {
+        private Integer id;
+    }
 
     @Getter
     @Builder
@@ -44,5 +51,4 @@ public class TemplateResponseDto {
         private String dependsOn;
         private String description;
     }
-
 }

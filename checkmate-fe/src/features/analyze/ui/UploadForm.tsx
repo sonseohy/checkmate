@@ -1,4 +1,5 @@
 import { Upload } from 'lucide-react';
+import Swal from 'sweetalert2'; // ← 추가
 
 const ALLOWED_TYPES = [
   'image/jpeg',
@@ -20,12 +21,24 @@ const UploadForm: React.FC<UploadFormProps> = ({ files, setFiles }) => {
       ALLOWED_TYPES.includes(file.type),
     );
 
+    // ✦ 1) 허용되지 않는 형식
     if (filteredFiles.length !== selectedFiles.length) {
-      alert('jpg, png, pdf, hwp 파일만 업로드 가능합니다.');
+      Swal.fire({
+        icon: 'warning',
+        title: '업로드 오류',
+        text: 'jpg, png, pdf, hwp 파일만 업로드할 수 있습니다.',
+        confirmButtonText: '확인',
+      });
     }
 
+    // ✦ 2) 개수 초과
     if (files.length + filteredFiles.length > MAX_FILES) {
-      alert('최대 20개 파일까지만 업로드할 수 있습니다.');
+      Swal.fire({
+        icon: 'warning',
+        title: '업로드 오류',
+        text: '최대 20개 파일까지만 업로드할 수 있습니다.',
+        confirmButtonText: '확인',
+      });
       return;
     }
 

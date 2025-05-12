@@ -10,6 +10,10 @@ const MainPage = lazy(() =>
 const MyPage = lazy(() =>
   import('@pages/mypage').then((module) => ({ default: module.MyPage })),
 );
+const DetailPage = lazy(() =>
+  import('@pages/detail').then((module) => ({ default: module.DetailPage })),
+);
+
 // 계약서 작성 페이지
 const WriteCategoryPage = lazy(() =>
   import('@pages/write').then((module) => ({
@@ -69,6 +73,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, path: '/', element: <MainPage /> },
       { path: 'mypage', element: <MyPage /> },
+      // 계약서 상세 조회
+      { path: 'detail/:contractId', element: <DetailPage />},
       
       // 계약서 작성 가이드
       { path: 'intro/write', element: <WriteIntroPage /> },

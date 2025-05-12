@@ -6,6 +6,12 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from '@/app/routes/routes';
 import { Provider } from 'react-redux';
 import { store } from '@/app/redux/store';
+// src/main.tsx
+import { pdfjs } from 'react-pdf'
+import 'react-pdf/dist/esm/Page/TextLayer.css'
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
+// public 폴더에 복사해 둔 워커를 루트 URL로 가리킵니다.
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
 const queryClient = new QueryClient();
 

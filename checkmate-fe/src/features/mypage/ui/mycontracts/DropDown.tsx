@@ -1,4 +1,4 @@
-import Select, { SingleValue }  from "react-select";
+import Select, { SingleValue, StylesConfig }  from "react-select";
 
 interface Option {
     value: string;
@@ -13,11 +13,32 @@ interface DropdownProps {
 
 const Dropdown:React.FC<DropdownProps> = ({ options, value, onChange }) => {
     
+    // 커스터마이징 스타일 정의
+    const customStyles: StylesConfig<Option, false> = {
+    control: (provided) => ({
+      ...provided,
+      borderColor: "#F3F4F6", // 선택된 항목의 테두리 색상
+      boxShadow: "none",
+      backgroundColor: "#ffffff",
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? "#F3F4F6" : "#ffffff", // 선택된 항목 배경색
+      color: "#202020", // 선택된 항목 글자색
+      ":hover": {
+        backgroundColor: "#F3F4F6", // 호버 시 배경색
+      },
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "#202020", // 선택된 항목 글자색
+    }),
+  };
     return (
         <div>
             <Select
                 classNamePrefix="select"
-                defaultValue={options[0]}
+
                 value={value}
                 isLoading={false}
                 isSearchable={false}
@@ -26,7 +47,8 @@ const Dropdown:React.FC<DropdownProps> = ({ options, value, onChange }) => {
                 onChange={(opt: SingleValue<Option>) => {
                     if (opt) onChange(opt);
                   }}
-                className="basic-single focus:ring-2 focus:ring-blue-500"
+                className="basic-single"
+                styles={customStyles} 
              /> 
         </div>
     )

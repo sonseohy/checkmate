@@ -2,8 +2,9 @@
 export { default as SideBar } from "./ui/SideBar";
 
 //대시보드
-export { default as Dashboard } from "./ui/Dashboard";
-export { PieDonutChart } from "./ui/PieDonutChart";
+export { default as Dashboard } from "./ui/dashboard/Dashboard";
+export { PieDonutChart } from "./ui/dashboard/PieDonutChart";
+export { default as ContractCarousel } from "./ui/dashboard/ContractCarousel";
 
 //회원 정보
 export { default as UserInfo } from "./ui/UserInfo";
@@ -21,6 +22,7 @@ export { default as ContractTable } from "./ui/mycontracts/ContractTable";
 
 //타입
 export type {
+    Contract,
     ContractListData,
     CourtList,
     LatLng,
@@ -28,4 +30,6 @@ export type {
 } from "./model/types"
 
 //api
-export { searchPlace } from "./api/MyPageApi";
+export { 
+    searchPlace, 
+    contractList } from "./api/MyPageApi";

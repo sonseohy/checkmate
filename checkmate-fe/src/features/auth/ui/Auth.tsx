@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { PostKakaoCallback } from "@/features/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Auth() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();  
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,13 +35,14 @@ export default function Auth() {
     // 5) 토큰 요청
     PostKakaoCallback(code, dispatch)
       .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["userInfo"] });
         navigate("/", { replace: true });
       })
       .catch((err) => {
         console.error("[Auth] 토큰 발급 실패:", err);
         setError("카카오 콜백 처리에 실패했습니다.");
       });
-  }, [dispatch, location, navigate]);
+  }, [dispatch, location, navigate, queryClient]);
 
   // 에러 알림
   useEffect(() => {

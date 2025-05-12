@@ -2,7 +2,7 @@ import { updateUserInfo } from "@/entities/user/api/UserApi";
 import { useUserInfo } from "@/features/auth";
 import { ModalContent } from "@/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 interface UserInfoModalProps {
@@ -15,7 +15,11 @@ const UserInfoModal:React.FC<UserInfoModalProps> = ({ onClose }) => {
 
     // 상태 관리 ( 생년월일 , 전화번호 )
     const [birth, setBirth] = useState<string>(user?.birth || "");
-    const [phone, setPhone] = useState<string>(user?.phone || "");
+    const [phone, setPhone] = useState<string>(""); 
+
+    useEffect(() => {
+        setPhone("");  // 수정화면이 열리면 phone 상태를 빈 문자열로 설정
+    }, []);
 
     const mutation = useMutation({
         mutationFn: (params: { birth: string; phone: string }) =>
@@ -82,28 +86,14 @@ const UserInfoModal:React.FC<UserInfoModalProps> = ({ onClose }) => {
                 <div className="text-xl font-bold">
                     회원 정보 수정
                 </div>
-                <div className="flex flex-row gap-12 mb-3 items-center">
+                <div className="flex flex-row gap-12 mb-3 items-center mt-8">
                     <div className="font-medium">
                         이름
                     </div>
-                    <div className="border-[#9F9F9F] border-1 rounded-md w-62 pl-2 py-1 ">
+                    <div className="pl-2 py-1 ">
                         <span className="">
                             {user?.name}
                         </span>
-                    </div>
-                </div>
-                <div className="flex flex-row gap-5 mb-3 items-center">
-                    <div className="font-medium">
-                        전화번호
-                    </div>
-                    <div className="border-[#9F9F9F] border-1 rounded-md w-62 pl-2  py-1">
-                        <input 
-                            type="text"
-                            value={phone}
-                            onChange={handlePhoneChange}
-                            placeholder="전화번호 입력(예: 01012341234)"
-                            className="w-full"
-                            />
                     </div>
                 </div>
                 <div className="flex flex-row gap-5 mb-3  items-center">
@@ -116,6 +106,19 @@ const UserInfoModal:React.FC<UserInfoModalProps> = ({ onClose }) => {
                             value={birth}
                             onChange={handleBirthChange}
                         />
+                    </div>
+                </div>
+                <div className="flex flex-row gap-5 mb-3 items-center">
+                    <div className="font-medium">
+                        전화번호
+                    </div>
+                    <div className="border-[#9F9F9F] border-1 rounded-md w-62 pl-2  py-1">
+                        <input 
+                            type="text"
+                            onChange={handlePhoneChange}
+                            placeholder="전화번호 입력(예: 01012341234)"
+                            className="w-full"
+                            />
                     </div>
                 </div>
                 <button 

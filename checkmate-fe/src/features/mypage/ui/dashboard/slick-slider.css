@@ -1,0 +1,19 @@
+
+.slick-track {
+  width: 100%;
+  height: auto  !important;
+  flex-wrap: nowrap !important;
+  display: flex;
+  align-items: center;
+}
+
+.slick-slide {
+  width: 280px !important;
+  height: 260px !important;
+  margin: 0 18px; 
+}
+
+.slick-list {
+  padding-top: 80px;
+  height: 360px !important;
+}

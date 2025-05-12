@@ -16,7 +16,8 @@ public interface AiAnalysisReportRepository extends MongoRepository<AiAnalysisRe
 		"{ $match: { 'contractId': ?0 } }",
 		"{ $lookup: { from: 'improvement_report', localField: '_id', foreignField: 'aiAnalysisReportId', as: 'improvements' } }",
 		"{ $lookup: { from: 'missing_clause_report', localField: '_id', foreignField: 'aiAnalysisReportId', as: 'missingClauses' } }",
-		"{ $lookup: { from: 'risk_clause_report', localField: '_id', foreignField: 'aiAnalysisReportId', as: 'riskClauses' } }"
+		"{ $lookup: { from: 'risk_clause_report', localField: '_id', foreignField: 'aiAnalysisReportId', as: 'riskClauses' } }",
+		"{ $lookup: { from: 'summary_report', localField: '_id', foreignField: 'aiAnalysisReportId', as: 'summaries' } }"
 	})
 	Optional<CompleteAiAnalysisReport> getCompleteReportByContractId(Integer contractId);
 }

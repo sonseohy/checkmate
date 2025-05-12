@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { MidCategory, SubCategory } from '@/features/categories';
 import { useChecklist, ChecklistModal, useTemplate, TemplateField } from '@/features/write';
 import { LuTag } from 'react-icons/lu';
+import Swal from 'sweetalert2';
 
 const renderInputField = (
   field: TemplateField,
@@ -35,11 +36,21 @@ const renderInputField = (
 
   switch (field.inputType) {
     case 'TEXT':
-      return <input type="text" {...commonProps} />;
     case 'NUMBER':
-      return <input type="number" {...commonProps} />;
     case 'DATE':
-      return <input type="date" {...commonProps} />;
+      return (
+        <input
+          type={field.inputType.toLowerCase()}
+          {...commonProps}
+          value={dependsOnStates[field.fieldKey] ?? ''}
+          onChange={(e) =>
+            setDependsOnStates((prev) => ({
+              ...prev,
+              [field.fieldKey]: e.target.value,
+            }))
+          }
+        />
+      );
     // RADIO에 있는 옵션 중 하나가 선택되면, 그 옵션에 맞는 입력 란만 열림
     // 예시: 월세 / 전세 중 전세 선택 시, 월세 금액 입력 란은 열리지 않음
     case 'RADIO':
@@ -111,10 +122,43 @@ const FillPage: React.FC = () => {
   const [dependsOnStates, setDependsOnStates] = useState<Record<string, any>>({});
 
   // 입력 값을 저장하고 preview 페이지로 이동
+  // RADIO 옵션 선택 안했을 시, 경고 창 띄움
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate(`/write/${mainCategorySlug}/${categoryId}/preview`);
+  e.preventDefault();
+
+  const missingRequiredFields: string[] = [];
+
+  for (const section of sections) {
+    for (const field of section.fields) {
+      const isDisabled = (() => {
+        if (!field.dependsOn || field.inputType === 'RADIO') return false;
+        if (field.dependsOn.includes('!=')) {
+          const [key, notExpected] = field.dependsOn.split('!=');
+          return dependsOnStates[key] === notExpected;
+        }
+        const [key, expected] = field.dependsOn.split('=');
+        return dependsOnStates[key] !== expected;
+      })();
+
+      if (!isDisabled && field.required && !(field.fieldKey in dependsOnStates)) {
+        missingRequiredFields.push(field.label);
+      }
+    }
   }
+  if (missingRequiredFields.length > 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: '필수 항목이 누락되었습니다.',
+      html: `<ul style="text-align:left; padding-left: 1em;">${missingRequiredFields
+        .map((item) => `<li>• ${item}</li>`)
+        .join('')}</ul>`,
+      confirmButtonText: '확인',
+    });
+    return;
+  }
+
+  navigate(`/write/${mainCategorySlug}/${categoryId}/preview`);
+};
 
   // Template 조회 후 처리
   const { data: template, isLoading, isError, error } = useTemplate(numericCategoryId);

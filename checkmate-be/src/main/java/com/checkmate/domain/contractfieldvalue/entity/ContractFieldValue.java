@@ -42,4 +42,12 @@ public class ContractFieldValue {
     @LastModifiedDate
     @Column(name = "updated_at", columnDefinition = "DATETIME(6)")
     private LocalDateTime updatedAt;
+
+    public static ContractFieldValue create(Contract contract, TemplateField field, String value) {
+        ContractFieldValue contractFieldValue = new ContractFieldValue();
+        contractFieldValue.setContract(contract);
+        contractFieldValue.setField(field);
+        contractFieldValue.setValue(value);
+        return contractFieldValue;
+    }
 }

@@ -1,8 +1,8 @@
 // src/features/detail/ContractPdfViewer.tsx
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Document, Page } from 'react-pdf'
-import { getContractDetail, getContractownload } from '@/features/detail';
+import { deleteContractDetail, getContractDetail, getContractownload } from '@/features/detail';
 import { LuDownload, LuX } from "react-icons/lu";
 
 
@@ -12,12 +12,24 @@ interface Params {
 }
 
 const ContractPdfViewer: React.FC = () => {
+  const navigate = useNavigate();
   const { contractId } = useParams<Params>();
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [thumbnails, setThumbnails ] = useState<string[]>([]);
 
+  
+  const handleDeleteContract = async () => {
+    try {
+      await deleteContractDetail(Number(contractId)); 
+      navigate("/"); 
+    } catch (error) {
+      console.error("계약서 삭제 실패:", error);
+
+    }
+  };
+  
   //줌 
   const [scale, setScale] = useState(1.0)
   useEffect(() => {
@@ -86,12 +98,18 @@ const ContractPdfViewer: React.FC = () => {
           </button>
         </div>
         <div className='flex flex-row gap-3'>
-          <button className='flex flex-row items-center justify-center gap-2 border-1 border-gray-200 p-2 rounded-xl' onClick={handlePdfDownload}>
+          <button 
+            className='flex flex-row items-center justify-center gap-2 border-1 border-gray-200 p-2 rounded-xl' 
+            onClick={handlePdfDownload}
+          >
             파일 다운로드
             <LuDownload size={30} />
           </button>
         
-          <button className='flex flex-row items-center justify-center gap-2 border-1 border-gray-200 p-2 rounded-xl'>
+          <button 
+            className='flex flex-row items-center justify-center gap-2 border-1 border-gray-200 p-2 rounded-xl'
+            onClick={handleDeleteContract}
+            >
             파일 삭제
             <LuX size={30}/>
           </button>

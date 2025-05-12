@@ -33,7 +33,15 @@ export const getContractownload = async (contractId:number) => {
   }
 };
 
-
+// 계약서 삭제
+export const deleteContractDetail = async (contractId:number) => {
+  try {
+    const response = await customAxios.delete( `/api/contract/${contractId}`)
+    return response;
+  } catch(error) {
+    console.error('계약서 삭제 실패:', error)
+  }
+};
 
 //질문 리스트
 export const getContractQuestions = async (contractId: number): Promise<questionList> => {

@@ -3,7 +3,8 @@
 //api
 export { getContractDetail, 
          getContractQuestions, 
-         getContractownload } from "./api/detailApi";
+         getContractownload, 
+         deleteContractDetail } from "./api/detailApi";
 
 
 export { default as ContractPdfViewer } from "./ui/ContractPdfViewer";

@@ -7,24 +7,22 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
-@Document(collection = "legal_clauses")
+@Document(collection = "legalClauses")
 @Getter
 @Setter
 public class LegalClause {
     @Id
     private String id;
-    private String clauseType;
-    private String clauseId;
+
     private String titleText;
     private Integer displayOrder;
+    private List<Integer> targetFields;
+    private Integer categoryId;
     private List<Component> components;
-    private List<String> applicableContractTypes;
-    private Boolean isRequired;
-    private Map<String, Object> displayConditions;
-    private String version;
-    private LocalDateTime lastUpdated;
+    private Boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @Getter
     @Setter
@@ -32,6 +30,20 @@ public class LegalClause {
         private String type;
         private String text;
         private Integer order;
-        private Map<String, String> fieldMappings;
+        private List<Integer> categoryIds;
+
+        private CompositeCondition conditions;
+    }
+
+    @Getter
+    @Setter
+    public static class CompositeCondition {
+        private Integer fieldId;
+        private String operator;
+        private Object value;
+
+        // 복합 조건 (OR, AND)
+        private List<CompositeCondition> or;
+        private List<CompositeCondition> and;
     }
 }

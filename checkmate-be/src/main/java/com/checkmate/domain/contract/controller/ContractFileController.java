@@ -4,6 +4,9 @@ import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.service.ContractFileService;
 import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.service.S3Service;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -30,6 +33,12 @@ public class ContractFileController {
     private final ContractFileService contractFileService;
     private final S3Service s3Service;
 
+    @Operation(summary = "내 계약서 PDF 다운로드", description = "계약서를 다운로드합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "다운 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음")
+    })
     @GetMapping("/{contractId}/download")
     public ResponseEntity<Resource> downloadPdf(
             @AuthenticationPrincipal CustomUserDetails userDetails,

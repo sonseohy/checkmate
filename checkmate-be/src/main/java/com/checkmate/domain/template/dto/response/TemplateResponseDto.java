@@ -34,6 +34,7 @@ public class TemplateResponseDto {
     @Getter
     @Builder
     public static class FieldDto {
+        private Integer id;
         private String fieldKey;
         private String label;
         private String inputType;

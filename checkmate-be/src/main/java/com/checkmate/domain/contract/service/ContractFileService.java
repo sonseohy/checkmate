@@ -1,11 +1,13 @@
 package com.checkmate.domain.contract.service;
 
+import com.checkmate.domain.contract.dto.response.ContractFilesResponse;
 import com.checkmate.domain.contract.dto.response.FileNumberResponse;
 import com.checkmate.domain.contract.dto.response.PdfMetadata;
 import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.entity.FileCategory;
 import com.checkmate.domain.contract.repository.ContractFileRepository;
+import com.checkmate.domain.contract.repository.ContractRepository;
 import com.checkmate.domain.user.entity.User;
 import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
@@ -31,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +49,7 @@ public class ContractFileService {
     private final PdfProcessingService pdfProcessing;
     private final MeterRegistry meterRegistry;
     private final UserService userService;
+    private final ContractRepository contractRepository;
 
     @Transactional
     public FileNumberResponse uploadContractFiles(
@@ -233,5 +237,26 @@ public class ContractFileService {
                 contentType,
                 contentLength
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<ContractFilesResponse> listContractFiles(int userId, int contractId) {
+        User user = userService.findUserById(userId);
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        if(!contract.getUser().getUserId().equals(userId)){
+            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
+        }
+
+        return contract.getFiles().stream()
+                .filter(file -> file.getFileType().equals(FileCategory.ASSET))
+                .map(file -> ContractFilesResponse.builder()
+                        .fileId(file.getId())
+                        .fileType(file.getFileType())
+                        .fileAddress(file.getFileAddress())
+                        .uploadAt(file.getUploadAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

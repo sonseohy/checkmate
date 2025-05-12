@@ -12,7 +12,6 @@ import com.checkmate.domain.user.entity.User;
 import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
-import com.checkmate.global.common.service.CloudFrontService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,6 @@ public class ContractService {
     private final ContractCategoryService categoryService;
     private final ContractFileService contractFileService;
     private final ContractRepository contractRepository;
-    private final CloudFrontService cloudFrontService;
 
     @Transactional
     public ContractUploadResponse uploadContract(Integer userId, ContractUploadsRequest request) {
@@ -48,6 +46,7 @@ public class ContractService {
         contract = contractRepository.save(contract);
 
         FileNumberResponse response = contractFileService.uploadContractFiles(contract, request.getFiles());
+        contract.setPageNo(response.getPageNo());
 
 
         return ContractUploadResponse.builder()
@@ -93,4 +92,5 @@ public class ContractService {
 
         contractRepository.deleteById(contractId);
     }
+
 }

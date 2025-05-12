@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { MidCategory, SubCategory } from '@/features/categories';
 import { useChecklist, ChecklistModal, useTemplate, TemplateField } from '@/features/write';
 import { LuTag } from 'react-icons/lu';
@@ -9,6 +9,7 @@ const renderInputField = (
   dependsOnStates: Record<string, any>,
   setDependsOnStates: React.Dispatch<React.SetStateAction<Record<string, any>>>
 ) => {
+  // RADIO나 Checkbox의 경우, 어떤 값을 선택했을 때 연관이 있는 입력 필드만 작성 가능하도록 오픈
   const isDisabled = (() => {
     if (!field.dependsOn || field.inputType === 'RADIO') return false;
   
@@ -20,7 +21,8 @@ const renderInputField = (
     const [key, expected] = field.dependsOn.split('=');
     return dependsOnStates[key] !== expected;
   })();
-
+  
+  // 입력 불가 = isDisabled CSS 설정
   const commonProps = {
     id: field.fieldKey,
     name: field.fieldKey,
@@ -38,6 +40,8 @@ const renderInputField = (
       return <input type="number" {...commonProps} />;
     case 'DATE':
       return <input type="date" {...commonProps} />;
+    // RADIO에 있는 옵션 중 하나가 선택되면, 그 옵션에 맞는 입력 란만 열림
+    // 예시: 월세 / 전세 중 전세 선택 시, 월세 금액 입력 란은 열리지 않음
     case 'RADIO':
       const radioOptions = Array.isArray(field.options)
         ? field.options
@@ -63,6 +67,7 @@ const renderInputField = (
           ))}
         </div>
       );
+      // 체크박스 역시, 선택(체크됨)되었을 때만 관련 내용 입력 란이 열림
       case 'CHECKBOX':
         return (
           <input
@@ -85,8 +90,9 @@ const renderInputField = (
 };
 
 const FillPage: React.FC = () => {
-  const { categoryId } = useParams<{ categoryId: string }>();
+  const { categoryId, mainCategorySlug } = useParams<{ categoryId: string; mainCategorySlug: string }>();
   const numericCategoryId = Number(categoryId);
+  const navigate = useNavigate();
 
   const { state } = useLocation() as {
     state?: {
@@ -100,26 +106,56 @@ const FillPage: React.FC = () => {
   const { data: checklist = [] } = useChecklist(midCategoryId);
   const [showModal, setShowModal] = useState(state?.isNew ?? true);
 
-  const { data: template } = useTemplate(numericCategoryId);
-  const templateName = template?.template.name ?? '';
-  const sections = template?.sections ?? [];
-
+  // LuTag 아이콘에 정보 내용 Tolltip 연결
   const [tooltipField, setTooltipField] = useState<number | null>(null);
   const [dependsOnStates, setDependsOnStates] = useState<Record<string, any>>({});
 
+  // 입력 값을 저장하고 preview 페이지로 이동
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate(`/write/${mainCategorySlug}/${categoryId}/preview`);
+  }
+
+  // Template 조회 후 처리
+  const { data: template, isLoading, isError, error } = useTemplate(numericCategoryId);
+
+  // 로딩 처리
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[300px] text-gray-600">
+        템플릿을 불러오는 중입니다...
+      </div>
+    );
+  }
+
+  // 에러 처리
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center min-h-[300px] text-red-600">
+        템플릿을 불러오는 데 실패했습니다. <br />
+        {(error as any)?.response?.data?.error?.message ?? '잠시 후 다시 시도해주세요.'}
+      </div>
+    );
+  }
+
+  const templateName = template?.template.name ?? '';
+  const sections = template?.sections ?? [];
   return (
     <div className="container py-16 mx-auto">
-      <h1 className="mb-8 text-3xl font-bold text-center">{templateName} 작성</h1>
+      <h1 className="mb-8 text-4xl font-bold text-center">{templateName} 작성</h1>
 
+      {/* 처음 작성하는 페이지 일 때, 체크리스트 모달 렌더링 */}
       {showModal && (
         <ChecklistModal checklist={checklist} onClose={() => setShowModal(false)} />
       )}
 
-      <form className="space-y-10 max-w-3xl mx-auto px-4 sm:px-6">
+      {/* 각 섹션 별로 파트를 구분 */}
+      <form className="space-y-10 max-w-3xl mx-auto px-4 sm:px-6" onSubmit={handleSubmit}>
         {sections.map((section) => (
           <section key={section.id} className="p-6 bg-[#F6F6F6] rounded-2xl shadow-xl relative">
             <div className="flex items-center gap-2 mb-4 relative">
-              <h2 className="text-xl font-bold">{section.name}</h2>
+              <h2 className="text-2xl font-bold">{section.name}</h2>
+              {/* 섹션 별 추가 설명 */}
               {section.description && (
                 <div className="relative">
                   <button
@@ -140,6 +176,7 @@ const FillPage: React.FC = () => {
               )}
             </div>
 
+            {/* 체크가 되었을 때와 해제되었을 때를 구분하여 렌더링 */}
             <div className="grid gap-4">
               {section.fields.map((field) => (
                 <div key={field.fieldKey} className={field.inputType === 'CHECKBOX' ? 'flex items-center' : 'space-y-1'}>
@@ -159,6 +196,7 @@ const FillPage: React.FC = () => {
           </section>
         ))}
 
+        {/* 전체 작성 후 작성하기 버튼 누르면 preview 페이지로 이동 */}
         <div className="text-center">
           <button
             type="submit"

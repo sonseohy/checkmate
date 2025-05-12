@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { customAxios } from '@/shared/api';
-import { ChecklistItem, TemplateResponse } from '@/features/write';
+import { ChecklistItem, TemplateResponse, SaveContractInputsRequest, SaveContractInputsResponse } from '@/features/write';
 
 export const useChecklist = (categoryId?: number) => {
     return useQuery<ChecklistItem[]>({
@@ -22,4 +22,12 @@ export const useTemplate = (templateId: number) => {
     },
     enabled: !!templateId, // undefined일 경우 호출 방지
   });
+};
+
+export const saveContractInputs = async ({
+  contractId,
+  inputs,
+}: SaveContractInputsRequest): Promise<SaveContractInputsResponse> => {
+  const response = await customAxios.post(`/api/contract/${contractId}/inputs`, inputs);
+  return response.data.data;
 };

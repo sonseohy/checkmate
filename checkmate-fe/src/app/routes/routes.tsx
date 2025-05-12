@@ -23,6 +23,10 @@ const WriteFillPage = lazy(() =>
   import('@pages/write').then((module) => ({ default: module.FillPage })),
 );
 
+const WritePreviewPage = lazy(() => 
+  import('@pages/write').then((module) => ({ default: module.PreviewPage })),
+);
+
 // 계약서 분석 페이지
 const AnalyzeCategoryPage = lazy(() =>
   import('@pages/analyze').then((module) => ({
@@ -72,6 +76,7 @@ export const router = createBrowserRouter([
       // 계약서 작성 플로우
       { path: 'write/:mainCategorySlug', element: <WriteCategoryPage /> },
       { path: 'write/:mainCategorySlug/:categoryId', element: <WriteFillPage /> },
+      { path: 'write/:mainCategorySlug/:categoryId/preview', element: <WritePreviewPage /> },
 
       // 계약서 분석 플로우
       { path: 'analyze/:mainCategorySlug', element: <AnalyzeCategoryPage /> },

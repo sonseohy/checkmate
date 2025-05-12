@@ -14,16 +14,14 @@ export default function MyContracts() {
                 "category_id": 2,
                 "title": "부동산 매매계약서",
                 "source_type": "USER_UPLOAD",
-                "page_no": 5,
-                "created_at": "2025-04-15T14:22:10.123456"
+                "updated_at": "2025-04-15T14:22:10.123456"
             },
             {
                 "contract_id": 2,
                 "category_id": 3,
                 "title": "임대차 계약서",
                 "source_type": "SERVICE_GENERATED",
-                "page_no": 3,
-                "created_at": "2025-04-10T09:15:30.123456"
+                "updated_at": "2025-04-10T09:15:30.123456"
             }
         ]
     }

@@ -1,3 +1,3 @@
 
 
-export { default as Detail} from "./ui/Detail";
+export { default as DetailPage} from "./ui/DetailPage";

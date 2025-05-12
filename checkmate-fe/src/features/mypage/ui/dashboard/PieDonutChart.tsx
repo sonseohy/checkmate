@@ -1,9 +1,18 @@
 //대시 보드/ 도넛 파이 차트 
 import ReactApexChart from "react-apexcharts";
 import { useMobile } from "@/shared";
+import { Contract } from "@/features/mypage";
 
-export const PieDonutChart: React.FC = () => {
+interface PieDonutChartProps {
+  contractList: Contract[];
+}
+
+export const PieDonutChart: React.FC<PieDonutChartProps> = ({ contractList }) => {
     const isMobile = useMobile();
+
+    const userUploadCount = contractList.filter(c => c.source_type === "USER_UPLOAD").length;
+    const otherCount = contractList.length - userUploadCount;
+    const serie = [userUploadCount, otherCount];
 
     const options: ApexCharts.ApexOptions = {
         chart: {
@@ -17,7 +26,10 @@ export const PieDonutChart: React.FC = () => {
                 fontFamily: 'Pretendard',
                 fontWeight: 'semibold',
             },
-            formatter: (val: number) => `${val}개`,
+            formatter: function (_val, opts) {
+                const realValue = opts.w.config.series[opts.seriesIndex] as number;
+                return `${realValue}개`;
+            },
             dropShadow: {
                 enabled: true,
                 top: 2,
@@ -25,6 +37,13 @@ export const PieDonutChart: React.FC = () => {
                 blur: 3,
                 opacity: 0.5,
             },
+        },
+        states: {
+            hover: {
+            filter: {
+                type: 'none'    // ← hover 시 필터(밝게/어둡게) 적용 안 함
+                }
+            }
         },
         plotOptions: {
             pie: {
@@ -81,10 +100,11 @@ export const PieDonutChart: React.FC = () => {
         
     };
 
-    const series = [55, 45];
+    const series = serie;
 
     return (
         <div>
+
             <ReactApexChart options={options} series={series} type="donut" height={isMobile ? 300 : 400}/>
         </div>
     )

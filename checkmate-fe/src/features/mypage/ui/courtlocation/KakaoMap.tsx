@@ -10,48 +10,69 @@ export default function KakaoMap() {
   const [map, setMap] = useState<any>();
   const [marker, setMarker] = useState<any>();
 
-  // 1) 카카오맵 불러오기
   useEffect(() => {
-    window.kakao.maps.load(() => {
-      const container = document.getElementById("map");
-      const options = {
-        center: new window.kakao.maps.LatLng(37.5642135, 127.0016985),
-        level: 3,
-      };
-      const mapInstance = new window.kakao.maps.Map(container, options);
-      setMap(mapInstance);
+    // 1) 이미 kakao 객체가 있으면 바로 init
+    if (window.kakao && window.kakao.maps) {
+      initMap();
+      return;
+    }
 
-      const markerInstance = new window.kakao.maps.Marker();
-      setMarker(markerInstance);
+    // 2) kakao 스크립트가 없으면 동적 삽입
+    const script = document.createElement("script");
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_KEY}&autoload=false`;
+    script.async = true;
+    document.head.appendChild(script);
 
-      // 지도 로드 시 위치 확인
-      getCurrentPosBtn(mapInstance, markerInstance);
-    });
+    // 3) 스크립트 로드가 끝나면 initMap 실행
+    script.onload = () => {
+      window.kakao.maps.load(initMap);
+    };
+
+    // cleanup: 컴포넌트 언마운트 시 스크립트 제거
+    return () => {
+      document.head.removeChild(script);
+    };
   }, []);
 
+  const initMap = () => {
+    const container = document.getElementById("map")!;
+    const options = {
+      center: new window.kakao.maps.LatLng(37.5642135, 127.0016985),
+      level: 3,
+    };
+
+    const mapInstance = new window.kakao.maps.Map(container, options);
+    setMap(mapInstance);
+
+    const markerInstance = new window.kakao.maps.Marker();
+    setMarker(markerInstance);
+
+    // 로드 즉시 내 위치 찍기
+    getCurrentPosBtn(mapInstance, markerInstance);
+  };
+
   const getCurrentPosBtn = (mapInstance: any, markerInstance: any) => {
+    if (!mapInstance || !markerInstance) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => getPosSuccess(pos, mapInstance, markerInstance),
       () => alert("위치 정보를 가져오는데 실패했습니다."),
-      {
-        enableHighAccuracy: true,
-        maximumAge: 3000,
-        timeout: 2700,
-      }
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 2700 }
     );
   };
 
-  const getPosSuccess = (pos: GeolocationPosition, mapInstance: any, markerInstance: any) => {
+  const getPosSuccess = (
+    pos: GeolocationPosition,
+    mapInstance: any,
+    markerInstance: any
+  ) => {
     const currentPos = new window.kakao.maps.LatLng(
-      pos.coords.latitude, // 위도
-      pos.coords.longitude // 경도
+      pos.coords.latitude,
+      pos.coords.longitude
     );
-
-    // 지도 이동
     mapInstance.panTo(currentPos);
-    // 새로운 마커 삽입
-    markerInstance.setMap(null); // 기존 마커 제거
-    markerInstance.setPosition(currentPos); // 새로운 위치로 설정
+
+    markerInstance.setMap(null);
+    markerInstance.setPosition(currentPos);
     markerInstance.setMap(mapInstance);
   };
 
@@ -59,12 +80,11 @@ export default function KakaoMap() {
     <>
       <div
         id="map"
-        style={{
-          width: "800px",
-          height: "400px",
-        }}
+        style={{ width: "800px", height: "400px" }}
       ></div>
-      <div onClick={() => getCurrentPosBtn(map, marker)}></div>
+      <button onClick={() => getCurrentPosBtn(map, marker)}>
+        내 위치 보기
+      </button>
     </>
   );
 }

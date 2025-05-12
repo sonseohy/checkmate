@@ -1,8 +1,11 @@
+// src/shared/ui/AppLayout.tsx
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Header, HeaderProps } from '@/shared/ui/Header';
 import { ChatbotButton } from '@/shared/ui/ChatbotButton';
-import { useState } from 'react';
 import { ChatModal } from '@/features/chat';
-
+import { RootState } from '@/app/redux/store';
+import { chatService } from '@/features/chat';
 export interface AppLayoutProps {
   children: React.ReactNode;
   headerProps?: HeaderProps;
@@ -17,6 +20,16 @@ export const AppLayout = ({
   const mergedHeaderClass = `bg-white shadow ${
     headerProps.className ?? ''
   }`.trim();
+
+  // 🟢 Redux에서 현재 로그인된 유저 ID 가져오기
+  const userId =
+    useSelector((state: RootState) => state.auth.user?.user_id)?.toString() ??
+    null;
+
+  // 🟢 userId가 바뀔 때마다 chatService에 setUser 호출
+  useEffect(() => {
+    chatService.setUser(userId);
+  }, [userId]);
 
   const [showChat, setShowChat] = useState(false);
 

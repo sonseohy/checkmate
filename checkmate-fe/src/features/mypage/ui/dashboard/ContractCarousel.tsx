@@ -30,7 +30,7 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
   };
 
   return (
-    <div className=" overflow-x-hidden  max-w-[1150px] h-[400px]">
+    <div className=" overflow-x-hidden  max-w-[800px] h-[400px]">
       <Slider {...setting}> 
         {contractList.map((contract) => (
            <div key={contract.contract_id} onClick={() => handleContractDetail(contract.contract_id, contract )}>

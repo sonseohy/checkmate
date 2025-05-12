@@ -21,4 +21,12 @@
     border-radius: 5px ;         
     text-align: center ;     
     margin-top: 3px;
+    margin-bottom: 3px;
+    height: 100%;
+}
+
+.ag-theme-alpine .ag-cell-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }

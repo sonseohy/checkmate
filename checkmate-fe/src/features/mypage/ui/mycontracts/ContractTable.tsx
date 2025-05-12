@@ -34,8 +34,9 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData }) => {
     {
       headerName: '',
       checkboxSelection: true,
-      width: 50,
+      width: 80,
       suppressSizeToFit: true,
+
     },
     {
       headerName: '분류',
@@ -50,14 +51,16 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData }) => {
     },
     { headerName: '계약서 명', field: 'title' },
     { headerName: '최종 수정일', field: 'created_at' },
+    { headerName: '다운로드', 
+      field: 'download',}
   ];
 
   return (
-    <div className="ag-theme-alpine w-[100%]  h-[100%]">
+    <div className="ag-theme-alpine w-full  h-[100%]">
       <AgGridReact
         gridOptions={gridOptions}
         headerHeight={50}
-        rowHeight={45}
+        rowHeight={55}
         rowData={rowData}
         columnDefs={colDefs}
         suppressMovableColumns={true}

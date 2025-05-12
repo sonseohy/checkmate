@@ -14,8 +14,8 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
   const navigate = useNavigate();
 
   //계약서 상세조회 api 호출 및 페이지 이동
-  const handleContractDetail = async(contractId:number) => {
-    navigate(`/detail/${contractId}`);
+  const handleContractDetail = async(contractId:number, contract:Contract ) => {
+    navigate(`/detail/${contractId}`,{ state: contract });
   };
 
   console.log(contractList)
@@ -33,7 +33,7 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
     <div className=" overflow-x-hidden  max-w-[1150px] h-[400px]">
       <Slider {...setting}> 
         {contractList.map((contract) => (
-           <div key={contract.contract_id} onClick={() => handleContractDetail(contract.contract_id)}>
+           <div key={contract.contract_id} onClick={() => handleContractDetail(contract.contract_id, contract )}>
             <div className="bg-white rounded-2xl shadow p-5 w-[300px] h-[200px]" >
               <span className={`inline-block rounded-md px-3 py-1 text-sm font-medium text-white ${
                 contract.source_type === 'USER_UPLOAD' ? 'bg-[#B4C7FF]' : 'bg-[#FFB4B5]'

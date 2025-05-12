@@ -1,4 +1,5 @@
 import { customAxios } from "@/shared/api"
+import { questionList, questions } from "@/features/detail";
 
 //계약서 상세조회
 export const getContractDetail = async (contractId: number): Promise<Blob> => {
@@ -29,5 +30,27 @@ export const getContractownload = async (contractId:number) => {
 
   } catch(error) {
     console.error('계약서 다운로드 실패:', error);
+  }
+};
+
+
+
+//질문 리스트
+export const getContractQuestions = async (contractId: number): Promise<questionList> => {
+  try {
+    const response = await customAxios.get(`/api/questions/${contractId}`);
+    console.log("API Response:", response.data); 
+    const data: questions[] = response.data.data; 
+    // questionDetail에서 따옴표를 제거한 후 반환
+    const cleanedQuestions = data.map((question) => ({
+      ...question,
+      questionDetail: question.questionDetail.replace(/"/g, "") // 따옴표 제거
+    }));
+
+    return { question: cleanedQuestions }; // 수정된 데이터를 반환
+
+  } catch (error) {
+    console.error("질문 리스트 불러오기 실패:", error);
+    return { question: [] };   // 실패 시 기본값 반환
   }
 };

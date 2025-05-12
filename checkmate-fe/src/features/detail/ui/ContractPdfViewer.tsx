@@ -3,12 +3,12 @@ import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { Document, Page } from 'react-pdf'
 import { getContractDetail, getContractownload } from '@/features/detail';
-import { LuDownload } from "react-icons/lu";
+import { LuDownload, LuX } from "react-icons/lu";
 
 
 interface Params {
-  contractId: string
-  [key: string]: string | undefined
+  contractId: string;
+  [key: string]: string | undefined;
 }
 
 const ContractPdfViewer: React.FC = () => {
@@ -85,9 +85,15 @@ const ContractPdfViewer: React.FC = () => {
             다음
           </button>
         </div>
-        <div>
-          <button onClick={handlePdfDownload}>
+        <div className='flex flex-row gap-3'>
+          <button className='flex flex-row items-center justify-center gap-2 border-1 border-gray-200 p-2 rounded-xl' onClick={handlePdfDownload}>
+            파일 다운로드
             <LuDownload size={30} />
+          </button>
+        
+          <button className='flex flex-row items-center justify-center gap-2 border-1 border-gray-200 p-2 rounded-xl'>
+            파일 삭제
+            <LuX size={30}/>
           </button>
         </div>
       </div>

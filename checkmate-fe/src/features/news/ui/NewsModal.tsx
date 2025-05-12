@@ -27,7 +27,7 @@ const NewsModal: React.FC<Props> = ({ article, onClose }) => {
 
           {/* 방법 A) 기사 링크를 iframe 으로 (크로스도메인 차단 시 썸네일·내용만) */}
           <iframe
-            src={article.link}
+            src={article.originallink}
             title="news"
             className="w-full h-[70vh] border-0"
           />

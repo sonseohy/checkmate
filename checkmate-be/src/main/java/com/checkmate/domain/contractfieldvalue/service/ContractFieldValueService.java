@@ -12,8 +12,11 @@ import com.checkmate.domain.contractfieldvalue.repository.LegalClauseRepository;
 import com.checkmate.domain.templatefield.entity.InputType;
 import com.checkmate.domain.templatefield.entity.TemplateField;
 import com.checkmate.domain.templatefield.repository.TemplateFieldRepository;
+import com.checkmate.domain.templatefieldcategory.service.TemplateFieldCategoryService;
 import com.checkmate.domain.templatesection.entity.TemplateSection;
 import com.checkmate.domain.templatesection.repository.TemplateSectionRepository;
+import com.checkmate.domain.section.entity.Section;
+import com.checkmate.domain.section.repository.SectionRepository;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -37,39 +40,133 @@ public class ContractFieldValueService {
 
     private final ContractRepository contractRepository;
     private final TemplateSectionRepository templateSectionRepository;
+    private final SectionRepository sectionRepository;
     private final TemplateFieldRepository templateFieldRepository;
     private final ContractFieldValueRepository contractFieldValueRepository;
     private final LegalClauseRepository legalClauseRepository;
+    private final TemplateFieldCategoryService templateFieldCategoryService;
 
     /**
-     * 계약서 섹션의 필드값을 저장하고, 필요 시 법조항을 렌더링
+     * 여러 섹션의 필드값을 한 번에 저장하고 법조항 렌더링
      */
     @Transactional
-    public ContractFieldValueResponseDto saveFieldValues(Integer contractId, ContractFieldValueRequestDto request) {
+    public List<ContractFieldValueResponseDto> saveFieldValues(Integer contractId, ContractFieldValueRequestDto request) {
+        List<ContractFieldValueResponseDto> responses = new ArrayList<>();
+
+        // 각 섹션별로 필드값 저장 및 법조항 렌더링
+        for (ContractFieldValueRequestDto.SectionFieldValues sectionValues : request.getSections()) {
+            ContractFieldValueResponseDto response = saveFieldValuesForSection(contractId, sectionValues);
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
+    /**
+     * 단일 섹션의 필드값 저장 및 법조항 렌더링
+     */
+    @Transactional // 중첩 트랜잭션 처리
+    protected ContractFieldValueResponseDto saveFieldValuesForSection(
+            Integer contractId,
+            ContractFieldValueRequestDto.SectionFieldValues sectionValues) {
+
         // 1. 계약서 존재 확인
         Contract contract = findContractById(contractId);
 
         // 2. 섹션 존재 확인
-        TemplateSection section = findSectionById(request.getSectionId());
+        Section section = findSectionEntityById(sectionValues.getSectionId());
 
-        // 3. 첫 저장인지 확인
-        boolean isFirstSave = !contractFieldValueRepository.existsByContractIdAndSectionId(contractId, request.getSectionId());
+        // 3. 템플릿 섹션 조회
+        TemplateSection templateSection = findTemplateSectionByTemplateAndSectionId(
+                contract.getTemplate().getId(), section.getId());
 
-        // 4. 필드값 저장/업데이트
-        saveOrUpdateFieldValues(contract, request.getFieldValues());
+        // 4. 모든 필드 ID 목록 추출
+        List<Integer> allFieldIds = sectionValues.getFieldValues().stream()
+                .map(ContractFieldValueRequestDto.FieldValueDto::getFieldId)
+                .collect(Collectors.toList());
 
-        // 5. 응답 생성
+        // 5. 필드값 저장/업데이트
+        saveOrUpdateFieldValues(contract, sectionValues.getFieldValues());
+
+        // 6. 응답 생성
         ContractFieldValueResponseDto response = new ContractFieldValueResponseDto();
         response.setContractId(contractId);
-        response.setSectionId(request.getSectionId());
+        response.setSectionId(sectionValues.getSectionId());
 
-        // 6. 첫 저장인 경우에만 법조항 렌더링
-        if (isFirstSave) {
-            List<LegalClauseDto> renderedClauses = renderLegalClausesForSection(contractId, section);
-            response.setLegalClauses(renderedClauses);
-        }
+        // 7. 법조항 렌더링
+        List<LegalClauseDto> renderedClauses = renderLegalClausesForFields(contractId, section, allFieldIds);
+        response.setLegalClauses(renderedClauses);
 
         return response;
+    }
+
+
+    /**
+     * 특정 필드 ID 목록에 해당하는 법조항을 렌더링
+     */
+    private List<LegalClauseDto> renderLegalClausesForFields(Integer contractId, Section section, List<Integer> fieldIds) {
+        // 1. 계약서 카테고리 ID 가져오기
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
+        Integer categoryId = contract.getTemplate().getCategory().getId();
+
+        log.debug("계약서 카테고리 ID: {}, 필드 ID 목록: {}", categoryId, fieldIds);
+
+        // 2. 필드값 맵 구성
+        Map<Integer, String> fieldIdValueMap = getFieldIdValueMap(contractId);
+        Map<Integer, String> fieldIdToKeyMap = getFieldIdToKeyMap(fieldIds);
+
+        // 3. 필드-카테고리 매핑에서 MongoDB ID 목록 조회 (최적화!)
+        List<String> mongoClauseIds = templateFieldCategoryService
+                .getMongoClauseIdsByFieldIdsAndCategoryId(fieldIds, categoryId);
+
+        List<LegalClause> legalClauses;
+
+        // 4. MongoDB ID가 있으면 직접 조회, 없으면 필터 조건으로 검색
+        if (!mongoClauseIds.isEmpty()) {
+            // 최적화: 저장된 MongoDB ID로 직접 조회
+            log.debug("최적화: 저장된 MongoDB ID로 법조항 직접 조회: {} 개", mongoClauseIds.size());
+            legalClauses = legalClauseRepository.findAllById(mongoClauseIds);
+        } else if (!fieldIds.isEmpty()) {
+            // MongoDB ID가 없는 경우만 기존 방식으로 검색
+            log.debug("MongoDB ID가 없어 기존 방식으로 검색");
+            legalClauses = legalClauseRepository.findByFieldIdsAndCategoryId(fieldIds, categoryId);
+
+            // 검색 결과를 매핑 테이블에 저장 (다음 조회를 위한 최적화)
+            saveLegalClauseMappings(fieldIds, categoryId, legalClauses);
+        } else {
+            legalClauses = Collections.emptyList();
+            log.debug("필드 ID가 없어 법조항 조회를 건너뜁니다.");
+        }
+
+        // 5. 법조항 렌더링 (최신 필드값 적용)
+        List<LegalClauseDto> result = renderLegalClauses(legalClauses, fieldIdValueMap, fieldIdToKeyMap);
+        log.debug("렌더링된 법조항 수: {}", result.size());
+        return result;
+    }
+
+    /**
+     * 검색된 법조항을 필드-카테고리 매핑 테이블에 저장
+     */
+    private void saveLegalClauseMappings(List<Integer> fieldIds, Integer categoryId, List<LegalClause> legalClauses) {
+        if (legalClauses.isEmpty()) {
+            return;
+        }
+
+        for (LegalClause clause : legalClauses) {
+            if (clause.getTargetFields() != null) {
+                // 현재 법조항과 관련된 필드 ID 목록 (필드 ID 목록과의 교집합)
+                List<Integer> relevantFieldIds = clause.getTargetFields().stream()
+                        .filter(fieldIds::contains)
+                        .collect(Collectors.toList());
+
+                // 각 관련 필드에 대해 MongoDB ID 매핑 저장
+                if (!relevantFieldIds.isEmpty()) {
+                    templateFieldCategoryService.saveMongoClauseIdForMultipleFields(
+                            relevantFieldIds, categoryId, clause.getId());
+                }
+            }
+        }
     }
 
     /**
@@ -81,11 +178,28 @@ public class ContractFieldValueService {
     }
 
     /**
-     * 섹션 ID로 템플릿 섹션 정보를 조회
+     * 섹션 ID로 섹션 엔티티 정보를 조회
      */
-    private TemplateSection findSectionById(Integer sectionId) {
-        return templateSectionRepository.findById(sectionId)
+    private Section findSectionEntityById(Integer sectionId) {
+        return sectionRepository.findById(sectionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SECTION_NOT_FOUND));
+    }
+
+    /**
+     * 템플릿 ID와 섹션 ID로 템플릿 섹션 정보를 조회
+     */
+    private TemplateSection findTemplateSectionByTemplateAndSectionId(Integer templateId, Integer sectionId) {
+        // 템플릿 ID와 섹션 ID로 템플릿 섹션 검색
+        List<TemplateSection> templateSections = templateSectionRepository.findAll().stream()
+                .filter(ts -> ts.getTemplate().getId().equals(templateId) &&
+                        ts.getSection().getId().equals(sectionId))
+                .collect(Collectors.toList());
+
+        if (templateSections.isEmpty()) {
+            throw new CustomException(ErrorCode.SECTION_NOT_FOUND);
+        }
+
+        return templateSections.get(0);
     }
 
     /**
@@ -170,39 +284,16 @@ public class ContractFieldValueService {
                     throw new CustomException(ErrorCode.INVALID_FIELD_VALUE);
                 }
                 break;
+
+            case RADIO:
+                // RADIO 타입은 옵션에 있는 값인지 확인 로직 추가
+                if (field.getOptions() != null && !field.getOptions().isEmpty()) {
+                    if (!field.getOptions().contains(value)) {
+                        throw new CustomException(ErrorCode.INVALID_FIELD_VALUE);
+                    }
+                }
+                break;
         }
-    }
-
-    /**
-     * 특정 섹션에 해당하는 법조항을 렌더링
-     */
-    private List<LegalClauseDto> renderLegalClausesForSection(Integer contractId, TemplateSection section) {
-        // 1. 계약서 카테고리 ID 가져오기
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
-        Integer categoryId = contract.getTemplate().getCategory().getId();
-
-        // 2. 섹션의 모든 필드 ID 목록 가져오기 (기존 메서드 활용)
-        List<TemplateField> sectionFields = templateFieldRepository
-                .findBySectionIdOrderBySequenceNoAsc(section.getId());
-        List<Integer> fieldIds = sectionFields.stream()
-                .map(TemplateField::getId)
-                .collect(Collectors.toList());
-
-        // 3. 필드값 맵 구성
-        Map<Integer, String> fieldIdValueMap = getFieldIdValueMap(contractId);
-        Map<Integer, String> fieldIdToKeyMap = getFieldIdToKeyMap(fieldIds);
-
-        // 4. MongoDB에서 법조항 검색 (fieldId와 categoryId 기반)
-        List<LegalClause> legalClauses;
-        if (!fieldIds.isEmpty()) {
-            legalClauses = legalClauseRepository.findByFieldIdsAndCategoryId(fieldIds, categoryId);
-        } else {
-            legalClauses = Collections.emptyList();
-        }
-
-        // 5. 법조항 렌더링
-        return renderLegalClauses(legalClauses, fieldIdValueMap, fieldIdToKeyMap);
     }
 
     /**
@@ -237,23 +328,6 @@ public class ContractFieldValueService {
     }
 
     /**
-     * 계약서의 모든 필드값을 키-값 맵으로 반환
-     */
-    private Map<String, String> getFieldKeyValueMap(Integer contractId) {
-        List<ContractFieldValue> fieldValues = contractFieldValueRepository.findByContractId(contractId);
-        Map<String, String> fieldKeyValueMap = new HashMap<>();
-
-        for (ContractFieldValue fieldValue : fieldValues) {
-            String fieldKey = fieldValue.getField().getFieldKey();
-            if (fieldKey != null && !fieldKey.isEmpty()) {
-                fieldKeyValueMap.put(fieldKey, fieldValue.getValue());
-            }
-        }
-
-        return fieldKeyValueMap;
-    }
-
-    /**
      * 법조항 목록을 필드값을 적용하여 렌더링
      */
     private List<LegalClauseDto> renderLegalClauses(
@@ -279,10 +353,8 @@ public class ContractFieldValueService {
 
         return legalClauses.stream().map(clause -> {
             LegalClauseDto dto = new LegalClauseDto();
-            dto.setClauseId(clause.getId());  // MongoDB ID 사용
             dto.setTitleText(clause.getTitleText());
             dto.setOrder(clause.getDisplayOrder());
-            dto.setIntroText("");  // 빈 문자열 사용
 
             // 구성요소별 렌더링
             List<String> renderedContent = new ArrayList<>();
@@ -325,19 +397,19 @@ public class ContractFieldValueService {
             return true;
         }
 
-        // 1. 단일 조건 평가 (기존 방식 호환)
+        // 1. 단일 조건 평가
         if (condition.getFieldId() != null) {
             String actualValue = fieldIdValueMap.get(condition.getFieldId());
             return evaluateSingleCondition(actualValue, condition.getOperator(), condition.getValue());
         }
 
-        // 2. OR 조건 평가 (하나라도 참이면 참)
+        // 2. OR 조건 평가
         if (condition.getOr() != null && !condition.getOr().isEmpty()) {
             return condition.getOr().stream()
                     .anyMatch(subCondition -> evaluateCondition(subCondition, fieldIdValueMap));
         }
 
-        // 3. AND 조건 평가 (모두 참이어야 참)
+        // 3. AND 조건 평가
         if (condition.getAnd() != null && !condition.getAnd().isEmpty()) {
             return condition.getAnd().stream()
                     .allMatch(subCondition -> evaluateCondition(subCondition, fieldIdValueMap));

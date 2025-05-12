@@ -15,15 +15,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/contracts")
+@RequestMapping("/api/contract")
 @RequiredArgsConstructor
 @Tag(name = "Contract Field Value API", description = "계약서 필드값 저장 및 법조항 렌더링 API")
 public class ContractFieldValueController {
     private final ContractFieldValueService contractFieldValueService;
 
     @Operation(summary = "필드값 저장 및 법조항 렌더링",
-            description = "계약서 섹션의 필드값을 저장하고, 첫 저장 시 법조항을 렌더링하여 반환합니다.")
+            description = "여러 섹션의 필드값을 한 번에 저장하고, 법조항을 렌더링하여 반환합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "필드값 저장 성공",
                     content = @Content(schema = @Schema(implementation = ContractFieldValueResponseDto.class))),
@@ -31,14 +33,14 @@ public class ContractFieldValueController {
             @ApiResponse(responseCode = "404", description = "계약서 또는 섹션 없음", content = @Content)
     })
     @PostMapping("/{contractId}/inputs")
-    public ApiResult<ContractFieldValueResponseDto> saveFieldValues(
+    public ApiResult<List<ContractFieldValueResponseDto>> saveFieldValues(
             @Parameter(description = "계약서 ID", required = true)
             @PathVariable Integer contractId,
 
             @Parameter(description = "필드값 저장 요청", required = true)
             @Valid @RequestBody ContractFieldValueRequestDto request) {
 
-        ContractFieldValueResponseDto response = contractFieldValueService.saveFieldValues(contractId, request);
-        return ApiResult.ok(response);
+        List<ContractFieldValueResponseDto> responses = contractFieldValueService.saveFieldValues(contractId, request);
+        return ApiResult.ok(responses);
     }
 }

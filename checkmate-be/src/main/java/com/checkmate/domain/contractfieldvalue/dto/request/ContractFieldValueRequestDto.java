@@ -8,8 +8,15 @@ import java.util.List;
 @Getter
 @Setter
 public class ContractFieldValueRequestDto {
-    private Integer sectionId;
-    private List<FieldValueDto> fieldValues;
+
+    private List<SectionFieldValues> sections;
+
+    @Getter
+    @Setter
+    public static class SectionFieldValues {
+        private Integer sectionId;
+        private List<FieldValueDto> fieldValues;
+    }
 
     @Getter
     @Setter

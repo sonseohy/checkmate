@@ -19,7 +19,8 @@ export const TemplateCardList: React.FC<TemplateCardListProps> = ({
   const variants = useCardVariants();
 
   return (
-    <div className="flex flex-wrap justify-center gap-8 mt-8 md:relative md:flex-nowrap md:items-end md:h-80">
+    // ① base = grid-cols-2 ② md↑ = flex 절대배치
+    <div className="grid grid-cols-2 gap-4 mt-8 md:relative md:flex md:flex-nowrap md:items-end md:h-80 md:gap-8 md:w-full md:justify-center">
       {templates.map(({ title, icon }, i) => (
         <motion.div
           key={title}
@@ -28,23 +29,24 @@ export const TemplateCardList: React.FC<TemplateCardListProps> = ({
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.5 }}
-          className="flex flex-col items-center justify-center w-full p-6 shadow-lg cursor-pointer h-80 bg-blue-50 rounded-2xl sm:w-72 sm:p-8 md:absolute"
+          /* 모바일: w-full → grid 셀 전체 차지 / md↑: w-72 + absolute */
+          className="flex flex-col items-center justify-center w-full p-4 shadow-lg cursor-pointer h-60 bg-blue-50 rounded-2xl sm:p-6 sm:h-72 md:w-72 md:h-80 md:p-8 md:absolute"
           style={{ zIndex: i === 1 ? 20 : 10 }}
           whileHover={
             variants === desktopCardVariants
               ? {
                   scale: 1.05,
                   rotate: 0,
-                  boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
+                  boxShadow: '0 10px 20px rgba(0,0,0,0.15)',
                 }
               : {}
           }
           onClick={() => onClickCard?.(title)}
         >
-          {/* 카드 제목 */}
-          <h1 className="mb-4 text-4xl font-bold text-center">{title}</h1>
-          {/* 카드 이미지 */}
-          <img src={icon} alt={title} className="h-40" />
+          <h1 className="mb-4 text-2xl font-bold text-center sm:text-3xl md:text-4xl">
+            {title}
+          </h1>
+          <img src={icon} alt={title} className="h-32 sm:h-40" />
         </motion.div>
       ))}
     </div>

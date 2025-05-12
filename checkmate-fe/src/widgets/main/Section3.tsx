@@ -1,14 +1,17 @@
 import { useMainCategories } from '@/features/categories/hooks/useCategories';
+import TemplateSectionSkeleton from '@/widgets/common/TemplateSectionSkeleton';
 import { TemplateSection } from '@/widgets/common/TemplateSection';
 import { categoryIconMap } from '@/shared/constants/categoryIconMap';
 
-const Section3 = () => {
-  const { data: mainCategories } = useMainCategories();
+const Section3: React.FC = () => {
+  const { data: mainCategories, isLoading } = useMainCategories();
+
+  if (isLoading) return <TemplateSectionSkeleton sectionId="templates-write" />;
 
   const templates =
     mainCategories?.map((cat) => ({
       title: cat.name,
-      icon: categoryIconMap[cat.name] || '', // fallback 처리도 가능
+      icon: categoryIconMap[cat.name] || '',
     })) || [];
 
   return (

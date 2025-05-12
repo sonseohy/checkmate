@@ -222,4 +222,56 @@ public class TemplateFieldCategoryService {
                 .map(TemplateFieldCategoryMappingResponseDto::from)
                 .collect(Collectors.toList());
     }
+
+
+    /**
+     * 필드와 카테고리 매핑에 MongoDB 법조항 ID 저장
+     */
+    @Transactional
+    public void saveMongoClauseId(Integer fieldId, Integer categoryId, String mongoClauseId) {
+        // 매핑이 존재하는지 확인
+        TemplateFieldCategory mapping = templateFieldCategoryRepository
+                .findByTemplateFieldIdAndContractCategoryId(fieldId, categoryId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MAPPING_NOT_FOUND));
+
+        // MongoDB ID 저장
+        mapping.setMongoClauseId(mongoClauseId);
+        templateFieldCategoryRepository.save(mapping);
+    }
+
+    /**
+     * 여러 필드와 카테고리 매핑에 MongoDB 법조항 ID 저장
+     */
+    @Transactional
+    public void saveMongoClauseIdForMultipleFields(List<Integer> fieldIds, Integer categoryId, String mongoClauseId) {
+        for (Integer fieldId : fieldIds) {
+            Optional<TemplateFieldCategory> mappingOpt = templateFieldCategoryRepository
+                    .findByTemplateFieldIdAndContractCategoryId(fieldId, categoryId);
+
+            if (mappingOpt.isPresent()) {
+                TemplateFieldCategory mapping = mappingOpt.get();
+                mapping.setMongoClauseId(mongoClauseId);
+                templateFieldCategoryRepository.save(mapping);
+            }
+        }
+    }
+
+    /**
+     * 필드 ID와 카테고리 ID로 MongoDB 법조항 ID 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<String> getMongoClauseIdsByFieldIdAndCategoryId(Integer fieldId, Integer categoryId) {
+        return templateFieldCategoryRepository.findMongoClauseIdsByFieldIdAndCategoryId(fieldId, categoryId);
+    }
+
+    /**
+     * 여러 필드 ID와 카테고리 ID로 MongoDB 법조항 ID 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<String> getMongoClauseIdsByFieldIdsAndCategoryId(List<Integer> fieldIds, Integer categoryId) {
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return List.of();
+        }
+        return templateFieldCategoryRepository.findMongoClauseIdsByFieldIdsAndCategoryId(fieldIds, categoryId);
+    }
 }

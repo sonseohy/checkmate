@@ -22,9 +22,6 @@ public interface TemplateFieldCategoryRepository extends JpaRepository<TemplateF
     Optional<TemplateFieldCategory> findByTemplateFieldIdAndContractCategoryId(
             Integer fieldId, Integer categoryId);
 
-    // 필드 ID와 카테고리 ID로 매핑 삭제
-    void deleteByTemplateFieldIdAndContractCategoryId(Integer fieldId, Integer categoryId);
-
     // 카테고리 ID로 필드 키 목록 조회
     @Query("SELECT tf.fieldKey FROM TemplateField tf JOIN tf.categoryMappings tfc " +
             "WHERE tfc.contractCategory.id = :categoryId")
@@ -36,5 +33,23 @@ public interface TemplateFieldCategoryRepository extends JpaRepository<TemplateF
             "AND tfc.contractCategory.id = :categoryId")
     List<TemplateFieldCategory> findBySectionIdAndCategoryId(
             @Param("sectionId") Integer sectionId,
+            @Param("categoryId") Integer categoryId);
+
+    // 필드 ID와 카테고리 ID로 MongoDB ID 목록 조회
+    @Query("SELECT tfc.mongoClauseId FROM TemplateFieldCategory tfc " +
+            "WHERE tfc.templateField.id = :fieldId " +
+            "AND tfc.contractCategory.id = :categoryId " +
+            "AND tfc.mongoClauseId IS NOT NULL")
+    List<String> findMongoClauseIdsByFieldIdAndCategoryId(
+            @Param("fieldId") Integer fieldId,
+            @Param("categoryId") Integer categoryId);
+
+    // 여러 필드 ID와 카테고리 ID로 MongoDB ID 목록 조회
+    @Query("SELECT DISTINCT tfc.mongoClauseId FROM TemplateFieldCategory tfc " +
+            "WHERE tfc.templateField.id IN :fieldIds " +
+            "AND tfc.contractCategory.id = :categoryId " +
+            "AND tfc.mongoClauseId IS NOT NULL")
+    List<String> findMongoClauseIdsByFieldIdsAndCategoryId(
+            @Param("fieldIds") List<Integer> fieldIds,
             @Param("categoryId") Integer categoryId);
 }

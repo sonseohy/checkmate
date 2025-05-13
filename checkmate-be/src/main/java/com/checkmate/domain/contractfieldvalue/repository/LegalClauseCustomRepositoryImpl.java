@@ -28,12 +28,11 @@ public class LegalClauseCustomRepositoryImpl implements LegalClauseCustomReposit
 
         log.debug("MongoDB 쿼리 실행 - fieldIds: {}, categoryId: {}", fieldIds, categoryId);
 
-        // 쿼리 수정: $elemMatch 대신 $in 사용
         Query query = new Query();
 
-        // isActive가 true이고 categoryId가 일치하는 문서 중에서
+        // isActive가 true이고 categoryIds 배열에 categoryId가 포함된 문서 중에서
         Criteria criteria = Criteria.where("isActive").is(true)
-                .and("categoryId").is(categoryId);
+                .and("categoryIds").in(categoryId);
 
         // targetFields 배열에 fieldIds 중 적어도 하나가 포함된 문서 검색
         criteria.and("targetFields").in(fieldIds);
@@ -54,7 +53,7 @@ public class LegalClauseCustomRepositoryImpl implements LegalClauseCustomReposit
         }
 
         Query query = new Query(Criteria.where("isActive").is(true)
-                .and("categoryId").is(categoryId)
+                .and("categoryIds").in(categoryId)
                 .and("targetFields").is(fieldId));
 
         query.with(Sort.by(Sort.Direction.ASC, "displayOrder"));
@@ -62,11 +61,4 @@ public class LegalClauseCustomRepositoryImpl implements LegalClauseCustomReposit
         return mongoTemplate.find(query, LegalClause.class);
     }
 
-    // 활성 상태의 모든 법조항 검색
-    public List<LegalClause> findAllActiveOrderByDisplayOrder() {
-        Query query = new Query(Criteria.where("isActive").is(true));
-        query.with(Sort.by(Sort.Direction.ASC, "displayOrder"));
-
-        return mongoTemplate.find(query, LegalClause.class);
-    }
 }

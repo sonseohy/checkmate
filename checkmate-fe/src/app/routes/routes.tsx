@@ -24,11 +24,11 @@ const WriteIntroPage = lazy(() =>
   import('@pages/write').then((module) => ({ default: module.WriteIntroPage })),
 );
 const WriteFillPage = lazy(() =>
-  import('@pages/write').then((module) => ({ default: module.FillPage })),
+  import('@pages/write').then((module) => ({ default: module.WriteFillPage })),
 );
 
 const WritePreviewPage = lazy(() => 
-  import('@pages/write').then((module) => ({ default: module.PreviewPage })),
+  import('@pages/write').then((module) => ({ default: module.WritePreviewPage })),
 );
 
 // 계약서 분석 페이지
@@ -82,7 +82,7 @@ export const router = createBrowserRouter([
       // 계약서 작성 플로우
       { path: 'write/:mainCategorySlug', element: <WriteCategoryPage /> },
       { path: 'write/:mainCategorySlug/:categoryId', element: <WriteFillPage /> },
-      { path: 'write/:mainCategorySlug/:categoryId/preview', element: <WritePreviewPage /> },
+      { path: 'contract/:contractId/preview', element: <WritePreviewPage /> },
 
       // 계약서 분석 플로우
       { path: 'analyze/:mainCategorySlug', element: <AnalyzeCategoryPage /> },

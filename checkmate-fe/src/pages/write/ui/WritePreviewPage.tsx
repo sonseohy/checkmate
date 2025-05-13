@@ -1,4 +1,4 @@
-const PreviewPage: React.FC = () => {
+const WritePreviewPage: React.FC = () => {
   return (
     <div className="container py-16 mx-auto space-y-6">
       <h1 className="text-2xl font-bold">작성된 계약서 미리보기</h1>
@@ -12,4 +12,4 @@ const PreviewPage: React.FC = () => {
   );
 };
 
-export default PreviewPage;
+export default WritePreviewPage;

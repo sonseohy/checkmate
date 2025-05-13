@@ -17,5 +17,8 @@ tf-keras
 torch
 nltk
 openai
+langchain>=0.1.4
+langchain-openai>=0.1.1
+tenacity>=8.2.3
 git+https://github.com/haven-jeon/PyKoSpacing.git#egg=pykospacing
 git+https://github.com/ssut/py-hanspell.git#egg=py-hanspell

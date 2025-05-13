@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { RootState } from '@/app/redux/store';
+
 import { Header, HeaderProps } from '@/shared/ui/Header';
 import { ChatbotButton } from '@/shared/ui/ChatbotButton';
-import { ChatModal } from '@/features/chat';
-import { RootState } from '@/app/redux/store';
-import { chatService } from '@/features/chat';
-import { TopButton } from '@/shared/ui/TopButton'; // 경로는 상황에 맞게 수정
+import { TopButton } from '@/shared/ui/TopButton';
+import { useAutoLogout } from '@/shared/hooks/useAutoLogout';
+
+import { ChatModal, chatService } from '@/features/chat';
 
 export interface AppLayoutProps {
   children: React.ReactNode;
@@ -18,10 +20,6 @@ export const AppLayout = ({
   headerProps = { className: 'bg-white shadow' },
   mainClassName = 'snap-y snap-mandatory overflow-y-auto',
 }: AppLayoutProps) => {
-  const mergedHeaderClass = `bg-white shadow ${
-    headerProps.className ?? ''
-  }`.trim();
-
   const userId =
     useSelector((state: RootState) => state.auth.user?.user_id)?.toString() ??
     null;
@@ -34,7 +32,10 @@ export const AppLayout = ({
   const [showTopButton, setShowTopButton] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
-  // 🟡 main 요소 기준으로 스크롤 감지
+  // 자동 로그아웃 훅
+  useAutoLogout(mainRef);
+
+  // Top 버튼 표시용 스크롤 감지
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
@@ -47,10 +48,13 @@ export const AppLayout = ({
     return () => el.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ⬆️ Section1로 스크롤 이동
   const scrollToTop = () => {
     mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const mergedHeaderClass = `bg-white shadow ${
+    headerProps.className ?? ''
+  }`.trim();
 
   return (
     <div className="flex flex-col h-screen relative">
@@ -66,11 +70,8 @@ export const AppLayout = ({
         {children}
       </main>
 
-      {/* 챗봇 버튼 */}
       <ChatbotButton onClick={() => setShowChat(true)} isVisible={!showChat} />
       {showChat && <ChatModal onClose={() => setShowChat(false)} />}
-
-      {/* Top 버튼 */}
       {showTopButton && <TopButton onClick={scrollToTop} />}
     </div>
   );

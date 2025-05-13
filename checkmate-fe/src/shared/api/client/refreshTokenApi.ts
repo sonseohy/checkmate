@@ -4,7 +4,6 @@ import { getRepreshAccessToken } from "@/entities/user"
 
 export const refreshAccessToken = async() => {
     const refreshToken = getRepreshAccessToken();
-    console.log("Retrieved Refresh Token:", refreshToken);
 
     try {
         const response = await customAxios.post('/api/auth/reissue-token', {
@@ -15,8 +14,6 @@ export const refreshAccessToken = async() => {
 
         if(response.data.success) {
             const [ access_token, refresh_token ] = response.data.data;
-            console.log('New Access Token:', access_token); // 새로운 access_token 출력
-            console.log('New Refresh Token:', refresh_token); // 새로운 refresh_token 출력
 
             localStorage.setItem('access_token', access_token);
             localStorage.setItem('refresh_token', refresh_token);

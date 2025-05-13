@@ -37,7 +37,7 @@ const ContractPdfViewer: React.FC = () => {
           text: "계약서가 삭제되었습니다.",
           icon: "success",
         }).then(() => {
-          navigate("/mypage"); // Navigate to MyPage after showing the success alert
+          navigate("/mypage"); 
         });
       } ;
     } catch (error) {

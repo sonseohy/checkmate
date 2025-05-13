@@ -1,5 +1,6 @@
 package com.checkmate.domain.contract.dto.response;
 
+import com.checkmate.domain.contract.entity.EditStatus;
 import com.checkmate.domain.contract.entity.SourceType;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -24,6 +25,8 @@ public class MyContractResponse {
     private String title;
 
     private SourceType sourceType;
+
+    private EditStatus editStatus;
 
     private LocalDateTime updatedAt;
 

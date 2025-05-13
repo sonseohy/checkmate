@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { customAxios } from '@/shared/api';
-import { ChecklistItem, TemplateResponse, SaveContractInputsRequest, SaveContractInputsResponse } from '@/features/write';
+import { ChecklistItem, SaveContractInputsRequest, SaveContractInputsResponse, CreateContractRequest, CreateContractResponse } from '@/features/write';
 
+// Checklist 조회 API
 export const useChecklist = (categoryId?: number) => {
     return useQuery<ChecklistItem[]>({
       queryKey: ['checklist', categoryId],
@@ -13,21 +14,28 @@ export const useChecklist = (categoryId?: number) => {
     });
   };
 
-export const useTemplate = (templateId: number) => {
-  return useQuery<TemplateResponse>({
-    queryKey: ['template', templateId],
-    queryFn: async () => {
-      const res = await customAxios.get(`/api/templates/${templateId}`);
-      return res.data.data;
+// 계약서 생성 및 조회 API
+export const useCreateContractTemplate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ categoryId, userId }: CreateContractRequest): Promise<CreateContractResponse> => {
+      const response = await customAxios.post(`/api/templates/${categoryId}/create-contract`, {
+        userId,
+      });
+      return response.data.data;
     },
-    enabled: !!templateId, // undefined일 경우 호출 방지
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
   });
 };
 
+// 계약서 작성 값 저장 API
 export const saveContractInputs = async ({
   contractId,
   inputs,
-}: SaveContractInputsRequest): Promise<SaveContractInputsResponse> => {
-  const response = await customAxios.post(`/api/contract/${contractId}/inputs`, inputs);
+}: SaveContractInputsRequest): Promise<SaveContractInputsResponse[]> => {
+  const response = await customAxios.post(`/api/contract/${contractId}/inputs`, { sections: inputs });
   return response.data.data;
 };

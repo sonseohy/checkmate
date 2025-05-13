@@ -28,6 +28,19 @@ export interface SaveContractInputsResponse {
 
 // 에러 응답
 export interface ContractInputError {
-  code: 'CONTRACT-001' | 'SECTION-001' | 'FIELD-001' | 'FIELD-002' | 'FIELD-003';
+  code: 'FIELD-001';
+  message: string;
+}
+
+export interface Clause {
+  titleText: string;
+  content: string[];
+  order?: number;
+}
+
+export interface LegalClauseGroup {
+  contractId: number;
+  sectionId: number;
+  legalClauses: Clause[];
   message: string;
 }

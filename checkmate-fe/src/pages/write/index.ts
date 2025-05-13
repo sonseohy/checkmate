@@ -1,4 +1,4 @@
 export { default as WriteCategoryPage } from "./ui/WriteCategoryPage"
 export { default as WriteIntroPage } from "./ui/WriteIntroPage.tsx";
-export { default as FillPage }  from "./ui/FillPage"
-export { default as PreviewPage } from "./ui/PreviewPage.tsx"
+export { default as WriteFillPage }  from "./ui/WriteFillPage.tsx"
+export { default as WritePreviewPage } from "./ui/WritePreviewPage.tsx"

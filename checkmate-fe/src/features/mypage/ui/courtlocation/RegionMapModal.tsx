@@ -22,17 +22,18 @@ export default function RegionMapModal({
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  console.log('Loaded topo1:', topo);
+  console.log('object keys:', Object.keys(topo?.objects || {}));
+
   useEffect(() => {
-    if (!topo || !containerRef.current) return;
-      console.log('Loaded topo:', topo);
+    
+      if (!isOpen || !topo || !containerRef.current) return;
+    console.log('Loaded topo2:', topo);
+    console.log('실제 그리기 이펙트가 한 번만 실행됩니다');
+
     // topojson → geojson
     const key = Object.keys(topo.objects)[0];
-     if (!key) {
-    console.warn('No key found in topo.objects');
-    return;
-  }
     const geo = feature(topo, topo.objects[key]) as FeatureCollection<Geometry, GeoJsonProperties>;
-
       console.log(geo); 
       
     // projection & path
@@ -58,23 +59,24 @@ export default function RegionMapModal({
       .data(geo.features)
       .join('path')
       .attr('d', pathGen)
-      .attr('fill', '#ddd')
-      .attr('stroke', '#333')
+      .attr('fill', '#60A5FA')
+      .attr('fill-opacity', 0.6)
+      .attr('stroke', '#666')
       .attr('stroke-width', 0.5);
-  }, [topo, width, height]);
+  }, [isOpen, topo, width, height]);
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <div className="fixed inset-0 bg-black/50" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="bg-white rounded-lg w-full max-w-[80vw] max-h-[80vh] overflow-auto">
+          <div ref={containerRef} className="w-[800px] h-[600px]"/>
           <button
             className="text-sm text-gray-500 mb-2"
             onClick={onClose}
           >
             닫기
           </button>
-          <div ref={containerRef} />
         </Dialog.Panel>
       </div>
     </Dialog>

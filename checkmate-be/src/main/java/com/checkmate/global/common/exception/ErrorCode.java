@@ -39,6 +39,7 @@ public enum ErrorCode {
     AI_ANALYSIS_REPORT_NOT_FOUND("ANALYSIS-001", HttpStatus.NOT_FOUND, "AI 분석 리포트를 찾을 수 없습니다."),
 
     TEMPLATE_NOT_FOUND("TEMPLATE-001", HttpStatus.NOT_FOUND, "존재하지 않는 템플릿입니다."),
+    TEMPLATE_NOT_FOUND_FOR_CATEGORY("TEMPLATE-002", HttpStatus.NOT_FOUND, "해당 카테고리에 대한 템플릿을 찾을 수 없습니다."),
 
     SECTION_NOT_FOUND("SECTION-001", HttpStatus.NOT_FOUND, "존재하지 않는 섹션 ID입니다."),
 

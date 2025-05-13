@@ -1,3 +1,4 @@
+// 템플릿 조회 관련 types
 export type InputType =
   | 'TEXT'
   | 'NUMBER'
@@ -38,6 +39,27 @@ export interface TemplateResponse {
   sections: TemplateSection[];
 }
 
+export interface CreateContractTemplateResponse extends TemplateResponse {
+  contract: {
+    id: number;
+  };
+}
+
+// 계약서 생성 관련 types
+export interface CreateContractRequest {
+  categoryId: number;
+  userId: string;
+}
+
+export interface CreateContractResponse {
+  contract: {
+    id: number;
+  };
+  template: Template;
+  sections: TemplateSection[];
+}
+
+// 체크리스트 관련 types
 export interface ChecklistItem {
     checkListId: number;
     contractCategoryId: number;

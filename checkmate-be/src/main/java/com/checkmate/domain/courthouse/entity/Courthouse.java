@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Point;
 
 @Getter
 @Entity
@@ -30,4 +33,7 @@ public class Courthouse {
 	@Column(nullable = false, length = 20)
 	private String courthousePhoneNumber;
 
+	@JdbcTypeCode(SqlTypes.GEOMETRY)
+	@Column(name = "location", columnDefinition = "POINT SRID 4326")
+	private Point location;
 }

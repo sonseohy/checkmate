@@ -5,7 +5,6 @@ import { Document, Page } from 'react-pdf'
 import { deleteContractDetail, getContractDetail, getContractownload } from '@/features/detail';
 import { LuDownload, LuX } from "react-icons/lu";
 
-
 interface Params {
   contractId: string;
   [key: string]: string | undefined;

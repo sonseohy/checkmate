@@ -4,6 +4,7 @@ import './ContractTable.css';
 import ReactPaginate from 'react-paginate';
 import { useNavigate } from 'react-router-dom';
 import { LuDownload } from "react-icons/lu";
+import { getContractownload } from '@/features/detail';
 
 interface ContractTableProps {
   rowData: Contract[];
@@ -43,6 +44,11 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData }) => {
     }
     setSeletedIds(next);
 };
+  // 다운로드
+  const handlePdfDownload = (id:number) => {
+    console.log('다운로드 클릭')
+    getContractownload(id);
+  };
 
   return (
     <div className=' p-0 overflow-x-hidden'>
@@ -68,7 +74,7 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData }) => {
             const isWritten = row.source_type === 'USER_UPLOAD';
             return (
               <tr 
-                className="hover:cursor-pointer hover:scale-105 hover:shadow-lg transition-transform  duration-300" 
+                className="hover:cursor-pointer" 
                 key={row.contract_id}
                 onClick={() =>
                   navigate(`/detail/${row.contract_id}`, {
@@ -97,7 +103,14 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData }) => {
                   </td>
                 <td className='table-ceil text-center'>{row.title}</td>
                 <td className='table-ceil text-center'>{new Date(row.updated_at).toLocaleDateString()}</td>
-                <td className='table-ceil flex justify-center text-center'> <LuDownload size={30}/> </td>
+                <td className='table-ceil flex justify-center text-center'> 
+                  <LuDownload 
+                    size={30} 
+                    onClick={e => {
+                      e.stopPropagation();               // tr onClick 과 겹치지 않도록
+                      handlePdfDownload(row.contract_id);
+                    }}/> 
+                  </td>
               </tr>
             );
           })}

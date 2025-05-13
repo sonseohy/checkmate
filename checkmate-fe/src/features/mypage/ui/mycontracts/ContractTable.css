@@ -1,32 +1,63 @@
 /* ContractTable.css */
 
-/* '작성' */
-.ag-cell.written {
-    background-color: #FFB4B5 ;  
-    color: white ;              
-    font-weight: bold ;         
-    border-radius: 5px ;          
-    text-align: center ;        
-    width: 10px;
-    margin-top: 3px;
-    
-
+/* 경계 */
+.table-head-ceil {
+  padding: 15px;
+  white-space: nowrap;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  background-color: transparent;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 1.5625rem;
+  color: #cbd5e0;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* '분석' */
-.ag-cell.analyzed {
-    background-color: #B4C7FF;  
-    color: white ;             
-    font-weight: bold ;         
-    border-radius: 5px ;         
-    text-align: center ;     
-    margin-top: 3px;
-    margin-bottom: 3px;
-    height: 100%;
+.table-ceil {
+   padding: 1rem;
+  text-align: center;
+  background-color: transparent;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+  font-size: 1.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+.pagenation-wrapper {
+  .pagination {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    list-style: none; /* ul 기본 스타일 제거 */
+    padding: 0; /* ul 기본 패딩 제거 */
+    margin: 40px 0; /* 필요하면 여백 설정 */
+  }
 
-.ag-theme-alpine .ag-cell-wrapper {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+  /* 각 페이지 번호를 감싸는 li */
+  .page-item {
+    margin: 0 5px;
+  }
+
+  /* 각 페이지 번호의 링크(a 태그) */
+  .page-item a {
+    background-color: #ffffff;
+    color: #202020;
+    padding: 8px 16px;
+    text-decoration: none; /* 밑줄 제거 */
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+  }
+
+  /* 비활성화된 버튼(이전, 다음이 없는 경우 등) */
+  .previous-item.disabled a,
+  .next-item.disabled a {
+    background-color: #ffffff;
+    color: #999;
+    cursor: not-allowed;
+  }
 }

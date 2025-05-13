@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { UserInfo } from "../model/types";
+import { UserInfo } from "@/features/auth";
 import { getUserInfo } from "@/entities/user";
 
 export function useUserInfo(): UserInfo | null {

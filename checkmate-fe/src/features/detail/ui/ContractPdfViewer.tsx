@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Document, Page } from 'react-pdf'
 import { deleteContractDetail, getContractDetail, getContractownload } from '@/features/detail';
 import { LuDownload, LuX } from "react-icons/lu";
-
+import Swal from 'sweetalert2';
 interface Params {
   contractId: string;
   [key: string]: string | undefined;
@@ -21,8 +21,25 @@ const ContractPdfViewer: React.FC = () => {
   
   const handleDeleteContract = async () => {
     try {
-      await deleteContractDetail(Number(contractId)); 
-      navigate("/"); 
+      const confirmDelete =  await Swal.fire({
+      title: "정말 삭제하시겠습니까?",
+      text: "삭제 후에는 복구할 수 없습니다.",
+      icon: "warning",
+      showCancelButton: true, 
+      confirmButtonText: "삭제", 
+      cancelButtonText: "취소", 
+    });
+
+      if (confirmDelete) {
+        await deleteContractDetail(Number(contractId)); 
+        Swal.fire({
+          title: "삭제되었습니다.",
+          text: "계약서가 삭제되었습니다.",
+          icon: "success",
+        }).then(() => {
+          navigate("/mypage"); // Navigate to MyPage after showing the success alert
+        });
+      } ;
     } catch (error) {
       console.error("계약서 삭제 실패:", error);
 

@@ -41,7 +41,9 @@ public enum ErrorCode {
     TEMPLATE_NOT_FOUND("TEMPLATE-001", HttpStatus.NOT_FOUND, "존재하지 않는 템플릿입니다."),
     TEMPLATE_NOT_FOUND_FOR_CATEGORY("TEMPLATE-002", HttpStatus.NOT_FOUND, "해당 카테고리에 대한 템플릿을 찾을 수 없습니다."),
 
-    INVALID_ID_FORMAT("MONGO-001", HttpStatus.BAD_REQUEST, "잘못된 ID 포멧입니다.");
+    INVALID_ID_FORMAT("MONGO-001", HttpStatus.BAD_REQUEST, "잘못된 ID 포멧입니다."),
+
+    SUMMARY_REPORT_NOT_FOUND("SUMMARY-001", HttpStatus.NOT_FOUND, "존재하지 않는 요약입니다.");
 
 
     private final String code;

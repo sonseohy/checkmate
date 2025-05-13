@@ -52,4 +52,11 @@ public interface TemplateFieldCategoryRepository extends JpaRepository<TemplateF
     List<String> findMongoClauseIdsByFieldIdsAndCategoryId(
             @Param("fieldIds") List<Integer> fieldIds,
             @Param("categoryId") Integer categoryId);
+
+    // label_override 직접 조회 메소드 추가
+    @Query("SELECT tfc.labelOverride FROM TemplateFieldCategory tfc " +
+            "WHERE tfc.templateField.id = :fieldId AND tfc.contractCategory.id = :categoryId")
+    String findLabelOverrideByFieldIdAndCategoryId(
+            @Param("fieldId") Integer fieldId,
+            @Param("categoryId") Integer categoryId);
 }

@@ -116,32 +116,43 @@ public class ContractFieldValueService {
         Map<Integer, String> fieldIdValueMap = getFieldIdValueMap(contractId);
         Map<Integer, String> fieldIdToKeyMap = getFieldIdToKeyMap(fieldIds);
 
-        // 3. 필드-카테고리 매핑에서 MongoDB ID 목록 조회 (최적화!)
+        // 3. 결과를 담을 Set (중복 제거를 위해 Set 사용)
+        Set<LegalClause> combinedResults = new HashSet<>();
+
+        // 4. MongoDB ID 목록 조회
         List<String> mongoClauseIds = templateFieldCategoryService
                 .getMongoClauseIdsByFieldIdsAndCategoryId(fieldIds, categoryId);
 
-        List<LegalClause> legalClauses;
-
-        // 4. MongoDB ID가 있으면 직접 조회, 없으면 필터 조건으로 검색
+        // 5. MongoDB ID가 있으면 해당 법조항 조회하여 결과에 추가
         if (!mongoClauseIds.isEmpty()) {
-            // 최적화: 저장된 MongoDB ID로 직접 조회
-            log.debug("최적화: 저장된 MongoDB ID로 법조항 직접 조회: {} 개", mongoClauseIds.size());
-            legalClauses = legalClauseRepository.findAllById(mongoClauseIds);
-        } else if (!fieldIds.isEmpty()) {
-            // MongoDB ID가 없는 경우만 기존 방식으로 검색
-            log.debug("MongoDB ID가 없어 기존 방식으로 검색");
-            legalClauses = legalClauseRepository.findByFieldIdsAndCategoryId(fieldIds, categoryId);
-
-            // 검색 결과를 매핑 테이블에 저장 (다음 조회를 위한 최적화)
-            saveLegalClauseMappings(fieldIds, categoryId, legalClauses);
-        } else {
-            legalClauses = Collections.emptyList();
-            log.debug("필드 ID가 없어 법조항 조회를 건너뜁니다.");
+            log.debug("MongoDB ID로 법조항 조회: {} 개", mongoClauseIds.size());
+            List<LegalClause> mongoIdResults = legalClauseRepository.findAllById(mongoClauseIds);
+            log.debug("MongoDB ID로 찾은 법조항 수: {}", mongoIdResults.size());
+            combinedResults.addAll(mongoIdResults);
         }
 
-        // 5. 법조항 렌더링 (최신 필드값 적용)
-        List<LegalClauseDto> result = renderLegalClauses(legalClauses, fieldIdValueMap, fieldIdToKeyMap);
+        // 6. 필드 ID와 카테고리 ID로도 검색하여 결과에 추가 (MongoDB ID로 찾지 못한 법조항 보완)
+        if (!fieldIds.isEmpty()) {
+            log.debug("필드 ID로 법조항 추가 검색");
+            List<LegalClause> fieldIdResults = legalClauseRepository.findByFieldIdsAndCategoryId(fieldIds, categoryId);
+            log.debug("필드 ID로 찾은 법조항 수: {}", fieldIdResults.size());
+            combinedResults.addAll(fieldIdResults);
+        }
+
+        // 7. 결과를 displayOrder로 정렬
+        List<LegalClause> sortedResults = combinedResults.stream()
+                .sorted(Comparator.comparing(LegalClause::getDisplayOrder))
+                .collect(Collectors.toList());
+
+        // 결과에 대한 매핑 정보 저장 (최적화)
+        if (!sortedResults.isEmpty()) {
+            saveLegalClauseMappings(fieldIds, categoryId, sortedResults);
+        }
+
+        // 8. 법조항 렌더링
+        List<LegalClauseDto> result = renderLegalClauses(sortedResults, fieldIdValueMap, fieldIdToKeyMap);
         log.debug("렌더링된 법조항 수: {}", result.size());
+
         return result;
     }
 
@@ -351,7 +362,10 @@ public class ContractFieldValueService {
             }
         }
 
-        return legalClauses.stream().map(clause -> {
+        // 중복 제거를 위한 Map
+        Map<String, LegalClauseDto> uniqueClausesMap = new LinkedHashMap<>();
+
+        legalClauses.forEach(clause -> {
             LegalClauseDto dto = new LegalClauseDto();
             dto.setTitleText(clause.getTitleText());
             dto.setOrder(clause.getDisplayOrder());
@@ -359,34 +373,37 @@ public class ContractFieldValueService {
             // 구성요소별 렌더링
             List<String> renderedContent = new ArrayList<>();
             if (clause.getComponents() != null) {
-                // 컴포넌트 처리 및 정렬
                 clause.getComponents().stream()
                         .sorted(Comparator.comparing(LegalClause.Component::getOrder))
                         .forEach(component -> {
                             // 조건부 컴포넌트 처리
-                            if (component.getConditions() != null) {
-                                if (!evaluateCondition(component.getConditions(), fieldIdValueMap)) {
-                                    return;
-                                }
+                            if (component.getConditions() != null &&
+                                    !evaluateCondition(component.getConditions(), fieldIdValueMap)) {
+                                return;
                             }
 
                             // 카테고리 필터링 처리
-                            if (component.getCategoryIds() != null && !component.getCategoryIds().isEmpty()) {
-                                Integer categoryId = clause.getCategoryId();
-                                if (!component.getCategoryIds().contains(categoryId)) {
-                                    return;
-                                }
+                            if (component.getCategoryIds() != null &&
+                                    !component.getCategoryIds().isEmpty() &&
+                                    !component.getCategoryIds().contains(clause.getCategoryId())) {
+                                return;
                             }
 
-                            String renderedText = component.getText();
-                            renderedText = renderText(renderedText, fieldKeyValueMap);
-                            renderedContent.add(renderedText);
+                            renderedContent.add(renderText(component.getText(), fieldKeyValueMap));
                         });
             }
 
             dto.setContent(renderedContent);
-            return dto;
-        }).collect(Collectors.toList());
+
+            // 중복 제거
+            String uniqueKey = dto.getTitleText() + "_" + dto.getOrder();
+            uniqueClausesMap.put(uniqueKey, dto);
+        });
+
+        // 정렬하여 반환
+        return uniqueClausesMap.values().stream()
+                .sorted(Comparator.comparing(LegalClauseDto::getOrder))
+                .collect(Collectors.toList());
     }
 
     /**

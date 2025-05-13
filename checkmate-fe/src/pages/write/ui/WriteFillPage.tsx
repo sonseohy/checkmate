@@ -198,9 +198,14 @@ const WriteFillPage: React.FC = () => {
       console.log('Sending inputs to API:', JSON.stringify({ contractId, inputs: inputPayload }, null, 2));
 
       try {
-        await saveContractInputs({ contractId, inputs: inputPayload });
+        const response = await saveContractInputs({ contractId, inputs: inputPayload });
 
-        navigate(`/contract/${contractId}/preview`);
+        navigate(`/contract/${contractId}/preview`, {
+          state: {
+            contractId,
+            legalClausesBySection: response, // 배열 형태로 전달
+          },
+        });
       } catch (err) {
         Swal.fire({
           icon: 'error',

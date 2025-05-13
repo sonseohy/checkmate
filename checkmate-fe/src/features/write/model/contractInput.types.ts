@@ -31,3 +31,16 @@ export interface ContractInputError {
   code: 'FIELD-001';
   message: string;
 }
+
+export interface Clause {
+  titleText: string;
+  content: string[];
+  order?: number;
+}
+
+export interface LegalClauseGroup {
+  contractId: number;
+  sectionId: number;
+  legalClauses: Clause[];
+  message: string;
+}

@@ -35,7 +35,7 @@ export const useCreateContractTemplate = () => {
 export const saveContractInputs = async ({
   contractId,
   inputs,
-}: SaveContractInputsRequest): Promise<SaveContractInputsResponse> => {
+}: SaveContractInputsRequest): Promise<SaveContractInputsResponse[]> => {
   const response = await customAxios.post(`/api/contract/${contractId}/inputs`, { sections: inputs });
   return response.data.data;
 };

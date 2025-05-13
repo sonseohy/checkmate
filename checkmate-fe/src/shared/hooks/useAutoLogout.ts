@@ -23,7 +23,7 @@ export const useAutoLogout = (mainRef: React.RefObject<HTMLElement | null>) => {
   //  유휴 시간 타이머 초기화
   const resetIdle = useCallback(() => {
     if (idleTimer.current) clearTimeout(idleTimer.current);
-    idleTimer.current = window.setTimeout(doLogout, 1 * 60 * 1000);
+    idleTimer.current = window.setTimeout(doLogout, 30 * 60 * 1000);
   }, [doLogout]);
 
   useEffect(() => {

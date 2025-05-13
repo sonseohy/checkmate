@@ -18,7 +18,7 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({ contractList }) =>
         chart: {
             type: "donut"
         },
-        labels: ['분석',' 작성'],
+        labels: ['작성',' 분석'],
         dataLabels: {
             enabled: true,
             style: {
@@ -96,7 +96,7 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({ contractList }) =>
         legend: {
             show: false,
         },
-        colors: ['#B4C7FF', '#FFB4B5'],
+        colors: ['#FFB4B5','#B4C7FF'],
         
     };
 

@@ -36,9 +36,9 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
            <div key={contract.contract_id} onClick={() => handleContractDetail(contract.contract_id, contract )}>
             <div className="bg-white rounded-2xl shadow p-5 w-[300px] h-[200px]" >
               <span className={`inline-block rounded-md px-3 py-1 text-sm font-medium text-white ${
-                contract.source_type === 'USER_UPLOAD' ? 'bg-[#B4C7FF]' : 'bg-[#FFB4B5]'
+                contract.source_type === 'USER_UPLOAD' ? 'bg-[#FFB4B5]' : 'bg-[#B4C7FF]'
               }`}>
-                {contract.source_type === 'USER_UPLOAD' ? '분석' : '작성'}
+                {contract.source_type === 'USER_UPLOAD' ? '작성' : '분석'}
               </span>
               <h3 className="mt-3 text-lg font-semibold">{contract.title}</h3>
               <p className="text-gray-500 text-sm mt-1">{new Date(contract.updated_at).toLocaleDateString()}</p>

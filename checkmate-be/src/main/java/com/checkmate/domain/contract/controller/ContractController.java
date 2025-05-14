@@ -1,10 +1,7 @@
 package com.checkmate.domain.contract.controller;
 
 import com.checkmate.domain.contract.dto.request.ContractUploadsRequest;
-import com.checkmate.domain.contract.dto.response.ContractFilesResponse;
-import com.checkmate.domain.contract.dto.response.ContractUploadResponse;
-import com.checkmate.domain.contract.dto.response.MyContractResponse;
-import com.checkmate.domain.contract.dto.response.PdfMetadata;
+import com.checkmate.domain.contract.dto.response.*;
 import com.checkmate.domain.contract.service.ContractFileService;
 import com.checkmate.domain.contract.service.ContractService;
 import com.checkmate.domain.user.dto.CustomUserDetails;
@@ -151,4 +148,19 @@ public class ContractController {
         return ApiResult.ok(response);
     }
 
+    @Operation(summary = "작성중인 계약서 조회", description = "계약서 ID로 작성중인 계약서 템플릿 구조와 저장된 값을 함께 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "계약서 조회 성공",
+                    content = @Content(schema = @Schema(implementation = ContractDetailsResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "계약서를 찾을 수 없음"),
+            @ApiResponse(responseCode = "401", description = "계약서에 대한 접근 권한이 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/{contractId}/edit")
+    public ResponseEntity<ApiResult<ContractDetailsResponseDto>> getContractDetails(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer contractId) {
+        ContractDetailsResponseDto response = contractService.getContractWithTemplateAndValues(userDetails.getUserId(), contractId);
+        return ResponseEntity.ok(ApiResult.ok(response));
+    }
 }

@@ -8,6 +8,7 @@ import com.checkmate.domain.aianalysisreport.entity.CompleteAiAnalysisReport;
 import com.checkmate.domain.improvementreport.dto.response.ImprovementResponseDto;
 import com.checkmate.domain.missingclausereport.dto.response.MissingResponseDto;
 import com.checkmate.domain.riskclausereport.dto.response.RiskClauseReportResponseDto;
+import com.checkmate.domain.summary.dto.response.SummaryResponseDto;
 
 import lombok.Builder;
 
@@ -16,6 +17,7 @@ public record AiAnalysisReportResponseDto (String aiAnalysisReportId, Integer co
 										   List<ImprovementResponseDto> improvements,
 										   List<MissingResponseDto> missingClauses,
 										   List<RiskClauseReportResponseDto> riskClauses,
+										   List<SummaryResponseDto> summaries,
 										   LocalDateTime createdAt) {
 	public static AiAnalysisReportResponseDto fromEntity(CompleteAiAnalysisReport report) {
 		return AiAnalysisReportResponseDto.builder()
@@ -30,6 +32,15 @@ public record AiAnalysisReportResponseDto (String aiAnalysisReportId, Integer co
 			.riskClauses(report.getRiskClauses().stream()
 				.map(RiskClauseReportResponseDto::fromEntity)
 				.collect(Collectors.toList()))
+			.summaries(report.getSummaries() != null ?
+				report.getSummaries().stream()
+					.map(doc -> SummaryResponseDto.builder()
+						.summaryReportId(doc.getObjectId("_id").toHexString())
+						.aiAnalysisReportId(doc.getObjectId("aiAnalysisReportId").toHexString())
+						.description(doc.getString("description"))
+						.build())
+					.collect(Collectors.toList()) :
+				List.of())
 			.createdAt(report.getCreatedAt())
 			.build();
 	}

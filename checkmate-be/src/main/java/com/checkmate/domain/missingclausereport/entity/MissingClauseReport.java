@@ -37,6 +37,6 @@ public class MissingClauseReport {
     private String description;
 
     @CreatedDate
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
 
 }

@@ -20,4 +20,6 @@ public interface AiAnalysisReportRepository extends MongoRepository<AiAnalysisRe
 		"{ $lookup: { from: 'summary_report', localField: '_id', foreignField: 'aiAnalysisReportId', as: 'summaries' } }"
 	})
 	Optional<CompleteAiAnalysisReport> getCompleteReportByContractId(Integer contractId);
+
+	Optional<AiAnalysisReport> findFirstByContractIdOrderByCreatedAtDesc(Integer contractId);
 }

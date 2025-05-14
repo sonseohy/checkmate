@@ -70,6 +70,7 @@ public class ContractService {
                         .categoryId(contract.getCategory().getId())
                         .title(contract.getTitle())
                         .sourceType(contract.getSourceType())
+                        .editStatus(contract.getEditStatus())
                         .updatedAt(contract.getUpdatedAt())
                         .build()
                 )

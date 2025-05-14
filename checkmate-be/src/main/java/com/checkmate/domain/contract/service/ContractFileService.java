@@ -45,7 +45,6 @@ public class ContractFileService {
     private final ContractFileRepository contractFileRepository;
     private final MalwareScanService malwareScan;
     private final FileConversionService fileConversion;
-    private final ImagePreprocessingService imgPreprocess;
     private final PdfProcessingService pdfProcessing;
     private final MeterRegistry meterRegistry;
     private final UserService userService;
@@ -110,8 +109,7 @@ public class ContractFileService {
                 } else if ("hwp".equals(ext)) {
                     pdfBytes = fileConversion.hwpToPdf(file.getBytes());
                 } else {
-                    byte[] pre = imgPreprocess.preprocessForOcr(file.getBytes());
-                    pdfBytes    = fileConversion.imageToPdf(pre);
+                    pdfBytes    = fileConversion.imageToPdf(file.getBytes());
                 }
                 pdfList.add(pdfBytes);
                 totalPages += pdfProcessing.countPages(

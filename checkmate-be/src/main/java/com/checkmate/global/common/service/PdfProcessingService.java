@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class PdfProcessingService {
 
-    private final ImagePreprocessingService imagePreprocessingService;
     private final MeterRegistry meterRegistry;
 
     public boolean isImageBasedPdf(InputStream pdfStream) {
@@ -65,8 +64,8 @@ public class PdfProcessingService {
             int pages = srcDoc.getNumberOfPages();
             for (int i = 0; i < pages; i++) {
                 BufferedImage pageImage = renderer.renderImageWithDPI(i, 300);
-                byte[] preprocessedBytes = imagePreprocessingService.preprocessForOcr(toPngBytes(pageImage));
-                BufferedImage processedImage = ImageIO.read(new ByteArrayInputStream(preprocessedBytes));
+                BufferedImage processedImage = pageImage;
+
                 PDPage page = new PDPage(PDRectangle.A4);
                 dstDoc.addPage(page);
                 PDImageXObject pdImage = LosslessFactory.createFromImage(dstDoc, processedImage);

@@ -53,10 +53,21 @@ public class Template {
         this.name = name;
         this.version = version;
     }
+
     // 섹션 추가 메소드
+    // 기존 메소드 유지
     public void addSection(Section section, Integer templateSectionNo, Boolean isRequiredInTemplate) {
-        // 기존 생성자 사용
+        // 새 메소드 호출, displayName은 null로 전달
+        addSection(section, templateSectionNo, isRequiredInTemplate, null);
+    }
+
+    // 새로운 메소드 추가 (displayName 포함)
+    public void addSection(Section section, Integer templateSectionNo, Boolean isRequiredInTemplate, String displayName) {
+        // 기존 생성자 사용 (TemplateSection 클래스도 수정 필요)
         TemplateSection templateSection = new TemplateSection(this, section, templateSectionNo);
+
+        // displayName 설정
+        templateSection.setDisplayName(displayName);
 
         // isRequiredInTemplate 값이 null이 아니면 설정
         if (isRequiredInTemplate != null) {

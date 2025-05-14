@@ -39,8 +39,19 @@ public enum ErrorCode {
     AI_ANALYSIS_REPORT_NOT_FOUND("ANALYSIS-001", HttpStatus.NOT_FOUND, "AI 분석 리포트를 찾을 수 없습니다."),
 
     TEMPLATE_NOT_FOUND("TEMPLATE-001", HttpStatus.NOT_FOUND, "존재하지 않는 템플릿입니다."),
+    TEMPLATE_NOT_FOUND_FOR_CATEGORY("TEMPLATE-002", HttpStatus.NOT_FOUND, "해당 카테고리에 대한 템플릿을 찾을 수 없습니다."),
+
+    SECTION_NOT_FOUND("SECTION-001", HttpStatus.NOT_FOUND, "존재하지 않는 섹션 ID입니다."),
+
+    FIELD_NOT_FOUND("FIELD-001", HttpStatus.NOT_FOUND, "존재하지 않는 필드 ID입니다."),
+    INVALID_FIELD_VALUE("FIELD-002", HttpStatus.BAD_REQUEST, "유효하지 않은 필드 값입니다."),
+    MISSING_REQUIRED_FIELD("FIELD-003", HttpStatus.BAD_REQUEST, "필수 필드가 누락되었습니다."),
+    DEPENDENCY_NOT_SATISFIED("FIELD-004", HttpStatus.BAD_REQUEST, "의존성 조건을 만족하지 않는 필드입니다."),
+    MAPPING_NOT_FOUND("FIELD-005", HttpStatus.NOT_FOUND, "필드-카테고리 매핑을 찾을 수 없습니다."),
 
     INVALID_ID_FORMAT("MONGO-001", HttpStatus.BAD_REQUEST, "잘못된 ID 포멧입니다."),
+
+    SUMMARY_REPORT_NOT_FOUND("SUMMARY-001", HttpStatus.NOT_FOUND, "존재하지 않는 요약입니다."),
 
     AI_ANALYSIS_API_ERROR("ANALYSIS-002", HttpStatus.INTERNAL_SERVER_ERROR, "AI 분석 서비스에 연결할 수 없습니다."),
 

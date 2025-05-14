@@ -1,0 +1,64 @@
+package com.checkmate.domain.contractfieldvalue.repository;
+
+import com.checkmate.domain.contractfieldvalue.entity.LegalClause;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.Collections;
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+@Slf4j
+public class LegalClauseCustomRepositoryImpl implements LegalClauseCustomRepository {
+
+    private final MongoTemplate mongoTemplate;
+
+    @Override
+    public List<LegalClause> findByFieldIdsAndCategoryId(List<Integer> fieldIds, Integer categoryId) {
+        if (fieldIds == null || fieldIds.isEmpty() || categoryId == null) {
+            log.debug("필드 ID 또는 카테고리 ID가 없어 법조항 조회를 건너뜁니다.");
+            return Collections.emptyList();
+        }
+
+        log.debug("MongoDB 쿼리 실행 - fieldIds: {}, categoryId: {}", fieldIds, categoryId);
+
+        Query query = new Query();
+
+        // isActive가 true이고 categoryIds 배열에 categoryId가 포함된 문서 중에서
+        Criteria criteria = Criteria.where("isActive").is(true)
+                .and("categoryIds").in(categoryId);
+
+        // targetFields 배열에 fieldIds 중 적어도 하나가 포함된 문서 검색
+        criteria.and("targetFields").in(fieldIds);
+
+        query.addCriteria(criteria);
+        query.with(Sort.by(Sort.Direction.ASC, "displayOrder"));
+
+        List<LegalClause> results = mongoTemplate.find(query, LegalClause.class);
+        log.debug("MongoDB 쿼리 결과 수: {}", results.size());
+
+        return results;
+    }
+
+    // 단일 필드 ID로 법조항 검색 메서드 (기존 메서드 대체)
+    public List<LegalClause> findByFieldIdAndCategoryId(Integer fieldId, Integer categoryId) {
+        if (fieldId == null || categoryId == null) {
+            return Collections.emptyList();
+        }
+
+        Query query = new Query(Criteria.where("isActive").is(true)
+                .and("categoryIds").in(categoryId)
+                .and("targetFields").is(fieldId));
+
+        query.with(Sort.by(Sort.Direction.ASC, "displayOrder"));
+
+        return mongoTemplate.find(query, LegalClause.class);
+    }
+
+}

@@ -17,19 +17,24 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
 
   //계약서 상세조회 api 호출 및 페이지 이동
   const handleContractDetail = async(contractId:number, contract:Contract ) => {
-    navigate(`/detail/${contractId}`,{ state: contract });
+    if (contract.edit_status === 'COMPLETED') {
+       navigate(`/detail/${contractId}`,{ state: contract });
+    } else {
+      navigate(`/write/edit/${contractId}`,{ state: contract });
+    }
   };
 
   console.log(contractList)
 
-   const slidesToShow = Math.min(contractList.length, 3);
+   const slidesToShow = Math.min(contractList.length, 2);
 
   const setting = {
-    dots: isMobile ? false: false,
+    dots:false,
     infinite: false,
     centerMode: false, 
     speed: 500,
     vertical: false,
+     variableWidth: true, 
     slidesToShow: slidesToShow,
     slidesToScroll:1,
   };

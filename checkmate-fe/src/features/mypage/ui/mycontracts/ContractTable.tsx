@@ -41,7 +41,7 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
             <th className='table-head-ceil w-8 text-center'>
               <input
                 type="checkbox"
-                className="w-4 h-4"
+                className="w-5 h-5"
                 checked={selectedIds.size === rowData.length}
                 onChange={toggleSelectAll}
               />
@@ -61,17 +61,26 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
               <tr
                 className="hover:cursor-pointer"
                 key={row.contract_id}
-                onClick={() =>
-                isCompleted 
-                  ? navigate(`/detail/${row.contract_id}`, {state: { contract: row },})
-                  : navigate(`/write/contract/${row.contract_id}`, {state: { contract: row },})
-                }
+                onClick={(e) => {
+                  // 체크박스를 클릭한 경우에는 navigate를 막음
+                  if (e.target instanceof HTMLInputElement) {
+                    e.stopPropagation(); // 체크박스를 클릭하면 navigate 방지
+                    return;
+                  }
+
+                  // isCompleted에 따라 navigate 경로 변경
+                  if (isCompleted) {
+                    navigate(`/detail/${row.contract_id}`, { state: { contract: row } });
+                  } else {
+                    navigate(`/write/contract/${row.contract_id}`, { state: { contract: row } });
+                  }
+                }}
               >
                 <td className='table-ceil text-center'>
                   <input
                     type="checkbox"
-                    className="w-4 h-4"
-                    checked={selectedIds.has(row.category_id)}
+                    className="w-5 h-5"
+                    checked={selectedIds.has(row.contract_id)}
                     onChange={(e) => {
                       e.stopPropagation(); // 체크박스 클릭 시 tr 클릭 방지
                       toggleSelect(row.contract_id);
@@ -89,7 +98,7 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                     {isWritten ? '작성' : '분석'}
                   </span>
                 </td>
-                <td className='table-ceil text-center'>{row.title}</td>
+                <td className='table-ceil text-center text-[#202020]'>{row.title}</td>
                 <td className='table-ceil text-center'>
                   <span
                     className={`inline-block px-3 py-1 text-[19px] font-bold uppercase rounded
@@ -101,7 +110,7 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                     {isCompleted ? '작성 완료' : '작성중'}
                   </span>
                 </td>
-                <td className='table-ceil text-center'>
+                <td className='table-ceil text-center text-[#202020]'>
                   {new Date(row.updated_at).toLocaleDateString()}
                 </td>
                 <td className='table-ceil text-center'>

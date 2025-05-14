@@ -33,6 +33,7 @@ public enum ErrorCode {
     CONTRACT_TITLE_REQUIRED("CONTRACT-001", HttpStatus.UNPROCESSABLE_ENTITY, "계약서명을 입력하지 않았습니다."),
     CONTRACT_NOT_FOUND("CONTRACT-002", HttpStatus.NOT_FOUND, "존재하지 않는 계약서입니다."),
     CONTRACT_ACCESS_DENIED("CONTRACT-003", HttpStatus.UNAUTHORIZED, "해당 계약서에 대한 접근 권한이 없습니다."),
+    CONTRACT_NOT_FOUND_FOR_SIGNATURE("CONTRACT-004", HttpStatus.NOT_FOUND, "서명 요청 ID에 해당하는 계약을 찾을 수 없습니다."),
 
     COURTHOUSE_NOT_FOUND("COURT-001", HttpStatus.NOT_FOUND, "법원 정보를 찾을 수 없습니다."),
 
@@ -51,7 +52,9 @@ public enum ErrorCode {
 
     INVALID_ID_FORMAT("MONGO-001", HttpStatus.BAD_REQUEST, "잘못된 ID 포멧입니다."),
 
-    SUMMARY_REPORT_NOT_FOUND("SUMMARY-001", HttpStatus.NOT_FOUND, "존재하지 않는 요약입니다.");
+    SUMMARY_REPORT_NOT_FOUND("SUMMARY-001", HttpStatus.NOT_FOUND, "존재하지 않는 요약입니다."),
+
+    WEBHOOK_AUTH_FAILURE("WEBHOOK-001", HttpStatus.UNAUTHORIZED, "웹훅 인증에 실패했습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

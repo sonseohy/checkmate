@@ -59,6 +59,16 @@ public class Contract {
     @Column(name = "page_no")
     private Integer pageNo;
 
+    @Column(name = "signature_request_id", length = 100, unique = true)
+    private String signatureRequestId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "signature_status", length = 20, nullable = false)
+    private SignatureStatus signatureStatus = SignatureStatus.PENDING;
+
+    @Column(name = "signed_at")
+    private LocalDateTime signedAt;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime createdAt;

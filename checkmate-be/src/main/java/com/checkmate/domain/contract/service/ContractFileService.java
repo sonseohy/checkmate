@@ -193,7 +193,7 @@ public class ContractFileService {
     }
 
     @Transactional(readOnly = true)
-    public ContractFile  findViewerFile(int userId, int contractId) {
+    public ContractFile findViewerFile(int userId, int contractId) {
         User user = userService.findUserById(userId);
         ContractFile file = contractFileRepository.findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
                 .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
@@ -201,9 +201,7 @@ public class ContractFileService {
         if (!file.getContract().getUser().getUserId().equals(userId)) {
             throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
         }
-
         return file;
-
     }
 
     @Transactional(readOnly = true)

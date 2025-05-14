@@ -77,7 +77,7 @@ dependencies {
     implementation 'org.hibernate.orm:hibernate-spatial:6.4.0.Final'
     implementation 'org.locationtech.jts:jts-core:1.19.0'
 
-
+    implementation "com.dropbox.sign:dropbox-sign:2.4.0"
 }
 dependencyManagement {
     imports {

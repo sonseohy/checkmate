@@ -3,6 +3,7 @@ package com.checkmate.domain.aianalysisreport.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -40,4 +41,6 @@ public class CompleteAiAnalysisReport {
 	private List<MissingClauseReport> missingClauses;
 
 	private List<RiskClauseReport> riskClauses;
+
+	private List<Document> summaries;
 }

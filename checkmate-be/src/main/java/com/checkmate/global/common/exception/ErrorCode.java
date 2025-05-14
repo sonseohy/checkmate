@@ -54,6 +54,14 @@ public enum ErrorCode {
 
     SUMMARY_REPORT_NOT_FOUND("SUMMARY-001", HttpStatus.NOT_FOUND, "존재하지 않는 요약입니다."),
 
+    AI_ANALYSIS_API_ERROR("ANALYSIS-002", HttpStatus.INTERNAL_SERVER_ERROR, "AI 분석 서비스에 연결할 수 없습니다."),
+
+    CLAUSE_NOT_FOUND("CLAUSE-001", HttpStatus.NOT_FOUND, "계약서 조항을 찾을 수 없습니다."),
+
+    IMPROVEMENT_REPORT_NOT_FOUND("IMPROVEMENT-001", HttpStatus.NOT_FOUND, "개선 사항 리스트를 찾을 수 없습니다."),
+    MISSING_REPORT_NOT_FOUND("MISSING-001", HttpStatus.NOT_FOUND, "누락 사항 리스트를 찾을 수 없습니다.."),
+    RISK_NOT_FOUND("RISK-001", HttpStatus.NOT_FOUND, "위험 사항 리스트를 찾을 수 없습니다."),
+
     WEBHOOK_AUTH_FAILURE("WEBHOOK-001", HttpStatus.UNAUTHORIZED, "웹훅 인증에 실패했습니다.");
 
     private final String code;

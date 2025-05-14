@@ -1,5 +1,6 @@
 package com.checkmate.global.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,4 +20,12 @@ public class WebClientConfig {
                 .defaultHeader("X-Naver-Client-Secret", naverApiConfig.clientSecret)
                 .build();
     }
+
+	@Bean
+	public WebClient webClient(
+		WebClient.Builder builder,
+		@Value("${fastapi.baseUrl}") String baseUrl
+	) {
+		return builder.baseUrl(baseUrl).build();
+	}
 }

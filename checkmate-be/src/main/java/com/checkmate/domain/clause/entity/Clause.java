@@ -1,13 +1,30 @@
 package com.checkmate.domain.clause.entity;
 
-import com.checkmate.domain.section.entity.Section;
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import com.checkmate.domain.contract.entity.Contract;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "clause")
@@ -20,35 +37,28 @@ public class Clause {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer clauseId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "section_id", nullable = false)
-    private Section section;
+    @JoinColumn(name = "contract_id", insertable = false, updatable = false)
+    private Contract contract;
+
+    @Column(name = "clause_title")
+    private String clauseTitle;
 
     @Lob
-    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
-    private String content;
+    @Column(name = "clause_content", columnDefinition = "TEXT", nullable = false)
+    private String clauseContent;
 
-    @Column(name = "sequence_no", nullable = false)
-    private Integer sequenceNo;
+    @Column(name = "clause_number", length = 50)
+    private String clauseNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "clause_type", nullable = false)
     private ClauseType clauseType;
 
-    @Column(name = "is_required", nullable = false)
-    private Boolean isRequired = false;
-
-    @Column(length = 30, nullable = false)
-    private String label;
-
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME(6)")
-    private LocalDateTime updatedAt;
 
 }

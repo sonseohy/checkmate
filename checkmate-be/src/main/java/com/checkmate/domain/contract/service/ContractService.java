@@ -1,12 +1,18 @@
 package com.checkmate.domain.contract.service;
 
 import com.checkmate.domain.contract.dto.request.ContractUploadsRequest;
+import com.checkmate.domain.contract.dto.response.ContractDetailsResponseDto;
+import com.checkmate.domain.contract.dto.response.ContractUploadResponse;
+import com.checkmate.domain.contract.dto.response.FileNumberResponse;
+import com.checkmate.domain.contract.dto.response.MyContractResponse;
 import com.checkmate.domain.contract.dto.request.SignatureRequest;
 import com.checkmate.domain.contract.dto.response.*;
 import com.checkmate.domain.contract.entity.*;
 import com.checkmate.domain.contract.repository.ContractRepository;
 import com.checkmate.domain.contractcategory.entity.ContractCategory;
 import com.checkmate.domain.contractcategory.service.ContractCategoryService;
+import com.checkmate.domain.template.dto.response.TemplateResponseDto;
+import com.checkmate.domain.template.service.TemplateService;
 import com.checkmate.domain.user.entity.User;
 import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
@@ -26,7 +32,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,6 +46,7 @@ public class ContractService {
     private final ContractCategoryService categoryService;
     private final ContractFileService contractFileService;
     private final ContractRepository contractRepository;
+    private final TemplateService templateService;
     private final SignatureRequestApi signatureRequestApi;
     private final S3Service s3Service;
 
@@ -106,6 +115,35 @@ public class ContractService {
         });
 
         contractRepository.deleteById(contractId);
+    }
+
+    @Transactional(readOnly = true)
+    public ContractDetailsResponseDto getContractWithTemplateAndValues(Integer userId, Integer contractId) {
+
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        if (!contract.getUser().getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
+        }
+
+        // 템플릿 응답 정보 조회 (기존 서비스 활용)
+        TemplateResponseDto templateResponse = templateService.getTemplate(contract.getTemplate().getId());
+
+        Map<String, Object> valueMap = new HashMap<>();
+        contract.getFieldValues().forEach(fieldValue ->
+                valueMap.put(fieldValue.getField().getFieldKey(), fieldValue.getValue())
+        );
+
+        // 통합 응답 생성
+        return ContractDetailsResponseDto.builder()
+                .contract(TemplateResponseDto.ContractDto.builder()
+                        .id(contract.getId())
+                        .build())
+                .template(templateResponse.getTemplate())
+                .sections(templateResponse.getSections())
+                .values(valueMap)
+                .build();
     }
 
     @Transactional

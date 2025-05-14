@@ -1,11 +1,5 @@
 package com.checkmate.domain.aianalysisreport.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisReportResponseDto;
 import com.checkmate.domain.aianalysisreport.service.AiAnalysisReportService;
 import com.checkmate.global.common.response.ApiResult;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/analysis")

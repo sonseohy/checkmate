@@ -14,4 +14,6 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
 
     // 사용자, 카테고리, 편집 상태로 계약서 조회
     Optional<Contract> findByUserAndCategoryAndEditStatus(User user, ContractCategory category, EditStatus editStatus);
+
+    Optional<Contract> findBySignatureRequestId(String signatureRequestId);
 }

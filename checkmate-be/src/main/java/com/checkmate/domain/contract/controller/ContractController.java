@@ -2,6 +2,8 @@ package com.checkmate.domain.contract.controller;
 
 import com.checkmate.domain.contract.dto.request.ContractUploadsRequest;
 import com.checkmate.domain.contract.dto.response.*;
+import com.checkmate.domain.contract.dto.request.SignatureRequest;
+import com.checkmate.domain.contract.dto.response.*;
 import com.checkmate.domain.contract.service.ContractFileService;
 import com.checkmate.domain.contract.service.ContractService;
 import com.checkmate.domain.user.dto.CustomUserDetails;
@@ -163,4 +165,21 @@ public class ContractController {
         ContractDetailsResponseDto response = contractService.getContractWithTemplateAndValues(userDetails.getUserId(), contractId);
         return ResponseEntity.ok(ApiResult.ok(response));
     }
+
+    @Operation(summary = "계약서 전자서명", description = "계약서를 전자서명합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서명 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @PostMapping(value = "/{contractId}/sign")
+    public ApiResult<ContractSignatureUploadResponse> uploadAndSign(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer contractId,
+            @RequestBody SignatureRequest signer
+    ) throws Exception {
+        ContractSignatureUploadResponse response =
+                contractService.uploadAndRequestSignature(userDetails.getUserId(), contractId, signer);
+        return ApiResult.created(response);
+    }
+
 }

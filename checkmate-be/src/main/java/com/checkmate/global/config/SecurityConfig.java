@@ -42,7 +42,8 @@ public class SecurityConfig {
             "/api/questions/**",
             "/api/courthouses/**",
             "/api/news",
-            "/api/chatbot"
+            "/api/chatbot",
+            "/api/hellosign/callback"
     };
 
     private final JwtUtil jwtUtil;

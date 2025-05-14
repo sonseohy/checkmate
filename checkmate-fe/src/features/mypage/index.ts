@@ -24,12 +24,11 @@ export { default as ContractTable } from "./ui/mycontracts/ContractTable";
 export type {
     Contract,
     ContractListData,
-    CourtList,
-    LatLng,
-    CourtWithCoords,
+    CourthouseList,
+    Courthouse,
 } from "./model/types"
 
 //api
 export { 
-    searchPlace, 
-    contractList } from "./api/MyPageApi";
+    contractList, 
+    getCourthouseList } from "./api/MyPageApi";

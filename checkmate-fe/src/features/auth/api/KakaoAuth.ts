@@ -117,14 +117,6 @@ export const postLogout = async (
     //로그아웃 시 리덕스 상태 초기화
     dispatch(logout());
 
-    // 2. 채팅 이력 삭제를 명확하게 추적하기 위한 디버깅 코드
-    console.log('로그아웃 전 로컬 스토리지 키:', Object.keys(localStorage));
-
-    // 3. 채팅 서비스에서 사용자 데이터 명시적으로 제거 (순서 중요)
-    if (chatService.currentKey) {
-      console.log('삭제할 채팅 키:', chatService.currentKey);
-    }
-
     // 4. 채팅 이력 삭제 처리
     chatService.clearUserData();
 
@@ -134,9 +126,6 @@ export const postLogout = async (
     // 로컬 토큰 완전 삭제
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
-
-    // 6. 삭제 후 로컬 스토리지 확인
-    console.log('로그아웃 후 로컬 스토리지 키:', Object.keys(localStorage));
 
     Swal.fire({
       title: '로그아웃',

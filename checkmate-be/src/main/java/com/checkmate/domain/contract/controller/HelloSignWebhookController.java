@@ -44,11 +44,11 @@ public class HelloSignWebhookController {
 
     @PostMapping(
             value = "/api/hellosign/callback",
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ApiResult<?> callback(
             @RequestHeader("X-HelloSign-Signature") String signatureHeader,
-            @RequestBody String payloadJson
+            @RequestParam("json") String payloadJson
     ) throws Exception {
         // --- 1. HMAC SHA256 검증 ---
         if (!hmacMatches(apiKey, payloadJson, signatureHeader)) {

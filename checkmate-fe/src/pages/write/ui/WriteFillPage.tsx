@@ -1,109 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { MidCategory, SubCategory } from '@/features/categories';
-import { useChecklist, ChecklistModal, CreateContractTemplateResponse, useCreateContractTemplate, TemplateField, ContractInputSection, saveContractInputs } from '@/features/write';
+import { useChecklist, ChecklistModal, CreateContractTemplateResponse, useCreateContractTemplate, TemplateField, ContractInputSection, saveContractInputs, fetchExistingContract } from '@/features/write';
 import { getUserInfo } from '@/entities/user';
 import { LuTag } from 'react-icons/lu';
 import Swal from 'sweetalert2';
 
-const renderInputField = (
-  field: TemplateField,
-  dependsOnStates: Record<string, any>,
-  setDependsOnStates: React.Dispatch<React.SetStateAction<Record<string, any>>>
-) => {
-  // RADIO나 Checkbox의 경우, 어떤 값을 선택했을 때 연관이 있는 입력 필드만 작성 가능하도록 오픈
-  const isDisabled = (() => {
-    if (!field.dependsOn || field.inputType === 'RADIO') return false;
-  
-    if (field.dependsOn.includes('!=')) {
-      const [key, notExpected] = field.dependsOn.split('!=');
-      return dependsOnStates[key] === notExpected;
-    }
-  
-    const [key, expected] = field.dependsOn.split('=');
-    return dependsOnStates[key] !== expected;
-  })();
-  
-  // 입력 불가 = isDisabled CSS 설정
-  const commonProps = {
-    id: field.fieldKey,
-    name: field.fieldKey,
-    required: field.required,
-    className: `w-full p-2 rounded-md border ${
-      isDisabled ? 'bg-gray-50 text-gray-400 border-gray-300' : 'bg-white border-gray-400'
-    }`,
-    disabled: isDisabled,
-  };
-
-  switch (field.inputType) {
-    case 'TEXT':
-    case 'NUMBER':
-    case 'DATE':
-      return (
-        <input
-          type={field.inputType.toLowerCase()}
-          {...commonProps}
-          value={dependsOnStates[field.fieldKey] ?? ''}
-          onChange={(e) =>
-            setDependsOnStates((prev) => ({
-              ...prev,
-              [field.fieldKey]: e.target.value,
-            }))
-          }
-        />
-      );
-    // RADIO에 있는 옵션 중 하나가 선택되면, 그 옵션에 맞는 입력 란만 열림
-    // 예시: 월세 / 전세 중 전세 선택 시, 월세 금액 입력 란은 열리지 않음
-    case 'RADIO':
-      const radioOptions = Array.isArray(field.options)
-        ? field.options
-        : typeof field.options === 'string'
-        ? JSON.parse(field.options)
-        : [];
-      return (
-        <div className="space-x-4">
-          {radioOptions.map((opt: string) => (
-            <label key={opt} className="inline-flex items-center">
-              <input
-                type="radio"
-                name={field.fieldKey}
-                value={opt}
-                checked={dependsOnStates[field.fieldKey] === opt}
-                onChange={() =>
-                  setDependsOnStates((prev) => ({ ...prev, [field.fieldKey]: opt }))
-                }
-                className="mr-1"
-              />
-              {opt}
-            </label>
-          ))}
-        </div>
-      );
-      // 체크박스 역시, 선택(체크됨)되었을 때만 관련 내용 입력 란이 열림
-      case 'CHECKBOX':
-        return (
-          <input
-            type="checkbox"
-            id={field.fieldKey}
-            name={field.fieldKey}
-            className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            checked={dependsOnStates[field.fieldKey] === '1'}
-            onChange={() =>
-              setDependsOnStates((prev) => ({
-                ...prev,
-                [field.fieldKey]: prev[field.fieldKey] === '1' ? '0' : '1',
-              }))
-            }
-          />
-        );
-    default:
-      return <input type="text" {...commonProps} />;
-  }
-};
-
-const WriteFillPage: React.FC = () => {
-  const { categoryId } = useParams<{ categoryId: string; }>();
-  const numericCategoryId = Number(categoryId);
+const WriteFillPage: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
+  const { categoryId, contractId: paramContractId } = useParams();
+  const numericCategoryId = categoryId ? Number(categoryId) : null;
+  const numericContractId = paramContractId ? Number(paramContractId) : null;
   const navigate = useNavigate();
 
   const { state } = useLocation() as {
@@ -117,11 +23,9 @@ const WriteFillPage: React.FC = () => {
   const midCategoryId = state?.selectedMid?.id;
   const { data: checklist = [] } = useChecklist(midCategoryId);
   const [showModal, setShowModal] = useState(state?.isNew ?? true);
-
   // LuTag 아이콘에 정보 내용 Tolltip 연결
   const [tooltipField, setTooltipField] = useState<number | null>(null);
   const [dependsOnStates, setDependsOnStates] = useState<Record<string, any>>({});
-
   // 생성되는 contractId 및 템플릿 입력 값 저장
   const [contractId, setContractId] = useState<number | null>(null);
   const [templateData, setTemplateData] = useState<CreateContractTemplateResponse | null>(null);
@@ -129,45 +33,133 @@ const WriteFillPage: React.FC = () => {
   const { mutate } = useCreateContractTemplate();
 
   useEffect(() => {
-    const fetchUserAndCreateContract = async () => {
+    const fetchData = async () => {
       const user = await getUserInfo();
       if (!user?.user_id) return;
-      mutate(
-        { categoryId: numericCategoryId, userId: user.user_id },
-        {
-          onSuccess: (res) => {
-            setContractId(res.contract.id);
-            setTemplateData({ template: res.template, sections: res.sections, contract: res.contract });
-          },
-        }
-      );
+
+      if (mode === 'create' && numericCategoryId) {
+        mutate(
+          { categoryId: numericCategoryId, userId: user.user_id },
+          {
+            onSuccess: (res) => {
+              setContractId(res.contract.id);
+              setTemplateData({ template: res.template, sections: res.sections, contract: res.contract });
+            },
+          }
+        );
+      } else if (mode === 'edit' && numericContractId) {
+        const res = await fetchExistingContract(numericContractId);
+        const { contract, template, sections, values } = res;
+        setContractId(contract.id);
+        setTemplateData({ contract, template, sections });
+        setDependsOnStates(values ?? {});
+      }
     };
 
-    fetchUserAndCreateContract();
-  }, [numericCategoryId, mutate]);
+    fetchData();
+  }, [mode, numericCategoryId, numericContractId]);
+
+  const handleFieldBlur = async (fieldId: number, sectionId: number, value: string) => {
+    if (!contractId) return;
+    try {
+      await saveContractInputs({
+        contractId,
+        inputs: [{ sectionId, fieldValues: [{ fieldId, value }] }],
+      });
+    } catch (error) {
+      console.error('자동 저장 실패:', error);
+    }
+  };
+
+  const shouldShowField = (field: TemplateField): boolean => {
+    if (!field.dependsOn) return true;
+    if (field.dependsOn.includes('!=')) {
+      const [key, notExpected] = field.dependsOn.split('!=');
+      return dependsOnStates[key] !== notExpected;
+    }
+    const [key, expected] = field.dependsOn.split('=');
+    return dependsOnStates[key] === expected;
+  };
+
+  const renderInputField = (field: TemplateField, sectionId: number) => {
+    const commonProps = {
+      id: field.fieldKey,
+      name: field.fieldKey,
+      required: field.required,
+      className: 'w-full p-2 rounded-md border bg-white border-gray-400',
+      onBlur: (e: React.FocusEvent<HTMLInputElement>) => handleFieldBlur(field.id, sectionId, e.target.value),
+    };
+
+    switch (field.inputType) {
+      case 'TEXT':
+      case 'NUMBER':
+      case 'DATE':
+        return (
+          <input
+            type={field.inputType.toLowerCase()}
+            {...commonProps}
+            value={dependsOnStates[field.fieldKey] ?? ''}
+            onChange={(e) => setDependsOnStates((prev) => ({ ...prev, [field.fieldKey]: e.target.value }))}
+          />
+        );
+      case 'RADIO': {
+        const radioOptions = Array.isArray(field.options)
+          ? field.options
+          : typeof field.options === 'string'
+          ? JSON.parse(field.options)
+          : [];
+        return (
+          <div className="space-x-4">
+            {radioOptions.map((opt: string) => (
+              <label key={opt} className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name={field.fieldKey}
+                  value={opt}
+                  checked={dependsOnStates[field.fieldKey] === opt}
+                  onChange={() => {
+                    setDependsOnStates((prev) => ({ ...prev, [field.fieldKey]: opt }));
+                    handleFieldBlur(field.id, sectionId, opt);
+                  }}
+                  className="mr-1"
+                />
+                {opt}
+              </label>
+            ))}
+          </div>
+        );
+      }
+      case 'CHECKBOX': {
+        return (
+          <input
+            type="checkbox"
+            id={field.fieldKey}
+            name={field.fieldKey}
+            className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            checked={dependsOnStates[field.fieldKey] === '1'}
+            onChange={() => {
+              const newValue = dependsOnStates[field.fieldKey] === '1' ? '0' : '1';
+              setDependsOnStates((prev) => ({ ...prev, [field.fieldKey]: newValue }));
+              handleFieldBlur(field.id, sectionId, newValue);
+            }}
+          />
+        );
+      }
+      default:
+        return <input type="text" {...commonProps} />;
+    }
+  };
 
   // 입력 값을 저장하고 preview 페이지로 이동
   // RADIO 옵션 선택 안했을 시, 경고 창 띄움
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const missingRequiredFields: string[] = [];
 
     for (const section of templateData?.sections ?? []) {
       for (const field of section.fields) {
-        const isDisabled = (() => {
-          if (!field.dependsOn || field.inputType === 'RADIO') return false;
-          if (field.dependsOn.includes('!=')) {
-            const [key, notExpected] = field.dependsOn.split('!=');
-            return dependsOnStates[key] === notExpected;
-          }
-          const [key, expected] = field.dependsOn.split('=');
-          return dependsOnStates[key] !== expected;
-        })();
-
-        if (!isDisabled && field.required && !(field.fieldKey in dependsOnStates)) {
-          missingRequiredFields.push(field.label);
-        }
+        if (!shouldShowField(field) || !field.required) continue;
+        if (!(field.fieldKey in dependsOnStates)) missingRequiredFields.push(field.label);
       }
     }
 
@@ -175,43 +167,27 @@ const WriteFillPage: React.FC = () => {
       Swal.fire({
         icon: 'warning',
         title: '필수 항목이 누락되었습니다.',
-        html: `<ul style="text-align:left; padding-left: 1em;">${missingRequiredFields
-          .map((item) => `<li>• ${item}</li>`) // prettier-ignore
-          .join('')}</ul>`,
+        html: `<ul style="text-align:left; padding-left: 1em;">${missingRequiredFields.map((item) => `<li>• ${item}</li>`).join('')}</ul>`,
         confirmButtonText: '확인',
       });
       return;
     }
 
-    // 필드 값 저장 API 호출
     if (contractId && templateData) {
       const inputPayload: ContractInputSection[] = templateData.sections.map((section) => ({
         sectionId: section.id,
         fieldValues: section.fields
           .filter((field) => field.fieldKey in dependsOnStates)
-          .map((field) => ({
-            fieldId: field.id,
-            value: String(dependsOnStates[field.fieldKey] ?? '')
-          })),
+          .map((field) => ({ fieldId: field.id, value: String(dependsOnStates[field.fieldKey] ?? '') })),
       }));
-
-      console.log('Sending inputs to API:', JSON.stringify({ contractId, inputs: inputPayload }, null, 2));
 
       try {
         const response = await saveContractInputs({ contractId, inputs: inputPayload });
-
         navigate(`/contract/${contractId}/preview`, {
-          state: {
-            contractId,
-            legalClausesBySection: response, // 배열 형태로 전달
-          },
+          state: { contractId, legalClausesBySection: response },
         });
       } catch (err) {
-        Swal.fire({
-          icon: 'error',
-          title: '저장 실패',
-          text: '계약서를 저장하는 중 오류가 발생했습니다. 다시 시도해주세요.',
-        });
+        Swal.fire({ icon: 'error', title: '저장 실패', text: '계약서를 저장하는 중 오류가 발생했습니다. 다시 시도해주세요.' });
       }
     }
   };
@@ -222,31 +198,19 @@ const WriteFillPage: React.FC = () => {
 
   const templateName = templateData.template.name;
   const sections = templateData.sections;
+  
   return (
     <div className="container py-16 mx-auto">
       <h1 className="mb-8 text-4xl font-bold text-center">{templateName} 작성</h1>
-
-      {/* 처음 작성하는 페이지 일 때, 체크리스트 모달 렌더링 */}
-      {showModal && (
-        <ChecklistModal checklist={checklist} onClose={() => setShowModal(false)} />
-      )}
-
-      {/* 각 섹션 별로 파트를 구분 */}
+      {showModal && <ChecklistModal checklist={checklist} onClose={() => setShowModal(false)} />}
       <form className="space-y-10 max-w-3xl mx-auto px-4 sm:px-6" onSubmit={handleSubmit}>
         {sections.map((section) => (
           <section key={section.id} className="p-6 bg-[#F6F6F6] rounded-2xl shadow-xl relative">
             <div className="flex items-center gap-2 mb-4 relative">
               <h2 className="text-2xl font-bold">{section.name}</h2>
-              {/* 섹션 별 추가 설명 */}
               {section.description && (
                 <div className="relative">
-                  <button
-                    type="button"
-                    className="text-gray-500 cursor-pointer"
-                    onClick={() =>
-                      setTooltipField((prev) => (prev === section.id ? null : section.id))
-                    }
-                  >
+                  <button type="button" className="text-gray-500 cursor-pointer" onClick={() => setTooltipField((prev) => (prev === section.id ? null : section.id))}>
                     <LuTag className="w-4 h-4" />
                   </button>
                   {tooltipField === section.id && (
@@ -257,26 +221,22 @@ const WriteFillPage: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* 체크가 되었을 때와 해제되었을 때를 구분하여 렌더링 */}
             <div className="grid gap-4">
-              {section.fields.map((field: TemplateField) => (
+              {section.fields.filter(shouldShowField).map((field) => (
                 <div key={field.fieldKey} className={field.inputType === 'CHECKBOX' ? 'flex items-center' : 'space-y-1'}>
                   <label htmlFor={field.fieldKey} className={`${field.inputType === 'CHECKBOX' ? 'order-2' : 'block'} font-medium`}>
                     {field.label}
                   </label>
                   {field.inputType === 'CHECKBOX' ? (
-                    <div className="order-1 mr-1">{renderInputField(field, dependsOnStates, setDependsOnStates)}</div>
+                    <div className="order-1 mr-1">{renderInputField(field, section.id)}</div>
                   ) : (
-                    renderInputField(field, dependsOnStates, setDependsOnStates)
+                    renderInputField(field, section.id)
                   )}
                 </div>
               ))}
             </div>
           </section>
         ))}
-
-        {/* 전체 작성 후 작성하기 버튼 누르면 preview 페이지로 이동 */}
         <div className="text-center">
           <button type="submit" className="px-6 py-3 mt-8 font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
             계약서 작성하기

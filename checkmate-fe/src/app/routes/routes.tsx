@@ -81,7 +81,10 @@ export const router = createBrowserRouter([
       
       // 계약서 작성 플로우
       { path: 'write/:mainCategorySlug', element: <WriteCategoryPage /> },
-      { path: 'write/:mainCategorySlug/:categoryId', element: <WriteFillPage /> },
+      // 신규 작성
+      { path: 'write/:mainCategorySlug/:categoryId', element: <WriteFillPage mode="create" /> },
+      // 이어서 작성
+      { path: 'write/contract/:contractId', element: <WriteFillPage mode="edit" /> },
       { path: 'contract/:contractId/preview', element: <WritePreviewPage /> },
 
       // 계약서 분석 플로우

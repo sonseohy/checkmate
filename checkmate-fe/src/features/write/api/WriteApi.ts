@@ -39,3 +39,9 @@ export const saveContractInputs = async ({
   const response = await customAxios.post(`/api/contract/${contractId}/inputs`, { sections: inputs });
   return response.data.data;
 };
+
+// 작성중인 계약서 조회
+export const fetchExistingContract = async (contractId: number) => {
+  const { data } = await customAxios.get(`/api/contract/${contractId}/edit`);
+  return data.data;
+};

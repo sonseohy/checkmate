@@ -57,25 +57,28 @@ public class HelloSignCallbackService {
         }
 
         // 2) JSON 파싱
-        JsonNode root = objectMapper.readTree(payloadJson);
-        String eventType = root.path("event").path("event_type").asText();
-        if (!"signature_request_signed".equals(eventType)) {
+        JsonNode root      = objectMapper.readTree(payloadJson);
+        String eventType   = root.path("event").path("event_type").asText();
+        String requestId   = root.path("signature_request").path("signature_request_id").asText();
+
+        // 3) PDF 다운로드 가능한 이벤트만 처리
+        if (!"signature_request_all_signed".equals(eventType)
+                && !"signature_request_downloadable".equals(eventType)) {
             return;
         }
-        String requestId = root.path("signature_request").path("signature_request_id").asText();
 
-        // 3) Contract 조회
+        // 4) Contract 조회
         Contract contract = contractRepository.findBySignatureRequestId(requestId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND_FOR_SIGNATURE));
 
-        // 4) 서명된 PDF 다운로드
+        // 5) 서명된 PDF 다운로드
         File signedPdf = signatureRequestApi.signatureRequestFiles(requestId, "pdf");
         byte[] pdfBytes = Files.readAllBytes(signedPdf.toPath());
         if (!signedPdf.delete()) {
-            log.warn("Failed to delete temp signed PDF: {}", signedPdf.getAbsolutePath());
+            log.warn("Could not delete temp file: {}", signedPdf.getAbsolutePath());
         }
 
-        // 5) AES-GCM 암호화 후 S3 업로드
+        // 6) AES-GCM 암호화 후 S3 업로드
         S3Service.SplitEncryptedResult result = s3Service.uploadEncryptedBytesWithKeySplit(
                 pdfBytes,
                 contract.getTitle() + "-signed.pdf",
@@ -83,19 +86,19 @@ public class HelloSignCallbackService {
                 S3Service.PDF_PREFIX
         );
 
-        // 6) DB 업데이트: 상태 & 서명 시각
+        // 7) Contract 상태 및 서명 시각 업데이트
         contract.setSignatureStatus(SignatureStatus.COMPLETED);
         contract.setSignedAt(LocalDateTime.now());
         contractRepository.save(contract);
 
-        // 7) 기존 Viewer 파일 제거
+        // 8) 기존 viewer 파일 제거
         ContractFile oldFile = contractFileRepository
                 .findByContractIdAndFileCategory(contract.getId(), FileCategory.VIEWER)
                 .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
         s3Service.deleteFile(oldFile.getFileAddress());
         contractFileRepository.deleteById(oldFile.getId());
 
-        // 8) 새 Viewer 파일 메타 저장
+        // 9) 새 viewer 파일 메타 저장
         ContractFile signedFile = ContractFile.builder()
                 .contract(contract)
                 .fileType("pdf")
@@ -107,13 +110,11 @@ public class HelloSignCallbackService {
                 .build();
         contractFileRepository.save(signedFile);
 
-        // 9) KeyShare Mongo 저장
+        // 10) 키 공유 정보 저장
         keyShareMongoService.saveShareB(Long.valueOf(signedFile.getId()), result.getShareB());
     }
 
-    /**
-     * HMAC-SHA256 계산 후 hex 비교
-     */
+    /** HMAC-SHA256 계산 후 hex 비교 */
     private boolean hmacMatches(String apiKey, String payload, String signature) throws Exception {
         Mac mac = Mac.getInstance("HmacSHA256");
         SecretKeySpec keySpec = new SecretKeySpec(

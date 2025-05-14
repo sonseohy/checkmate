@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -54,19 +55,28 @@ public class TemplateService {
 
     @Transactional
     public TemplateResponseDto createEmptyContractByCategory(Integer categoryId, String userId) {
-        // 1. 카테고리 ID로 카테고리 조회
+
         ContractCategory category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        // 2. 카테고리로부터 최신 템플릿 조회
-        Template template = templateRepository.findTopByCategoryOrderByVersionDesc(category)
-                .orElseThrow(() -> new CustomException(ErrorCode.TEMPLATE_NOT_FOUND_FOR_CATEGORY));
-
-        // 3. 사용자 조회
         User user = userRepository.findById(Integer.valueOf(userId))
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 4. 빈 계약서 생성
+        // 해당 카테고리와 사용자로 작성 중인 계약서가 있는지 확인
+        Optional<Contract> existingContract = contractRepository.findByUserAndCategoryAndEditStatus(
+                user, category, EditStatus.EDITING);
+
+        // 작성 중인 계약서가 있으면 해당 정보 반환
+        if (existingContract.isPresent()) {
+            Contract contract = existingContract.get();
+
+            return buildTemplateResponse(contract.getTemplate(), contract);
+        }
+
+        // 작성 중인 계약서가 없으면 빈 계약서 생성
+        Template template = templateRepository.findTopByCategoryOrderByVersionDesc(category)
+                .orElseThrow(() -> new CustomException(ErrorCode.TEMPLATE_NOT_FOUND_FOR_CATEGORY));
+
         Contract contract = Contract.builder()
                 .user(user)
                 .category(category)
@@ -77,10 +87,8 @@ public class TemplateService {
                 .processStatus(ProcessStatus.IN_PROGRESS)
                 .build();
 
-        // 5. 계약서 저장
         Contract savedContract = contractRepository.save(contract);
 
-        // 6. 템플릿 응답 생성 (계약서 정보 포함)
         return buildTemplateResponse(template, savedContract);
     }
 
@@ -203,5 +211,18 @@ public class TemplateService {
                 .options(field.getOptions())
                 .dependsOn(field.getDependsOn())
                 .build();
+    }
+
+    public Optional<Contract> findExistingEditingContract(Integer categoryId, String userId) {
+
+        ContractCategory category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        User user = userRepository.findById(Integer.valueOf(userId))
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 작성 중인 계약서 확인 및 반환
+        return contractRepository.findByUserAndCategoryAndEditStatus(
+                user, category, EditStatus.EDITING);
     }
 }

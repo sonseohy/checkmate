@@ -5,6 +5,7 @@ export interface Contract {
     category_id: number;
     title: string;
     source_type: string;
+    edit_status: string;
     updated_at: string;
 };
 export interface ContractListData {

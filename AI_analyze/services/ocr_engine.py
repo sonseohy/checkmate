@@ -1,19 +1,23 @@
 import httpx
-from app.config import settings
+
+from config.settings import (
+    UPSTAGE_OCR_API_URL, UPSTAGE_OCR_API_KEY,
+)
+
 
 class OcrEngine:
     def __init__(self):
-        self.url     = settings.UPSTAGE_OCR_API_URL
-        self.api_key = settings.UPSTAGE_OCR_API_KEY
+        self.url = UPSTAGE_OCR_API_URL
+        self.api_key = UPSTAGE_OCR_API_KEY
 
     async def recognize(self, pdf_bytes: bytes) -> dict:
         headers = {
             "Authorization": f"Bearer {self.api_key}"
         }
-        
+
         data = {
             "ocr": "auto",
-            "base64_encoding": "['table']", 
+            "base64_encoding": "['table']",
             "model": "document-parse"
         }
         files = {

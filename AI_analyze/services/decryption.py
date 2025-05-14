@@ -1,10 +1,15 @@
-import base64
-import boto3
 from urllib.parse import urlparse
+
+import boto3
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from app.config import settings
-from app.db.mysql import MySQLManager
-from app.db.mongo import MongoDBManager
+
+from config.settings import (
+    AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
+    AWS_REGION, S3_BUCKET_NAME
+)
+from db.mongo import MongoDBManager
+from db.mysql import MySQLManager
+
 
 class DecryptionService:
     def __init__(self, mysql: MySQLManager, mongo: MongoDBManager):
@@ -12,9 +17,9 @@ class DecryptionService:
         self.mongo = mongo
         self.s3 = boto3.client(
             's3',
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_REGION
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=AWS_REGION
         )
 
     async def decrypt(self, contract_id: int) -> bytes:
@@ -25,7 +30,7 @@ class DecryptionService:
         file_id = info['id']
         pdf_url = info['file_address']
         share_a = info['encrypted_data_key']
-        iv      = info['iv']
+        iv = info['iv']
 
         share_b = await self.mongo.get_share_b(file_id)
         if not share_b:
@@ -39,7 +44,7 @@ class DecryptionService:
         key = parsed.path.lstrip("/")
 
         # S3에서 암호문 다운로드
-        resp = self.s3.get_object(Bucket=settings.S3_BUCKET_NAME, Key=key)
+        resp = self.s3.get_object(Bucket=S3_BUCKET_NAME, Key=key)
         ciphertext = resp['Body'].read()
 
         # AES-GCM 복호화

@@ -1,29 +1,29 @@
 import logging
 import re
 from collections import defaultdict
+
 from bs4 import BeautifulSoup, NavigableString, Tag
-from pykospacing import Spacing
 from hanspell import spell_checker
 
 try:
     from konlpy.tag import Okt
+
     _okt = Okt()
 except Exception:
     _okt = None
 
 logger = logging.getLogger(__name__)
 
-_spacer = Spacing()
 _table_line_pattern = re.compile(r"^\s*\|.*\|\s*$")
-_separator_pattern   = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$")
+_separator_pattern = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$")
 
 
 def normalize_text(text: str) -> str:
-    text = re.sub(r'_+',    '', text)
-    text = re.sub(r'\s*/\s*','/', text)
-    text = re.sub(r'\s*:\s*',': ', text)
-    text = re.sub(r'\s*-\s*',' - ', text)
-    text = re.sub(r'[�]',   '', text)
+    text = re.sub(r'_+', '', text)
+    text = re.sub(r'\s*/\s*', '/', text)
+    text = re.sub(r'\s*:\s*', ': ', text)
+    text = re.sub(r'\s*-\s*', ' - ', text)
+    text = re.sub(r'[�]', '', text)
     return text
 
 
@@ -39,12 +39,11 @@ def review_tokens(text: str) -> str:
 
 
 def correct_paragraph(txt: str) -> str:
-    spaced = _spacer(txt)
     try:
-        res = spell_checker.check(spaced)
+        res = spell_checker.check(txt)
         checked = res.checked.strip()
     except Exception:
-        checked = spaced
+        checked = txt
     return review_tokens(normalize_text(checked))
 
 
@@ -79,12 +78,12 @@ def parse_html_to_markdown(html_blocks: list) -> str:
                 if t: paras.append(t)
             elif isinstance(el, Tag):
                 if el.name == "table":
-                    rows = [[cell.get_text(strip=True) for cell in tr.find_all(["th","td"])]
+                    rows = [[cell.get_text(strip=True) for cell in tr.find_all(["th", "td"])]
                             for tr in el.find_all("tr")]
                     if rows:
                         header = rows[0]
                         table_md = ["| " + " | ".join(header) + " |",
-                                    "|" + "|".join([" --- "]*len(header)) + "|"]
+                                    "|" + "|".join([" --- "] * len(header)) + "|"]
                         for r in rows[1:]:
                             table_md.append("| " + " | ".join(r) + " |")
                         paras.append("\n".join(table_md))
@@ -96,6 +95,7 @@ def parse_html_to_markdown(html_blocks: list) -> str:
                     t = el.get_text("\n\n", strip=True)
                     if t: paras.append(t)
     return "\n\n".join(paras)
+
 
 def postprocessing_pipeline(ocr_result: dict, contract_id: int) -> list[dict]:
     """
@@ -110,8 +110,8 @@ def postprocessing_pipeline(ocr_result: dict, contract_id: int) -> list[dict]:
     for elem in ocr_result.get("elements", []):
         # 실제 API 스펙에 따라 key 이름이 달라질 수 있음
         page_no = elem.get("content", {}).get("page_no",
-                    elem.get("page_no", 0))
-        html    = elem.get("content", {}).get("html")
+                                              elem.get("page_no", 0))
+        html = elem.get("content", {}).get("html")
         pages[page_no].append(html)
 
     results = []
@@ -128,9 +128,9 @@ def postprocessing_pipeline(ocr_result: dict, contract_id: int) -> list[dict]:
                 in_code = not in_code
                 cleaned_lines.append(ln)
             elif in_code \
-                 or _table_line_pattern.match(ln) \
-                 or _separator_pattern.match(ln) \
-                 or not s:
+                    or _table_line_pattern.match(ln) \
+                    or _separator_pattern.match(ln) \
+                    or not s:
                 cleaned_lines.append(ln)
             else:
                 cleaned_lines.append(correct_paragraph(ln))
@@ -141,9 +141,9 @@ def postprocessing_pipeline(ocr_result: dict, contract_id: int) -> list[dict]:
         logger.info(f"[{contract_id}][page {page_no}] 후처리 완료 ({len(cleaned_lines)} 줄)")
 
         results.append({
-            "contract_id":     contract_id,
-            "page_no":         page_no,
-            "raw_markdown":    raw_md,
+            "contract_id": contract_id,
+            "page_no": page_no,
+            "raw_markdown": raw_md,
             "cleaned_markdown": cleaned_md,
         })
 

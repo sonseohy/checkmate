@@ -37,6 +37,9 @@ public class MissingClauseReportService {
 		}
 		List<MissingClauseReport> missingClauseReport = missingClauseReportRepository
 			.findAllByAiAnalysisReportId(aiAnalysisId);
+		if (missingClauseReport.isEmpty()) {
+			throw new CustomException(ErrorCode.MISSING_REPORT_NOT_FOUND);
+		}
 		return missingClauseReport.stream()
 			.map(MissingResponseDto::fromEntity)
 			.collect(Collectors.toList());

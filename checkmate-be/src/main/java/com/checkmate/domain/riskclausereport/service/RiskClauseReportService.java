@@ -36,6 +36,9 @@ public class RiskClauseReportService {
 			throw new CustomException(ErrorCode.AI_ANALYSIS_REPORT_NOT_FOUND);
 		}
 		List<RiskClauseReport> risks = riskClauseReportRepository.findAllByAiAnalysisReportId(aiAnalysisId);
+		if (risks.isEmpty()) {
+			throw new CustomException(ErrorCode.RISK_NOT_FOUND);
+		}
 		return risks.stream()
 			.map(RiskClauseReportResponseDto::fromEntity)
 			.collect(Collectors.toList());

@@ -37,6 +37,9 @@ public class ImprovementReportService {
 		}
 		List<ImprovementReport> improvementReports = improvementReportRepository
 			.findAllByAiAnalysisReportId(aiAnalysisId);
+		if (improvementReports.isEmpty()) {
+			throw new CustomException(ErrorCode.IMPROVEMENT_REPORT_NOT_FOUND);
+		}
 		return improvementReports.stream()
 			.map(ImprovementResponseDto::fromEntity)
 			.collect(Collectors.toList());

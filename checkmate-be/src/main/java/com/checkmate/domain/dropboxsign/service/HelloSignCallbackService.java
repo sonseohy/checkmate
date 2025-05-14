@@ -96,6 +96,7 @@ public class HelloSignCallbackService {
                 .findByContractIdAndFileCategory(contract.getId(), FileCategory.VIEWER)
                 .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
         s3Service.deleteFile(oldFile.getFileAddress());
+        contract.removeFile(oldFile);
         contractFileRepository.delete(oldFile);
 
         // 9) 새 viewer 파일 메타 저장

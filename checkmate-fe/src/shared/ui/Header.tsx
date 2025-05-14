@@ -65,7 +65,6 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
   // 로그아웃
    const handleisLogout = async () => {
-      // postLogout 함수에 navigate 전달
       await postLogout(navigate, dispatch); // navigate를 전달하여 로그아웃 후 리다이렉트
     };
   
@@ -168,6 +167,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           showModal={showModal}
           categoryNames={categoryNames} // ✅ 모바일 메뉴도 전달
           isLogIn={isLogIn} //로그인 상태 전달
+          isLogOut={handleisLogout}
           showGuide={() => {
             setMobileOpen(false);
             navigate('/intro/write');

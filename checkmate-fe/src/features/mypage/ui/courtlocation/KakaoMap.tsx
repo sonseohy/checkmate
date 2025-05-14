@@ -19,7 +19,12 @@ export default function KakaoMap() {
 
     // 2) kakao 스크립트가 없으면 동적 삽입
     const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_KEY}&autoload=false`;
+    script.src = `
+      https://dapi.kakao.com/v2/maps/sdk.js
+      ?appkey=${import.meta.env.VITE_KAKAO_MAP_KEY}
+      &libraries=services
+      &autoload=false
+    `.replace(/\s+/g, "");
     script.async = true;
     document.head.appendChild(script);
 

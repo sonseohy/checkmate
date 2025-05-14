@@ -1,4 +1,5 @@
 // 사용자 계약서 컴포넌트
+import { deleteContractDetail } from "@/features/detail";
 import { 
     Dropdown, 
     ContractTable, 
@@ -8,10 +9,14 @@ import {
 } from "@/features/mypage";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
+import Swal from "sweetalert2";
 
 export default function MyContracts() {
+  //체크박스 상태 
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
   // 데이터 요청
-  const { data, isLoading, isError, error } = useQuery<ContractListData, Error>({
+  const { data, isLoading, isError, error, refetch } = useQuery<ContractListData, Error>({
     queryKey: ['contractList'],
     queryFn: contractList,
   });
@@ -32,7 +37,7 @@ export default function MyContracts() {
     [data?.contracts],
   );
 
-  // 필터링된 계약서 리스트 (항상 Contract[] 반환)
+  // 필터링된 계약서 리스트
   const filteredContracts = useMemo<Contract[]>(() => {
     switch (filter.value) {
       case 'created':
@@ -44,30 +49,98 @@ export default function MyContracts() {
     }
   }, [filter, contracts]);
 
+    // 삭제 함수
+  const handleDeleteContracts = async () => {
+    if (selectedIds.size === 0) {
+      return;
+    }
+
+    try {
+      const confirmDelete = await Swal.fire({
+        title: "정말 삭제하시겠습니까?",
+        text: "선택한 계약서들을 삭제합니다. 삭제 후에는 복구할 수 없습니다.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "삭제",
+        cancelButtonText: "취소",
+      });
+
+      if (confirmDelete.isConfirmed) {
+        // 삭제 요청
+        for (const contractId of Array.from(selectedIds)) {
+          await deleteContractDetail(contractId);
+        }
+        
+        // 삭제 후 데이터 다시 가져오기
+        await refetch();;  // 데이터를 새로고침하여 테이블을 갱신
+        Swal.fire("삭제 완료", "선택한 계약서들이 삭제되었습니다.", "success");
+      }
+    } catch (error) {
+      console.error("계약서 삭제 실패:", error);
+      Swal.fire("삭제 실패", "계약서 삭제 중 문제가 발생했습니다.", "error");
+    }
+  };
+
+
+    // 선택된 계약서 ID 추적
+  const toggleSelect = (id: number) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setSelectedIds(next);
+  };
+
+  // 전체 선택/취소
+  const toggleSeletAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(new Set(contracts.map((r) => r.contract_id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
   // 로딩 및 에러 핸들링
   if (isLoading) {
     return <div>Loading...</div>;
-  }
+  };
+
   if (isError) {
     return <div>Error: {error instanceof Error ? error.message : 'An error occurred'}</div>;
-  }
+  };
 
 
   return (
     <div className="flex flex-col gap-3 m-10 p-10 rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.2)]">
         <div className="text-3xl font-bold">내 계약서</div>
         <div className="">
-            <div className="mt-5 w-45  relative z-3">
+          <div className="flex flex-row justify-between items-center">
+            <div className="mt-5 w-45 mb-5 relative z-3">
                 <Dropdown
                 options={options}
                 value={filter}
                 onChange={setFilter}
                 />
             </div>
+            <button
+              className={`text-2xl px-5 py-3 rounded-xl border-2  ${selectedIds.size ===0 ? 'text-[#cccccc] border-[#cccccc]' : 'text-[#9E9E9E] border-[#9E9E9E]'}`}
+              onClick={handleDeleteContracts}
+              disabled={selectedIds.size === 0} 
+            >
+              삭제
+            </button>
+          </div>
 
             <div className="mt-3">
                 {contracts.length > 0 ? (
-                <ContractTable rowData={filteredContracts} />
+                <ContractTable 
+                  rowData={filteredContracts} 
+                  selectedIds={selectedIds}
+                  toggleSelect={toggleSelect}
+                  toggleSelectAll={toggleSeletAll}
+                  />
                 ) : (
                 <p>등록된 계약서가 없습니다.</p>
                 )}

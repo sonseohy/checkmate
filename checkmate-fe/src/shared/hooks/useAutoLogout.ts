@@ -8,6 +8,7 @@ export const useAutoLogout = (mainRef: React.RefObject<HTMLElement | null>) => {
   const idleTimer = useRef<number>(0);
   const expiryTimer = useRef<number>(0);
 
+  // 로그아웃 수행 함수
   const doLogout = useCallback(() => {
     dispatch(logout());
     localStorage.removeItem('access_token');
@@ -34,6 +35,7 @@ export const useAutoLogout = (mainRef: React.RefObject<HTMLElement | null>) => {
       resetIdle();
     };
 
+    // 이벤트 등록
     const activityEvents = [
       'mousedown',
       'mousemove',

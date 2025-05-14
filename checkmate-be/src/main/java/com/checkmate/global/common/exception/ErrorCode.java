@@ -42,7 +42,9 @@ public enum ErrorCode {
 
     INVALID_ID_FORMAT("MONGO-001", HttpStatus.BAD_REQUEST, "잘못된 ID 포멧입니다."),
 
-    AI_ANALYSIS_API_ERROR("ANALYSIS-002", HttpStatus.INTERNAL_SERVER_ERROR, "AI 분석 서비스에 연결할 수 없습니다.");
+    AI_ANALYSIS_API_ERROR("ANALYSIS-002", HttpStatus.INTERNAL_SERVER_ERROR, "AI 분석 서비스에 연결할 수 없습니다."),
+
+    CLAUSE_NOT_FOUND("CLAUSE-001", HttpStatus.NOT_FOUND, "계약서 조항을 찾을 수 없습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

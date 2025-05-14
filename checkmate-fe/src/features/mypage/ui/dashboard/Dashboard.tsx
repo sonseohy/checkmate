@@ -3,12 +3,12 @@ import { PieDonutChart,
         ContractListData,
         contractList, 
         ContractCarousel } from "@/features/mypage";
-import useDeviceType from "@/shared/hooks/useMobile";
+import useMobile from "@/shared/hooks/useMobile";
 import { useQuery } from "@tanstack/react-query";
 
 
 export default function Dashboard() {
-    const isMobile = useDeviceType();
+    const isMobile = useMobile();
     
     const { data, isLoading, isError, error } = useQuery<ContractListData, Error>({
         queryKey: ['contractList'],
@@ -25,23 +25,28 @@ export default function Dashboard() {
 
     return (
         <div> 
-            {/* 활동에 대한 그래프 */}
-            <div className={`flex mt-10 ${isMobile ? 'flex-col justify-center' : 'flex-row gap-10 ml-10 h-120 '} items-center `}>
-                <div className={` rounded-2xl bg-white shadow-[0_0px_15px_rgba(0,0,0,0.2)] ${isMobile ? 'w-full mb-5' : 'w-1/4'}`}>
-                    <div className="mt-5 text-2xl ml-5 font-semibold">
-                        계약 활동
+            <div className={`flex flex-col  ${isMobile ? ' justify-center items-center': 'ml-10 h-120 mt-10 '}`}>
+                <div className={` ${isMobile ? 'w-full': 'w-full rounded-2xl'}`}>
+                    <div className={` text-[#202020] font-semibold ${isMobile ? 'my-3 text-xl': 'mt-5 text-2xl ml-5'}`}>
+                        최근 활동
                     </div>
-                    <PieDonutChart contractList={data?.contracts ?? []} />
-                </div>
-                <div className={` w-3/4 h-[450px] rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.2)] `}>
-                    <div className="mt-5 text-2xl ml-5 font-semibold">
-                        최근 계약서
-                    </div>
-                    <div className=" justify-center">
+                    <div className="">
                         <ContractCarousel contractList={data?.contracts ?? []} />
                     </div>
                 </div>
+                {isMobile 
+                ? <div className=" rounded-2xl bg-white w-full mb-5 ">
+                    <PieDonutChart contractList={data?.contracts ?? []} />
+                  </div>
+                : <div className="rounded-2xl bg-white shadow-[0_0px_15px_rgba(0,0,0,0.2)] w-1/4">
+                    <div className="mt-5 ml-5 text-black text-2xl font-semibold">
+                        계약 활동
+                    </div>
+                    <PieDonutChart contractList={data?.contracts ?? []} />
+                  </div>
+                }
             </div>
+
         </div>
     );
 };

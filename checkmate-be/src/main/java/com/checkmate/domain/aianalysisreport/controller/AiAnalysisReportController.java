@@ -10,12 +10,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisReportResponseDto;
 import com.checkmate.domain.aianalysisreport.dto.request.AiAnalysisWebhookRequestDto;
-import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisWebhookResponseDto;
+import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisReportResponseDto;
 import com.checkmate.domain.aianalysisreport.service.AiAnalysisReportService;
-import com.checkmate.global.common.exception.CustomException;
-import com.checkmate.global.common.exception.ErrorCode;
 import com.checkmate.global.common.response.ApiResult;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,33 +50,35 @@ public class AiAnalysisReportController {
 		return ApiResult.ok(data);
 	}
 
+	/**
+	 * 분석 완료 알림 웹훅
+	 *
+	 * @param apiKey 직접 작성한 api key -> 보완을 위해
+	 * @param webhookRequestDto 웹훅 요청 dto
+	 */
 	@PostMapping("/webhook")
-	public ApiResult<AiAnalysisWebhookResponseDto> handleAiAnalysisWebhook(
+	public void handleAiAnalysisWebhook(
 		@RequestHeader("X-API-Key") String apiKey,
-		@RequestBody AiAnalysisWebhookRequestDto webhookResponseDto) {
+		@RequestBody AiAnalysisWebhookRequestDto webhookRequestDto) {
 
-		AiAnalysisWebhookResponseDto data;
-		if ("completed".equals(webhookResponseDto.status())) {
-			data = aiAnalysisReportService.handleAnalysisCompleted(
+		if ("completed".equals(webhookRequestDto.status())) {
+			aiAnalysisReportService.handleAnalysisCompleted(
 				webhookApiKey,
 				apiKey,
-				webhookResponseDto.contractId(),
-				webhookResponseDto.contractCategoryId(),
-				webhookResponseDto.jobId()
+				webhookRequestDto.contractId(),
+				webhookRequestDto.contractCategoryId(),
+				webhookRequestDto.jobId()
 			);
-			return ApiResult.ok(data);
 		}
-		else if ("failed".equals(webhookResponseDto.status())) {
+		else if ("failed".equals(webhookRequestDto.status())) {
 			aiAnalysisReportService.handleAnalysisFailed(
 				webhookApiKey,
 				apiKey,
-				webhookResponseDto.contractId(),
-				webhookResponseDto.contractCategoryId(),
-				webhookResponseDto.jobId(),
-				webhookResponseDto.error()
+				webhookRequestDto.contractId(),
+				webhookRequestDto.contractCategoryId(),
+				webhookRequestDto.jobId(),
+				webhookRequestDto.error()
 			);
-			return ApiResult.fail(new CustomException(ErrorCode.ANALYSIS_FAIL), webhookResponseDto.error());
 		}
-		return ApiResult.fail(new CustomException(ErrorCode.UNKNOWN_ANALYSIS_STATUS));
 	}
 }

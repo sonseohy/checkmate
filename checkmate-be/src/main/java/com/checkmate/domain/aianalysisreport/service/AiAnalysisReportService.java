@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 
 import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisReportResponseDto;
 import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisWebSocketResponseDto;
-import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisWebhookResponseDto;
 import com.checkmate.domain.aianalysisreport.entity.CompleteAiAnalysisReport;
 import com.checkmate.domain.aianalysisreport.repository.AiAnalysisReportRepository;
 import com.checkmate.domain.contract.repository.ContractRepository;
@@ -39,7 +38,16 @@ public class AiAnalysisReportService {
 		return AiAnalysisReportResponseDto.fromEntity(aiAnalysisReport);
 	}
 
-	public AiAnalysisWebhookResponseDto handleAnalysisCompleted(String webhookApiKey, String ApiKey ,int contractId, int contractCategoryId, String jobId) {
+	/**
+	 * 웹소켓으로 분석 완료 상태 보내기
+	 *
+	 * @param webhookApiKey 보안을 위한 api key
+	 * @param ApiKey 보안을 위한 api key
+	 * @param contractId 계약서 ID
+	 * @param contractCategoryId 계약서 카테고리 ID
+	 * @param jobId 계약서 분석 작업 ID
+	 */
+	public void handleAnalysisCompleted(String webhookApiKey, String ApiKey ,int contractId, int contractCategoryId, String jobId) {
 		if (!verifyWebhookApiKey(webhookApiKey, ApiKey)) {
 			throw new CustomException(ErrorCode.UNAUTHORIZED);
 		}
@@ -55,11 +63,17 @@ public class AiAnalysisReportService {
 				contractCategoryId
 			)
 		);
-		return AiAnalysisWebhookResponseDto.builder()
-			.status("success")
-			.build();
 	}
 
+	/**
+	 *
+	 * @param webhookApiKey 보안을 위한 api key
+	 * @param ApiKey 보안을 위한 api key
+	 * @param contractId 계약서 ID
+	 * @param contractCategoryId 계약서 카테고리 ID
+	 * @param jobId 계약서 분석 작업 ID
+	 * @param error 에러 메세지
+	 */
 	public void handleAnalysisFailed(String webhookApiKey, String ApiKey ,int contractId, int contractCategoryId, String jobId, String error) {
 		if (!verifyWebhookApiKey(webhookApiKey, ApiKey)) {
 			throw new CustomException(ErrorCode.UNAUTHORIZED);

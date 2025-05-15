@@ -43,7 +43,7 @@ public class Clause {
     @JoinColumn(name = "contract_id", insertable = false, updatable = false)
     private Contract contract;
 
-    @Column(name = "clause_title")
+    @Column(name = "clause_title", length = 50)
     private String clauseTitle;
 
     @Lob
@@ -55,7 +55,7 @@ public class Clause {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "clause_type", nullable = false)
-    private ClauseType clauseType;
+    private ClauseType clauseType = ClauseType.STANDARD;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")

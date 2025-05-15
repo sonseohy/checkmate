@@ -9,11 +9,6 @@ import java.util.List;
 @Setter
 public class ContractFieldValueResponseDto {
     private Integer contractId;
-    private Integer sectionId;
+    private String groupId;
     private List<LegalClauseDto> legalClauses;
-    private String message;
-
-    public ContractFieldValueResponseDto() {
-        this.message = "필드 값이 성공적으로 저장되었습니다";
-    }
 }

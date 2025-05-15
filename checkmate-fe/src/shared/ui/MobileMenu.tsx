@@ -30,12 +30,12 @@ const MobileMenu = ({
   isLogOut,
   showGuide,
 }: MobileMenuProps) => (
-  <div className="absolute left-0 z-40 w-full bg-white border-b shadow-md top-full md:hidden">
+  <div className="absolute left-0 z-40 w-full bg-white shadow-md top-full md:hidden">
     <div className="flex flex-col p-4 space-y-2">
       {/* 계약서 작성 가이드 */}
       <button
         onClick={showGuide}
-        className="flex justify-between w-full py-2 text-left hover:text-blue-600"
+        className="flex justify-between w-full py-2 text-left hover:text-black"
       >
         계약서 작성 가이드
       </button>
@@ -44,7 +44,7 @@ const MobileMenu = ({
       <div>
         <button
           onClick={toggleWrite}
-          className="flex justify-between w-full py-2 text-left hover:text-blue-600"
+          className="flex justify-between w-full py-2 text-left hover:text-black"
         >
           계약서 작성
           <ChevronDown
@@ -61,7 +61,7 @@ const MobileMenu = ({
                     e.stopPropagation();
                     handleWriteClick(name);
                   }}
-                  className="block w-full px-4 py-2 text-left hover:bg-sky-500 hover:text-white"
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 hover:text-black"
                 >
                   {name}
                 </button>
@@ -75,7 +75,7 @@ const MobileMenu = ({
       <div>
         <button
           onClick={toggleAnalyze}
-          className="flex justify-between w-full py-2 text-left hover:text-blue-600"
+          className="flex justify-between w-full py-2 text-left hover:text-black"
         >
           계약서 분석
           <ChevronDown
@@ -92,7 +92,7 @@ const MobileMenu = ({
                     e.stopPropagation();
                     handleAnalyzeClick(name);
                   }}
-                  className="block w-full px-4 py-2 text-left hover:bg-sky-500 hover:text-white"
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 hover:text-black"
                 >
                   {name}
                 </button>
@@ -110,13 +110,13 @@ const MobileMenu = ({
               closeMobile();
               window.location.href = '/mypage'; // 마이페이지로 리다이렉트
             }}
-            className="pt-4 w-full text-center text-gray-700 border-t cursor-pointer hover:text-black"
+            className="pt-4 w-full text-left text-gray-700 border-t border-gray-300 cursor-pointer hover:text-black"
           >
             마이페이지
           </button>
           <button
             onClick={isLogOut}
-            className=" w-full pt-4 text-center text-gray-700 border-t cursor-pointer hover:text-black"
+            className=" w-full pt-4 text-left text-gray-700 cursor-pointer hover:text-black"
           >
             로그아웃
           </button>
@@ -127,7 +127,7 @@ const MobileMenu = ({
             showModal();
             closeMobile();
           }}
-          className="pt-4 text-center text-gray-700 border-t cursor-pointer hover:text-black"
+          className="pt-4 text-left text-gray-700 border-t border-gray-300 cursor-pointer hover:text-black"
         >
           회원가입 / 로그인
         </button>

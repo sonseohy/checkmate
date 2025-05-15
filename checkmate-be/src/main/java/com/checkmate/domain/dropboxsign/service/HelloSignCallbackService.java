@@ -9,6 +9,7 @@ import com.checkmate.domain.contract.repository.ContractRepository;
 import com.checkmate.domain.notification.dto.response.NotificationResponse;
 import com.checkmate.domain.notification.entity.Notification;
 import com.checkmate.domain.notification.entity.NotificationType;
+import com.checkmate.domain.notification.repository.NotificationRepository;
 import com.checkmate.domain.notification.service.NotificationService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
@@ -48,6 +49,7 @@ public class HelloSignCallbackService {
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     /**
      * Webhook 페이로드(JSON)와 HMAC 서명값을 받아 처리합니다.
@@ -139,12 +141,14 @@ public class HelloSignCallbackService {
                 .userId(notification.getUser().getUserId())
                 .contractId(contract.getId())
                 .build();
+        notificationRepository.save(notification);
 
         messagingTemplate.convertAndSendToUser(
                 String.valueOf(notification.getUser().getUserId()),
                 "/queue/notifications",
                 response
         );
+        log.debug("알림 로그");
 
         long updatedCount = notificationService.countUnreadNotifications(notification.getUser().getUserId());
         messagingTemplate.convertAndSendToUser(
@@ -152,6 +156,7 @@ public class HelloSignCallbackService {
                 "/queue/notification-count",
                 updatedCount
         );
+        log.debug("카운트 로그");
     }
 
     /** HMAC-SHA256 계산 후 hex 비교 */

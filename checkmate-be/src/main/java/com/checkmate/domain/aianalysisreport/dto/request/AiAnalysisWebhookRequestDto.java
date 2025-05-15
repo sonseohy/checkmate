@@ -10,6 +10,5 @@ public record AiAnalysisWebhookRequestDto(
 	int contractId,
 	int contractCategoryId,
 	String status,
-	LocalDateTime timestamp,
 	String error) {
 }

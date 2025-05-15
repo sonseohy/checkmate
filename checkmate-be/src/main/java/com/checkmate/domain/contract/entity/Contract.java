@@ -63,7 +63,7 @@ public class Contract {
     private String signatureRequestId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "signature_status", length = 20, nullable = false)
+    @Column(name = "signature_status", length = 20)
     private SignatureStatus signatureStatus = SignatureStatus.PENDING;
 
     @Column(name = "signed_at")
@@ -89,44 +89,5 @@ public class Contract {
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ContractClause> contractClauses = new ArrayList<>();
-
-    public void addFile(ContractFile f) {
-        files.add(f);
-        f.setContract(this);
-    }
-
-    public void removeFile(ContractFile f) {
-        files.remove(f);
-        f.setContract(null);
-    }
-
-    public void addQuestion(Question q) {
-        questions.add(q);
-        q.setContract(this);
-    }
-
-    public void removeQuestion(Question q) {
-        questions.remove(q);
-        q.setContract(null);
-    }
-
-    public void addFieldValue(ContractFieldValue v) {
-        fieldValues.add(v);
-        v.setContract(this);
-    }
-
-    public void removeFieldValue(ContractFieldValue v) {
-        fieldValues.remove(v);
-        v.setContract(null);
-    }
-
-    public void addContractClause(ContractClause cc) {
-        contractClauses.add(cc);
-        cc.setContract(this);
-    }
-    public void removeContractClause(ContractClause cc) {
-        contractClauses.remove(cc);
-        cc.setContract(null);
-    }
 
 }

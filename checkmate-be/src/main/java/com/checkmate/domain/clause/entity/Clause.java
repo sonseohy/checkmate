@@ -43,7 +43,7 @@ public class Clause {
     @JoinColumn(name = "contract_id", insertable = false, updatable = false)
     private Contract contract;
 
-    @Column(name = "clause_title", length = 50)
+    @Column(name = "clause_title")
     private String clauseTitle;
 
     @Lob

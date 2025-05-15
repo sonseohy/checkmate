@@ -5,12 +5,11 @@ import MobileMenu from './MobileMenu';
 import HeaderDropdown from './HeaderDropdown';
 import { KakaoLoginModal } from '@/features/main';
 import { Menu, X } from 'lucide-react';
-import { useMainCategories } from '@/features/categories/hooks/useCategories';
+import { useMainCategories } from '@/features/categories';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/app/redux/store';
 import { loginSuccess, logout } from '@/features/auth/slices/authSlice';
 import { postLogout, useUserInfo } from '@/features/auth';
-
 
 export interface HeaderProps {
   className?: string;
@@ -32,7 +31,6 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   //리덕스에서 상태 가져오기
   const isLogIn = useSelector((state: RootState) => state.auth.isAuthenticated);
 
-
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
     if (accessToken && user) {
@@ -43,7 +41,6 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       dispatch(logout());
     }
   }, [dispatch, user]);
-
 
   const handleWriteClick = (name: string) => {
     const slug = categoryNameToSlugMap[name];
@@ -64,10 +61,9 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   };
 
   // 로그아웃
-   const handleisLogout = async () => {
-      await postLogout(navigate, dispatch); // navigate를 전달하여 로그아웃 후 리다이렉트
-    };
-  
+  const handleisLogout = async () => {
+    await postLogout(navigate, dispatch); // navigate를 전달하여 로그아웃 후 리다이렉트
+  };
 
   //회원가입/로그인 모달
   const showModal = () => {
@@ -131,7 +127,6 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
               로그아웃
             </button>
           </>
-          
         ) : (
           <button
             onClick={showModal}

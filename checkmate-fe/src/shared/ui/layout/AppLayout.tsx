@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/app/redux/store';
 
 import { Header, HeaderProps } from '@/shared/ui/Header';
+import Footer from '@/shared/ui/Footer';
 import { ChatbotButton } from '@/shared/ui/ChatbotButton';
 import { TopButton } from '@/shared/ui/TopButton';
 import { useAutoLogout } from '@/shared/hooks/useAutoLogout';
@@ -18,7 +19,7 @@ export interface AppLayoutProps {
 export const AppLayout = ({
   children,
   headerProps = { className: 'bg-white shadow' },
-  mainClassName = 'snap-y snap-mandatory overflow-y-auto',
+  mainClassName = '',
 }: AppLayoutProps) => {
   const userId =
     useSelector((state: RootState) => state.auth.user?.user_id)?.toString() ??
@@ -32,24 +33,22 @@ export const AppLayout = ({
   const [showTopButton, setShowTopButton] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
-  // 자동 로그아웃 훅
+  // 자동 로그아웃 - 사용자 활동 감지용 main 영역
   useAutoLogout(mainRef);
 
-  // Top 버튼 표시용 스크롤 감지
+  // ✅ Top 버튼 표시용: window 스크롤 감지
   useEffect(() => {
-    const el = mainRef.current;
-    if (!el) return;
-
     const handleScroll = () => {
-      setShowTopButton(el.scrollTop > el.clientHeight * 0.5);
+      const threshold = 200;
+      setShowTopButton(window.scrollY > threshold);
     };
 
-    el.addEventListener('scroll', handleScroll);
-    return () => el.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollToTop = () => {
-    mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const mergedHeaderClass = `bg-white shadow ${
@@ -57,19 +56,22 @@ export const AppLayout = ({
   }`.trim();
 
   return (
-    <div className="flex flex-col h-screen relative">
+    <div className="flex flex-col min-h-screen relative">
+      {/* 헤더 */}
       <Header
         {...headerProps}
         className={`sticky top-0 z-50 ${mergedHeaderClass}`}
       />
 
-      <main
-        ref={mainRef}
-        className={`flex-1 overflow-y-auto snap-y snap-mandatory ${mainClassName}`}
-      >
+      {/* 콘텐츠 영역 */}
+      <main ref={mainRef} className={`flex-grow ${mainClassName}`}>
         {children}
       </main>
 
+      {/* Footer 항상 하단 */}
+      <Footer />
+
+      {/* 챗봇 & Top 버튼 */}
       <ChatbotButton onClick={() => setShowChat(true)} isVisible={!showChat} />
       {showChat && <ChatModal onClose={() => setShowChat(false)} />}
       {showTopButton && <TopButton onClick={scrollToTop} />}

@@ -1,5 +1,11 @@
 export { Header } from './ui/Header';
+export { default as Footer } from './ui/Footer';
 export { AppLayout } from '@/shared/ui/layout/AppLayout';
 export { default as useMobile } from './hooks/useMobile';
 export { ModalContent } from './ui/ModalContent';
-export { categorySlugMap, categoryIdToNameMap, categoryIdToSlugMap, categoryNameToSlugMap } from './constants/categorySlugMap'
+export {
+  categorySlugMap,
+  categoryIdToNameMap,
+  categoryIdToSlugMap,
+  categoryNameToSlugMap,
+} from './constants/categorySlugMap';

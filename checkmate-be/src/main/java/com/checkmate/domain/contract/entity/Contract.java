@@ -1,6 +1,6 @@
 package com.checkmate.domain.contract.entity;
 
-import com.checkmate.domain.contractclause.entity.ContractClause;
+import com.checkmate.domain.clause.entity.Clause;
 import com.checkmate.domain.contractfieldvalue.entity.ContractFieldValue;
 import com.checkmate.domain.contractcategory.entity.ContractCategory;
 import com.checkmate.domain.question.entity.Question;
@@ -88,6 +88,6 @@ public class Contract {
     private List<ContractFieldValue> fieldValues = new ArrayList<>();
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<ContractClause> contractClauses = new ArrayList<>();
+    private List<Clause> clauses = new ArrayList<>();
 
 }

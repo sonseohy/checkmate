@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getContractQuestions, questionList } from "@/features/detail";
+import { categories, useMobile } from "@/shared";
 
 const ContractDetail:React.FC = () => {
+    const isMobile = useMobile();
     const location = useLocation();
     const contract = location.state;
     const [questions, setQuestions] = useState<questionList>({ question: [] });
@@ -24,24 +26,23 @@ const ContractDetail:React.FC = () => {
     }
   }, [contract.contract_id]);  
 
-  
+  const category = categories.find(c => c.id === contract.category_id);
 
     return (
         <div>
-            <div className="my-5">
-                <p>계약서명 : {contract.title}</p>
-                 <p>계약 ID: {contract.contract_id}</p>
-                <p className="text-gray-500 text-sm mt-1">작성 날짜: {new Date(contract.updated_at).toLocaleDateString()}</p>
-
+            <div className={` ${isMobile ? '':'my-5'}`}>
+                <p className="font-semibold mb-2 text-2xl" > {contract.title}</p>
+                <p className="text-lg">카테고리 : {category?.name ?? contract.category_id}</p>
+                {/* <p className="text-gray-500 text-sm mt-1">작성 날짜: {new Date(contract.updated_at).toLocaleDateString()}</p> */}
             </div>
             <div className="h-px bg-gray-200 " />
             <div className="mt-3">
-                <div>질문 리스트</div>
+                <div className="font-medium mb-2 text-xl">질문 리스트</div>
                 {questions?.question?.length === 0 ? (
-                    <div>질문 리스트가 존재하지 않습니다.</div>
+                    <div className="text-lg">질문 리스트가 존재하지 않습니다.</div>
                     ) : (
                     questions?.question?.map((question) => (
-                        <li key={question.questionId}>{question.questionDetail}</li>
+                        <li key={question.questionId}> <span>Q. </span> {question.questionDetail}</li>
                     ))
                 )}
             </div>

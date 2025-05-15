@@ -2,7 +2,7 @@
 
 /* 경계 */
 .table-head-ceil {
-  padding: 15px;
+  padding: 12px;
   white-space: nowrap;
   font-weight: bold;
   text-align: center;
@@ -17,7 +17,7 @@
 }
 
 .table-ceil {
-  padding: 1rem;
+  padding: 10px;
   text-align: center;
   background-color: transparent;
   border-bottom: 1px solid #e2e8f0;

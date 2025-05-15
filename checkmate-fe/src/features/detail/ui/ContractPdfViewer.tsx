@@ -3,8 +3,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Document, Page } from 'react-pdf';
 import { deleteContractDetail, getContractDetail, getContractownload } from '@/features/detail';
-import { LuDownload, LuX } from 'react-icons/lu';
+import { LuDownload, LuTrash2, LuPlus, LuMinus } from 'react-icons/lu';
 import Swal from 'sweetalert2';
+import { useMobile } from '@/shared';
+
 
 interface Params {
   contractId: string;
@@ -12,12 +14,13 @@ interface Params {
 }
 
 const ContractPdfViewer: React.FC = () => {
+  const isMobile = useMobile();
   const navigate = useNavigate();
   const { contractId } = useParams<Params>();
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(isMobile ? 0.6 : 1);
 
   // 강제 리마운트를 위해 Blob URL을 key로 사용
   const documentKey = useMemo(() => {
@@ -35,6 +38,12 @@ const ContractPdfViewer: React.FC = () => {
       }
     })();
   }, [contractId]);
+
+
+  useEffect(() => {
+    setScale(isMobile ? 0.6 : 1);
+  }, [isMobile]);
+
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -74,13 +83,13 @@ const ContractPdfViewer: React.FC = () => {
       {/* 컨트롤 버튼들 */}
       <div className="flex justify-between items-center my-3 gap-5 ml-3">
         {/* Zoom */}
-        <div className="flex space-x-2 items-center">
-          <button onClick={() => setScale((s) => s - 0.1)} className="px-2 py-1 bg-gray-200 rounded">
-            축소
+        <div className={`flex items-center ${isMobile ? 'space-x-1': 'space-x-2 '}`}>
+          <button onClick={() => setScale((s) => s - 0.1)} className={` py-1 bg-gray-200 rounded ${isMobile ? 'text-sm px-1':'text-md px-2'}`}>
+            <LuMinus />
           </button>
           <span>{(scale * 100).toFixed(0)}%</span>
-          <button onClick={() => setScale((s) => s + 0.1)} className="px-2 py-1 bg-gray-200 rounded">
-            확대
+          <button onClick={() => setScale((s) => s + 0.1)} className={` py-1 bg-gray-200 rounded ${isMobile ? 'text-sm px-1':'text-md px-2'}`}>
+            <LuPlus />
           </button>
         </div>
         {/* Pagination */}
@@ -105,17 +114,29 @@ const ContractPdfViewer: React.FC = () => {
         </div>
         {/* Download / Delete */}
         <div className="flex space-x-3">
-          <button onClick={handlePdfDownload} className="flex items-center gap-2 border p-2 rounded-xl">
-            파일 다운로드 <LuDownload size={20} />
-          </button>
-          <button onClick={handleDeleteContract} className="flex items-center gap-2 border p-2 rounded-xl">
-            파일 삭제 <LuX size={20} />
-          </button>
+          {isMobile 
+          ?  <div className='flex flex-row'>
+              <button onClick={handlePdfDownload} className="flex items-center p-2 text-sm ">
+                <LuDownload size={25}  />
+              </button>
+              <button onClick={handleDeleteContract} className="flex items-center p-2 ">
+                 <LuTrash2 size={25} />
+              </button>
+            </div>
+          : <div className='flex flew-col gap-2 '>
+              <button onClick={handlePdfDownload} className="flex items-center gap-1 p-2 border-1 rounded-lg">
+                파일 다운로드 <LuDownload size={20}  />
+              </button>
+              <button onClick={handleDeleteContract} className="flex items-center gap-1 p-2 border-1 rounded-lg">
+                파일 삭제 <LuTrash2 size={20} />
+              </button>
+            </div> }
+         
         </div>
       </div>
 
       {/* PDF Viewer */}
-      <div className="">
+      <div className={` ${isMobile? 'mt-1': 'mt-2 '}`}>
         {!pdfBlob ? (
           <div>PDF 불러오는 중…</div>
         ) : (
@@ -125,22 +146,30 @@ const ContractPdfViewer: React.FC = () => {
             onLoadSuccess={onDocumentLoadSuccess}
             loading="로딩 중…"
           >
-            <div className='flex flex-row '>
+            <div className={`flex ${isMobile ? 'flex-col': 'flex-row'}`}>
               {/* 썸네일 */}
-              <div className="w-60 overflow-y-auto overflow-x-hidden h-[845px]">
+              <div
+                className={
+                  isMobile
+                    ? "w-full flex flex-row overflow-x-auto overflow-y-hidden max-w-full"
+                    : "w-60 overflow-y-auto overflow-x-hidden h-[845px] mr-3"
+                }
+
+              >
                 {Array.from({ length: numPages }).map((_, idx) => (
                   <div
                     key={idx}
                     onClick={() => handleThumbnailClick(idx + 1)}
-                    className={`cursor-pointer p-2 mb-2 ${pageNumber === idx + 1 ? 'bg-gray-100' : ''}`}
+                    className={`cursor-pointer ${isMobile ?'p-2' :''} mb-2 ${pageNumber === idx + 1 ? 'border-2 border-[#cccccc]' : ''}`}
                   >
-                    <Page pageNumber={idx + 1} scale={0.4} renderAnnotationLayer={false} />
+                    <Page pageNumber={idx + 1} scale={ isMobile ? 0.2 :0.4} renderAnnotationLayer={false} />
                   </div>
                 ))}
               </div>
+              <div className="h-px bg-gray-200 mb-3" />
 
               {/* 메인 뷰 */}
-              <div className="flex-1 flex justify-center items-start">
+              <div className="flex-1 flex justify-center items-start ">
                 <Page pageNumber={pageNumber} scale={scale} />
               </div>
             </div>

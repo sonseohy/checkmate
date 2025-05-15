@@ -63,7 +63,7 @@ public class Contract {
     private String signatureRequestId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "signature_status", length = 20, nullable = false)
+    @Column(name = "signature_status", length = 20)
     private SignatureStatus signatureStatus = SignatureStatus.PENDING;
 
     @Column(name = "signed_at")

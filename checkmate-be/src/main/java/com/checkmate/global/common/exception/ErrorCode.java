@@ -62,7 +62,11 @@ public enum ErrorCode {
     MISSING_REPORT_NOT_FOUND("MISSING-001", HttpStatus.NOT_FOUND, "누락 사항 리스트를 찾을 수 없습니다.."),
     RISK_NOT_FOUND("RISK-001", HttpStatus.NOT_FOUND, "위험 사항 리스트를 찾을 수 없습니다."),
 
-    WEBHOOK_AUTH_FAILURE("WEBHOOK-001", HttpStatus.UNAUTHORIZED, "웹훅 인증에 실패했습니다.");
+    WEBHOOK_AUTH_FAILURE("WEBHOOK-001", HttpStatus.UNAUTHORIZED, "웹훅 인증에 실패했습니다."),
+
+    ANALYSIS_FAIL("ANALYSIS-003", HttpStatus.BAD_REQUEST, "계약서 분석에 실패했습니다."),
+
+    UNKNOWN_ANALYSIS_STATUS("ANALYSIS-004", HttpStatus.BAD_REQUEST, "계약서 분석 상태를 알 수 없습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

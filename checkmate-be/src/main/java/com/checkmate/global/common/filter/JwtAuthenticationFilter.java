@@ -42,7 +42,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/news",
             "/api/chatbot",
             "/api/courthouses",
-            "/api/hellosign/callback"
+            "/api/hellosign/callback",
+            "/ws/",
+            "/app"
     };
 
     /**

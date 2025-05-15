@@ -34,6 +34,7 @@ public enum ErrorCode {
     CONTRACT_NOT_FOUND("CONTRACT-002", HttpStatus.NOT_FOUND, "존재하지 않는 계약서입니다."),
     CONTRACT_ACCESS_DENIED("CONTRACT-003", HttpStatus.UNAUTHORIZED, "해당 계약서에 대한 접근 권한이 없습니다."),
     CONTRACT_NOT_FOUND_FOR_SIGNATURE("CONTRACT-004", HttpStatus.NOT_FOUND, "서명 요청 ID에 해당하는 계약을 찾을 수 없습니다."),
+    CONTRACT_ALREADY_SIGNED("CONTRACT-005", HttpStatus.CONFLICT, "해당 계약서는 이미 전자서명되었습니다."),
 
     COURTHOUSE_NOT_FOUND("COURT-001", HttpStatus.NOT_FOUND, "법원 정보를 찾을 수 없습니다."),
 
@@ -62,7 +63,10 @@ public enum ErrorCode {
     MISSING_REPORT_NOT_FOUND("MISSING-001", HttpStatus.NOT_FOUND, "누락 사항 리스트를 찾을 수 없습니다.."),
     RISK_NOT_FOUND("RISK-001", HttpStatus.NOT_FOUND, "위험 사항 리스트를 찾을 수 없습니다."),
 
-    WEBHOOK_AUTH_FAILURE("WEBHOOK-001", HttpStatus.UNAUTHORIZED, "웹훅 인증에 실패했습니다.");
+    WEBHOOK_AUTH_FAILURE("WEBHOOK-001", HttpStatus.UNAUTHORIZED, "웹훅 인증에 실패했습니다."),
+
+    NOTIFICATION_NOT_FOUND("NOTIFICATION-001", HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
+    NOTIFICATION_ACCESS_DENIED("NOTIFICATION-002", HttpStatus.UNAUTHORIZED, "해당 알림에 대한 접근 권한이 없습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

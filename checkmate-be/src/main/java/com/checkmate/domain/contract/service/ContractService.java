@@ -154,6 +154,10 @@ public class ContractService {
             SignatureRequest signer
     ) throws Exception {
 
+        if (contractRepository.existsByIdAndSignatureStatus(contractId, SignatureStatus.COMPLETED)) {
+            throw new CustomException(ErrorCode.CONTRACT_ALREADY_SIGNED);
+        }
+
         PdfMetadata meta = contractFileService.loadViewerPdfMetadata(userId, contractId);
 
         InputStream decrypted = s3Service.getDecryptedStream(

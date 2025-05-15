@@ -22,7 +22,6 @@ public class LegalClauseCustomRepositoryImpl implements LegalClauseCustomReposit
     @Override
     public List<LegalClause> findByFieldIdsAndCategoryId(List<Integer> fieldIds, Integer categoryId) {
         if (fieldIds == null || fieldIds.isEmpty() || categoryId == null) {
-            log.debug("필드 ID 또는 카테고리 ID가 없어 법조항 조회를 건너뜁니다.");
             return Collections.emptyList();
         }
 
@@ -46,7 +45,7 @@ public class LegalClauseCustomRepositoryImpl implements LegalClauseCustomReposit
         return results;
     }
 
-    // 단일 필드 ID로 법조항 검색 메서드 (기존 메서드 대체)
+    // 단일 필드 ID로 법조항 검색 메서드
     public List<LegalClause> findByFieldIdAndCategoryId(Integer fieldId, Integer categoryId) {
         if (fieldId == null || categoryId == null) {
             return Collections.emptyList();
@@ -61,4 +60,43 @@ public class LegalClauseCustomRepositoryImpl implements LegalClauseCustomReposit
         return mongoTemplate.find(query, LegalClause.class);
     }
 
+    @Override
+    public List<LegalClause> findByCategoryId(Integer categoryId) {
+        if (categoryId == null) {
+            return Collections.emptyList();
+        }
+
+        log.debug("MongoDB 쿼리 실행 - 카테고리 ID: {}", categoryId);
+
+        Query query = new Query(Criteria.where("isActive").is(true)
+                .and("categoryIds").in(categoryId));
+
+        query.with(Sort.by(Sort.Direction.ASC, "displayOrder"));
+
+        List<LegalClause> results = mongoTemplate.find(query, LegalClause.class);
+        log.debug("카테고리 ID로 조회된 법조항 수: {}", results.size());
+
+        return results;
+    }
+
+    // 추가: 그룹 ID와 카테고리 ID로 법조항 검색
+    @Override
+    public List<LegalClause> findByGroupIdAndCategoryId(String groupId, Integer categoryId) {
+        if (groupId == null || categoryId == null) {
+            return Collections.emptyList();
+        }
+
+        log.debug("MongoDB 쿼리 실행 - 그룹 ID: {}, 카테고리 ID: {}", groupId, categoryId);
+
+        Query query = new Query(Criteria.where("isActive").is(true)
+                .and("categoryIds").in(categoryId)
+                .and("groupId").is(groupId));
+
+        query.with(Sort.by(Sort.Direction.ASC, "displayOrder"));
+
+        List<LegalClause> results = mongoTemplate.find(query, LegalClause.class);
+        log.debug("그룹 ID와 카테고리 ID로 조회된 법조항 수: {}", results.size());
+
+        return results;
+    }
 }

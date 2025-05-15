@@ -17,9 +17,11 @@ public class LegalClause {
     private String id;
 
     private String titleText;
+    private String groupId;
     private Integer displayOrder;
     private List<Integer> targetFields;
     private List<Integer> categoryIds;
+    private CompositeCondition groupCondition;
     private List<Component> components;
     private Boolean isActive;
     private LocalDateTime createdAt;

@@ -12,11 +12,6 @@ import com.checkmate.domain.contractfieldvalue.repository.LegalClauseRepository;
 import com.checkmate.domain.templatefield.entity.InputType;
 import com.checkmate.domain.templatefield.entity.TemplateField;
 import com.checkmate.domain.templatefield.repository.TemplateFieldRepository;
-import com.checkmate.domain.templatefieldcategory.service.TemplateFieldCategoryService;
-import com.checkmate.domain.templatesection.entity.TemplateSection;
-import com.checkmate.domain.templatesection.repository.TemplateSectionRepository;
-import com.checkmate.domain.section.entity.Section;
-import com.checkmate.domain.section.repository.SectionRepository;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -39,145 +34,102 @@ import java.util.stream.Collectors;
 public class ContractFieldValueService {
 
     private final ContractRepository contractRepository;
-    private final TemplateSectionRepository templateSectionRepository;
-    private final SectionRepository sectionRepository;
     private final TemplateFieldRepository templateFieldRepository;
     private final ContractFieldValueRepository contractFieldValueRepository;
     private final LegalClauseRepository legalClauseRepository;
-    private final TemplateFieldCategoryService templateFieldCategoryService;
 
     /**
      * 여러 섹션의 필드값을 한 번에 저장하고 법조항 렌더링
      */
     @Transactional
     public List<ContractFieldValueResponseDto> saveFieldValues(Integer contractId, ContractFieldValueRequestDto request) {
-        List<ContractFieldValueResponseDto> responses = new ArrayList<>();
-
-        // 각 섹션별로 필드값 저장 및 법조항 렌더링
+        // 1. 필드값 저장
         for (ContractFieldValueRequestDto.SectionFieldValues sectionValues : request.getSections()) {
-            ContractFieldValueResponseDto response = saveFieldValuesForSection(contractId, sectionValues);
-            responses.add(response);
+            saveFieldValuesForSection(contractId, sectionValues);
         }
 
-        return responses;
+        // 2. 그룹별 법조항 렌더링
+        return renderLegalClausesByGroups(contractId);
     }
 
     /**
-     * 단일 섹션의 필드값 저장 및 법조항 렌더링
+     * 필드값 저장 (법조항 렌더링 없음)
      */
-    @Transactional // 중첩 트랜잭션 처리
-    protected ContractFieldValueResponseDto saveFieldValuesForSection(
-            Integer contractId,
-            ContractFieldValueRequestDto.SectionFieldValues sectionValues) {
-
+    @Transactional
+    protected void saveFieldValuesForSection(Integer contractId, ContractFieldValueRequestDto.SectionFieldValues sectionValues) {
         // 1. 계약서 존재 확인
         Contract contract = findContractById(contractId);
 
-        // 2. 섹션 존재 확인
-        Section section = findSectionEntityById(sectionValues.getSectionId());
-
-        // 3. 템플릿 섹션 조회
-        TemplateSection templateSection = findTemplateSectionByTemplateAndSectionId(
-                contract.getTemplate().getId(), section.getId());
-
-        // 4. 모든 필드 ID 목록 추출
-        List<Integer> allFieldIds = sectionValues.getFieldValues().stream()
-                .map(ContractFieldValueRequestDto.FieldValueDto::getFieldId)
-                .collect(Collectors.toList());
-
-        // 5. 필드값 저장/업데이트
+        // 2. 필드값 저장/업데이트
         saveOrUpdateFieldValues(contract, sectionValues.getFieldValues());
-
-        // 6. 응답 생성
-        ContractFieldValueResponseDto response = new ContractFieldValueResponseDto();
-        response.setContractId(contractId);
-        response.setSectionId(sectionValues.getSectionId());
-
-        // 7. 법조항 렌더링
-        List<LegalClauseDto> renderedClauses = renderLegalClausesForFields(contractId, section, allFieldIds);
-        response.setLegalClauses(renderedClauses);
-
-        return response;
     }
 
-
     /**
-     * 특정 필드 ID 목록에 해당하는 법조항을 렌더링
+     * 그룹별 법조항 렌더링
      */
-    private List<LegalClauseDto> renderLegalClausesForFields(Integer contractId, Section section, List<Integer> fieldIds) {
+    public List<ContractFieldValueResponseDto> renderLegalClausesByGroups(Integer contractId) {
         // 1. 계약서 카테고리 ID 가져오기
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
         Integer categoryId = contract.getTemplate().getCategory().getId();
 
-        log.debug("계약서 카테고리 ID: {}, 필드 ID 목록: {}", categoryId, fieldIds);
-
-        // 2. 필드값 맵 구성
+        // 2. 모든 필드값 맵 구성
         Map<Integer, String> fieldIdValueMap = getFieldIdValueMap(contractId);
-        Map<Integer, String> fieldIdToKeyMap = getFieldIdToKeyMap(fieldIds);
+        Map<Integer, String> fieldIdToKeyMap = getFieldIdToKeyMap(
+                fieldIdValueMap.keySet().stream().collect(Collectors.toList()));
 
-        // 3. 결과를 담을 Set (중복 제거를 위해 Set 사용)
-        Set<LegalClause> combinedResults = new HashSet<>();
+        // 3. 카테고리에 해당하는 모든 법조항 조회
+        List<LegalClause> allClauses = legalClauseRepository.findByCategoryId(categoryId);
 
-        // 4. MongoDB ID 목록 조회
-        List<String> mongoClauseIds = templateFieldCategoryService
-                .getMongoClauseIdsByFieldIdsAndCategoryId(fieldIds, categoryId);
+        // 4. 각 법조항을 그룹별로 분류
+        Map<String, List<LegalClause>> groupedClauses = new HashMap<>();
 
-        // 5. MongoDB ID가 있으면 해당 법조항 조회하여 결과에 추가
-        if (!mongoClauseIds.isEmpty()) {
-            log.debug("MongoDB ID로 법조항 조회: {} 개", mongoClauseIds.size());
-            List<LegalClause> mongoIdResults = legalClauseRepository.findAllById(mongoClauseIds);
-            log.debug("MongoDB ID로 찾은 법조항 수: {}", mongoIdResults.size());
-            combinedResults.addAll(mongoIdResults);
+        for (LegalClause clause : allClauses) {
+            // 그룹 조건 평가 - 표시 여부 결정
+            if (clause.getGroupCondition() != null &&
+                    !evaluateCondition(clause.getGroupCondition(), fieldIdValueMap)) {
+                continue; // 그룹 조건이 false면 제외
+            }
+
+            String groupId = clause.getGroupId();
+            if (groupId == null) {
+                continue; // 그룹 ID가 없으면 제외
+            }
+
+            // 해당 그룹에 법조항 추가
+            if (!groupedClauses.containsKey(groupId)) {
+                groupedClauses.put(groupId, new ArrayList<>());
+            }
+            groupedClauses.get(groupId).add(clause);
         }
 
-        // 6. 필드 ID와 카테고리 ID로도 검색하여 결과에 추가 (MongoDB ID로 찾지 못한 법조항 보완)
-        if (!fieldIds.isEmpty()) {
-            log.debug("필드 ID로 법조항 추가 검색");
-            List<LegalClause> fieldIdResults = legalClauseRepository.findByFieldIdsAndCategoryId(fieldIds, categoryId);
-            log.debug("필드 ID로 찾은 법조항 수: {}", fieldIdResults.size());
-            combinedResults.addAll(fieldIdResults);
+        // 5. 각 그룹별로 응답 객체 생성
+        List<ContractFieldValueResponseDto> result = new ArrayList<>();
+
+        for (Map.Entry<String, List<LegalClause>> entry : groupedClauses.entrySet()) {
+            String groupId = entry.getKey();
+            List<LegalClause> clauses = entry.getValue();
+
+            // 그룹별 응답 생성
+            ContractFieldValueResponseDto response = new ContractFieldValueResponseDto();
+            response.setContractId(contractId);
+            response.setGroupId(groupId);
+
+            // 법조항 렌더링
+            List<LegalClauseDto> renderedClauses = renderLegalClauses(clauses, fieldIdValueMap, fieldIdToKeyMap);
+            response.setLegalClauses(renderedClauses);
+
+            result.add(response);
         }
 
-        // 7. 결과를 displayOrder로 정렬
-        List<LegalClause> sortedResults = combinedResults.stream()
-                .sorted(Comparator.comparing(LegalClause::getDisplayOrder))
-                .collect(Collectors.toList());
-
-        // 결과에 대한 매핑 정보 저장 (최적화)
-        if (!sortedResults.isEmpty()) {
-            saveLegalClauseMappings(fieldIds, categoryId, sortedResults);
-        }
-
-        // 8. 법조항 렌더링
-        List<LegalClauseDto> result = renderLegalClauses(sortedResults, fieldIdValueMap, fieldIdToKeyMap);
-        log.debug("렌더링된 법조항 수: {}", result.size());
+        // 6. 결과를 order 기준으로 정렬
+        result.sort((r1, r2) -> {
+            int order1 = r1.getLegalClauses().isEmpty() ? Integer.MAX_VALUE : r1.getLegalClauses().get(0).getOrder();
+            int order2 = r2.getLegalClauses().isEmpty() ? Integer.MAX_VALUE : r2.getLegalClauses().get(0).getOrder();
+            return Integer.compare(order1, order2);
+        });
 
         return result;
-    }
-
-    /**
-     * 검색된 법조항을 필드-카테고리 매핑 테이블에 저장
-     */
-    private void saveLegalClauseMappings(List<Integer> fieldIds, Integer categoryId, List<LegalClause> legalClauses) {
-        if (legalClauses.isEmpty()) {
-            return;
-        }
-
-        for (LegalClause clause : legalClauses) {
-            if (clause.getTargetFields() != null) {
-                // 현재 법조항과 관련된 필드 ID 목록 (필드 ID 목록과의 교집합)
-                List<Integer> relevantFieldIds = clause.getTargetFields().stream()
-                        .filter(fieldIds::contains)
-                        .collect(Collectors.toList());
-
-                // 각 관련 필드에 대해 MongoDB ID 매핑 저장
-                if (!relevantFieldIds.isEmpty()) {
-                    templateFieldCategoryService.saveMongoClauseIdForMultipleFields(
-                            relevantFieldIds, categoryId, clause.getId());
-                }
-            }
-        }
     }
 
     /**
@@ -186,31 +138,6 @@ public class ContractFieldValueService {
     private Contract findContractById(Integer contractId) {
         return contractRepository.findById(contractId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
-    }
-
-    /**
-     * 섹션 ID로 섹션 엔티티 정보를 조회
-     */
-    private Section findSectionEntityById(Integer sectionId) {
-        return sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SECTION_NOT_FOUND));
-    }
-
-    /**
-     * 템플릿 ID와 섹션 ID로 템플릿 섹션 정보를 조회
-     */
-    private TemplateSection findTemplateSectionByTemplateAndSectionId(Integer templateId, Integer sectionId) {
-        // 템플릿 ID와 섹션 ID로 템플릿 섹션 검색
-        List<TemplateSection> templateSections = templateSectionRepository.findAll().stream()
-                .filter(ts -> ts.getTemplate().getId().equals(templateId) &&
-                        ts.getSection().getId().equals(sectionId))
-                .toList();
-
-        if (templateSections.isEmpty()) {
-            throw new CustomException(ErrorCode.SECTION_NOT_FOUND);
-        }
-
-        return templateSections.get(0);
     }
 
     /**

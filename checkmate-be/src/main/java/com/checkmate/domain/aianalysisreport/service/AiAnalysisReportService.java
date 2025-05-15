@@ -56,11 +56,11 @@ public class AiAnalysisReportService {
 			)
 		);
 		return AiAnalysisWebhookResponseDto.builder()
-			.status("sucess")
+			.status("success")
 			.build();
 	}
 
-	public AiAnalysisWebhookResponseDto handleAnalysisFailed(String webhookApiKey, String ApiKey ,int contractId, int contractCategoryId, String jobId, String error) {
+	public void handleAnalysisFailed(String webhookApiKey, String ApiKey ,int contractId, int contractCategoryId, String jobId, String error) {
 		if (!verifyWebhookApiKey(webhookApiKey, ApiKey)) {
 			throw new CustomException(ErrorCode.UNAUTHORIZED);
 		}
@@ -77,10 +77,6 @@ public class AiAnalysisReportService {
 				contractCategoryId
 			)
 		);
-		return AiAnalysisWebhookResponseDto.builder()
-			.status("failed")
-			.message(error)
-			.build();
 	}
 
 	public boolean verifyWebhookApiKey(String webhookApiKey, String apiKey) {

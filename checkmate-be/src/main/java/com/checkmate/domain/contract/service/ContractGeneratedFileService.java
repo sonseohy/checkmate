@@ -68,7 +68,7 @@ public class ContractGeneratedFileService {
 
             // 5. 기존 파일 확인 (삭제할 필요가 있는 경우를 위해)
             Optional<ContractFile> existingFile = contractFileRepository
-                    .findByContractIdAndFileCategory(contractId, FileCategory.GENERATED);
+                    .findByContractIdAndFileCategory(contractId, FileCategory.VIEWER);
 
             // 기존 파일이 있으면 S3에서 삭제
             if (existingFile.isPresent()) {
@@ -86,7 +86,7 @@ public class ContractGeneratedFileService {
                     .contract(contract)
                     .fileType("pdf")
                     .fileAddress(res.getUrl())
-                    .fileCategory(FileCategory.GENERATED)
+                    .fileCategory(FileCategory.VIEWER)
                     .encryptedDataKey(res.getShareA())
                     .iv(res.getIv())
                     .uploadAt(LocalDateTime.now())

@@ -3,6 +3,7 @@ package com.checkmate.domain.contract.service;
 import com.checkmate.domain.contract.dto.response.ContractGeneratedFileResponseDto;
 import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.entity.ContractFile;
+import com.checkmate.domain.contract.entity.EditStatus;
 import com.checkmate.domain.contract.entity.FileCategory;
 import com.checkmate.domain.contract.repository.ContractFileRepository;
 import com.checkmate.domain.contract.repository.ContractRepository;
@@ -97,9 +98,14 @@ public class ContractGeneratedFileService {
             // 8. MongoDB에 shareB 저장
             keyShareMongo.saveShareB(Long.valueOf(savedFile.getId()), res.getShareB());
 
-            log.info("계약서 생성 파일 저장 완료: contractId={}, fileId={}", contractId, savedFile.getId());
+            // 9. 계약서 상태 업데이트 - EDITING → COMPLETED
+            contract.setEditStatus(EditStatus.COMPLETED);
+            contractRepository.save(contract);
 
-            // 9. 응답 생성
+            log.info("계약서 생성 파일 저장 및 상태 업데이트 완료: contractId={}, fileId={}, status=COMPLETED",
+                    contractId, savedFile.getId());
+
+            // 10. 응답 생성
             return ContractGeneratedFileResponseDto.builder()
                     .contractId(contractId)
                     .fileName(finalFileName)

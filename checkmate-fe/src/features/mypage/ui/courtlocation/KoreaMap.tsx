@@ -126,7 +126,7 @@ export default function KoreaMap({ courtCoords }: KoreaMapProps) {
       .join('circle')
       .attr('cx', d => geoProj([d.longitude, d.latitude])![0])
       .attr('cy', d => geoProj([d.longitude, d.latitude])![1])
-      .attr('r', 4)
+      .attr('r', 4 )
       .attr('fill', 'red');
   }, [courtCoords, pathGen, geoProj]);
 

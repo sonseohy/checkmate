@@ -96,7 +96,7 @@ public class HelloSignCallbackService {
                 .findByContractIdAndFileCategory(contract.getId(), FileCategory.VIEWER)
                 .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
         s3Service.deleteFile(oldFile.getFileAddress());
-        contract.removeFile(oldFile);
+        contractFileRepository.delete(oldFile);
 
         // 9) 새 viewer 파일 메타 저장
         ContractFile signedFile = ContractFile.builder()
@@ -108,8 +108,7 @@ public class HelloSignCallbackService {
                 .iv(result.getIv())
                 .uploadAt(LocalDateTime.now())
                 .build();
-        contract.addFile(signedFile);
-        contractRepository.save(contract);
+        contractFileRepository.save(signedFile);
 
         // 10) 키 공유 정보 저장
         keyShareMongoService.saveShareB(Long.valueOf(signedFile.getId()), result.getShareB());

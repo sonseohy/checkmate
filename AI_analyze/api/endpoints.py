@@ -152,6 +152,7 @@ async def process_contract_background(
             error=str(e)
         )
 
+
 async def process_contract_pipeline(
         req: OcrRequest,
         decryption_service: DecryptionService,
@@ -322,6 +323,7 @@ async def get_ocr_result(cid, decryption_service, ocr_engine, ocr_cache):
     asyncio.create_task(ocr_cache.set(cid, pages))
 
     return pages
+
 
 async def send_webhook_notification(
         job_id: str,

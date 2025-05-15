@@ -9,6 +9,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMBEDDING_REPO_ID = os.environ.get("EMBEDDING_REPO_ID")
 
 QDRANT_URL = os.environ.get("QDRANT_URL")
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY")
 
 MONGO_HOST = os.environ.get("MONGO_HOST", "localhost")
 MONGO_PORT = os.environ.get("MONGO_PORT", "27017")
@@ -16,6 +17,7 @@ MONGO_DB = os.environ.get("MONGO_DB")
 MONGO_USERNAME = os.environ.get("MONGO_USERNAME")
 MONGO_PASSWORD = os.environ.get("MONGO_PASSWORD")
 MONGO_AUTH = os.environ.get("MONGO_AUTH")
+
 
 # MongoDB URI 구성
 if MONGO_USERNAME and MONGO_PASSWORD:

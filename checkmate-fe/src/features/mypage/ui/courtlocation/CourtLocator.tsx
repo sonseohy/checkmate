@@ -28,7 +28,7 @@ export default function CourtLocation() {
         <div>
             <div className="flex flex-col">
                 <div className="m-10 rounded-2xl bg-white">
-                    <KoreaMap courtCoords={courts} /> 
+                    <KoreaMap /> 
                 </div>
                 <div className="flex flex-row">
                     <div>

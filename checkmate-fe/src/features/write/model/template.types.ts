@@ -57,6 +57,7 @@ export interface CreateContractResponse {
   };
   template: Template;
   sections: TemplateSection[];
+  values?: Record<string, any>;
 }
 
 // 체크리스트 관련 types

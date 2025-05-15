@@ -1,7 +1,12 @@
+import Swal from 'sweetalert2'; // 이미 있다면 생략 가능
 import { useState } from 'react';
 import { SignatureService } from '@/features/e-sign';
 
-const SignatureRequestForm = () => {
+interface Props {
+  contractId: number;
+}
+
+const SignatureRequestForm = ({ contractId }: Props) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<
@@ -13,11 +18,30 @@ const SignatureRequestForm = () => {
     setStatus('loading');
 
     try {
-      await SignatureService.request({ name, email });
+      await SignatureService.request(contractId, { name, email });
       setStatus('success');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setStatus('error');
+
+      // ✅ 에러 메시지 파악
+      const code = err?.response?.data?.error?.code;
+
+      if (code === 'FILE-001') {
+        Swal.fire({
+          icon: 'info',
+          title: 'PDF 저장 필요',
+          text: '먼저 PDF를 저장해주세요.',
+          confirmButtonText: '확인',
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: '요청 실패',
+          text: '전자서명 요청 중 문제가 발생했습니다. 다시 시도해주세요.',
+          confirmButtonText: '확인',
+        });
+      }
     }
   };
 
@@ -60,11 +84,6 @@ const SignatureRequestForm = () => {
 
       {status === 'success' && (
         <p className="text-green-600 mt-2">요청이 성공적으로 전송되었습니다!</p>
-      )}
-      {status === 'error' && (
-        <p className="text-red-600 mt-2">
-          요청에 실패했습니다. 다시 시도해주세요.
-        </p>
       )}
     </form>
   );

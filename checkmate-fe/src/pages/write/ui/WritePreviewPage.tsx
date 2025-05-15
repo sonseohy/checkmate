@@ -1,5 +1,7 @@
 import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { LegalClauseGroup, Clause } from '@/features/write';
+import SignatureRequestForm from '@/features/e-sign/ui/SignatureRequestForm';
 
 const WritePreviewPage: React.FC = () => {
   const { state } = useLocation() as {
@@ -9,10 +11,20 @@ const WritePreviewPage: React.FC = () => {
     };
   };
 
-  if (!state?.legalClausesBySection || state.legalClausesBySection.length === 0) {
-    return <div className="text-center text-gray-500">표시할 계약서 미리보기 내용이 없습니다.</div>;
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+
+  if (
+    !state?.legalClausesBySection ||
+    state.legalClausesBySection.length === 0
+  ) {
+    return (
+      <div className="text-center text-gray-500">
+        표시할 계약서 미리보기 내용이 없습니다.
+      </div>
+    );
   }
 
+  const contractId = state.contractId;
   const today = new Date().toISOString().split('T')[0].replace(/-/g, '.');
 
   const sortedSections = [...state.legalClausesBySection].sort((a, b) => {
@@ -29,11 +41,13 @@ const WritePreviewPage: React.FC = () => {
 
       <div className="max-w-3xl mx-auto space-y-10 print:space-y-6">
         {sortedSections.map((section, index) => {
-          const sortedClauses: Clause[] = [...section.legalClauses].sort((a, b) => {
-            const orderA = typeof a.order === 'number' ? a.order : Infinity;
-            const orderB = typeof b.order === 'number' ? b.order : Infinity;
-            return orderA - orderB;
-          });
+          const sortedClauses: Clause[] = [...section.legalClauses].sort(
+            (a, b) => {
+              const orderA = typeof a.order === 'number' ? a.order : Infinity;
+              const orderB = typeof b.order === 'number' ? b.order : Infinity;
+              return orderA - orderB;
+            },
+          );
 
           const [headerClause, ...otherClauses] = sortedClauses;
           const orderNumber = headerClause?.order;
@@ -42,22 +56,25 @@ const WritePreviewPage: React.FC = () => {
             const nextSection = sortedSections[index + 1];
             const nextClauses = nextSection?.legalClauses ?? [];
             return (
-              <>
+              <div key={`combined-${section.sectionId}`}>
                 <div className="text-center text-gray-700 font-bold text-xl mb-6 print:text-base print:mb-4">
                   {today}.
                 </div>
-                <div
-                  key={`combined-${section.sectionId}`}
-                  className="bg-white p-6 rounded-lg border border-gray-300 shadow-sm print:shadow-none print:p-4 print:break-inside-avoid"
-                >
+                <div className="bg-white p-6 rounded-lg border border-gray-300 shadow-sm print:shadow-none print:p-4 print:break-inside-avoid">
                   {[...sortedClauses, ...nextClauses].map((clause, i) => (
                     <div key={i} className="mb-6">
-                      <h3 className="font-bold text-lg print:text-base mb-2">{clause.titleText}</h3>
+                      <h3 className="font-bold text-lg print:text-base mb-2">
+                        {clause.titleText}
+                      </h3>
                       <ul className="pl-5 text-gray-700 print:text-sm">
                         {clause.content.map((line, j) => (
                           <li
                             key={j}
-                            className={/^[0-9]+[.)]/.test(line.trim()) ? 'list-none pl-0' : 'list-disc list-inside'}
+                            className={
+                              /^[0-9]+[.)]/.test(line.trim())
+                                ? 'list-none pl-0'
+                                : 'list-disc list-inside'
+                            }
                           >
                             {line}
                           </li>
@@ -66,7 +83,7 @@ const WritePreviewPage: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </>
+              </div>
             );
           }
 
@@ -80,19 +97,24 @@ const WritePreviewPage: React.FC = () => {
               {headerClause ? (
                 <>
                   <h2 className="text-xl font-bold print:text-lg">
-                    제{headerClause.order ?? '-'}조({headerClause.titleText ?? '제목 없음'})
+                    제{headerClause.order ?? '-'}조(
+                    {headerClause.titleText ?? '제목 없음'})
                   </h2>
                   <ul className="pl-5 text-gray-700 print:text-sm">
                     {headerClause.content.map((line, i) => (
                       <li
                         key={i}
-                        className={/^[0-9]+[.)]/.test(line.trim()) ? 'list-none pl-0' : 'list-disc list-inside'}
-                      >
-                        {
-                          line.replace(/금\s?(\d{1,})(원정|원)/g, (_, amount, suffix) => {
-                            return `금 ${Number(amount).toLocaleString()}${suffix}`;
-                          })
+                        className={
+                          /^[0-9]+[.)]/.test(line.trim())
+                            ? 'list-none pl-0'
+                            : 'list-disc list-inside'
                         }
+                      >
+                        {line.replace(
+                          /금\s?(\d{1,})(원정|원)/g,
+                          (_, amount, suffix) =>
+                            `금 ${Number(amount).toLocaleString()}${suffix}`,
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -103,12 +125,18 @@ const WritePreviewPage: React.FC = () => {
 
               {otherClauses.map((clause, index) => (
                 <div key={index} className="space-y-2">
-                  <h3 className="text-lg font-semibold print:text-base">{clause.titleText}</h3>
+                  <h3 className="text-lg font-semibold print:text-base">
+                    {clause.titleText}
+                  </h3>
                   <ul className="pl-5 text-gray-700 print:text-sm">
                     {clause.content.map((line, i) => (
                       <li
                         key={i}
-                        className={/^[0-9]+[.)]/.test(line.trim()) ? 'list-none pl-0' : 'list-disc list-inside'}
+                        className={
+                          /^[0-9]+[.)]/.test(line.trim())
+                            ? 'list-none pl-0'
+                            : 'list-disc list-inside'
+                        }
                       >
                         {line}
                       </li>
@@ -121,14 +149,37 @@ const WritePreviewPage: React.FC = () => {
         })}
       </div>
 
-      <div className="text-center mt-12 print:hidden">
+      {/* ✅ 버튼 영역 */}
+      <div className="text-center mt-12 space-x-4 print:hidden">
         <button
           className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
           onClick={() => window.print()}
         >
           PDF 다운로드
         </button>
+        <button
+          className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
+          onClick={() => setShowSignatureModal(true)}
+        >
+          전자서명
+        </button>
       </div>
+
+      {/* ✅ 전자서명 모달 */}
+      {showSignatureModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative">
+            <button
+              className="absolute top-2 right-3 text-gray-500 hover:text-black"
+              onClick={() => setShowSignatureModal(false)}
+            >
+              ✕
+            </button>
+            {/* ✅ contractId 전달 */}
+            <SignatureRequestForm contractId={contractId} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -67,6 +67,7 @@ public class ContractFieldValueService {
     /**
      * 그룹별 법조항 렌더링
      */
+    @Transactional
     public List<ContractFieldValueResponseDto> renderLegalClausesByGroups(Integer contractId) {
         // 1. 계약서 카테고리 ID 가져오기
         Contract contract = contractRepository.findById(contractId)
@@ -93,7 +94,7 @@ public class ContractFieldValueService {
 
             String groupId = clause.getGroupId();
             if (groupId == null) {
-                continue; // 그룹 ID가 없으면 제외
+                groupId = "default";
             }
 
             // 해당 그룹에 법조항 추가
@@ -110,16 +111,18 @@ public class ContractFieldValueService {
             String groupId = entry.getKey();
             List<LegalClause> clauses = entry.getValue();
 
-            // 그룹별 응답 생성
-            ContractFieldValueResponseDto response = new ContractFieldValueResponseDto();
-            response.setContractId(contractId);
-            response.setGroupId(groupId);
-
             // 법조항 렌더링
             List<LegalClauseDto> renderedClauses = renderLegalClauses(clauses, fieldIdValueMap, fieldIdToKeyMap);
-            response.setLegalClauses(renderedClauses);
 
-            result.add(response);
+            // 렌더링된 법조항이 있는 경우에만 그룹 응답 생성
+            if (!renderedClauses.isEmpty()) {
+                ContractFieldValueResponseDto response = new ContractFieldValueResponseDto();
+                response.setContractId(contractId);
+                response.setGroupId(groupId);
+                response.setLegalClauses(renderedClauses);
+
+                result.add(response);
+            }
         }
 
         // 6. 결과를 order 기준으로 정렬
@@ -322,9 +325,12 @@ public class ContractFieldValueService {
 
             dto.setContent(renderedContent);
 
-            // 중복 제거
-            String uniqueKey = dto.getTitleText() + "_" + dto.getOrder();
-            uniqueClausesMap.put(uniqueKey, dto);
+            // content가 비어있지 않은 경우에만 추가
+            if (!renderedContent.isEmpty()) {
+                // 중복 제거
+                String uniqueKey = dto.getTitleText() + "_" + dto.getOrder();
+                uniqueClausesMap.put(uniqueKey, dto);
+            }
         });
 
         // 정렬하여 반환

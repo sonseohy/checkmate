@@ -1,4 +1,7 @@
 import asyncio
+import httpx
+from datetime import datetime
+from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, BackgroundTasks
@@ -17,6 +20,7 @@ from services.postprocessing import postprocessing_pipeline
 from services.summarization import generate_summary
 from utils.dependencies import get_mongo, get_mysql, get_ocr_cache, get_vector_store
 from utils.logging import setup_logger
+from config.settings import SPRINGBOOT_WEBHOOK_URL, WEBHOOK_API_KEY
 
 logger = setup_logger(__name__)
 router = APIRouter()
@@ -127,10 +131,26 @@ async def process_contract_background(
         # 작업 상태 업데이트
         await ocr_cache.save_job_status(job_id, req.contract_id, "completed", result_data)
 
+        # Spring Boot에 웹훅 전송
+        await send_webhook_notification(
+            job_id=job_id,
+            contract_id=req.contract_id,
+            contract_category_id=req.contract_category_id,
+            status="completed",
+        )
+
     except Exception as e:
         logger.error(f"백그라운드 처리 오류: {e}", exc_info=True)
         await ocr_cache.save_job_status(job_id, req.contract_id, "failed", str(e))
 
+        # 실패 알림도 전송
+        await send_webhook_notification(
+            job_id=job_id,
+            contract_id=req.contract_id,
+            contract_category_id=req.contract_category_id,
+            status="failed",
+            error=str(e)
+        )
 
 async def process_contract_pipeline(
         req: OcrRequest,
@@ -302,3 +322,42 @@ async def get_ocr_result(cid, decryption_service, ocr_engine, ocr_cache):
     asyncio.create_task(ocr_cache.set(cid, pages))
 
     return pages
+
+async def send_webhook_notification(
+        job_id: str,
+        contract_id: int,
+        contract_category_id: int,
+        status: str,
+        error: Optional[str] = None
+):
+    """Spring Boot에 웹훅 전송"""
+    webhook_url = SPRINGBOOT_WEBHOOK_URL
+
+    payload = {
+        "jobId": job_id,
+        "contractId": contract_id,
+        "contractCategoryId": contract_category_id,
+        "status": status,
+        "timestamp": datetime.now().isoformat()
+    }
+
+    if status == "failed" and error:
+        payload["error"] = error
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-API-Key": WEBHOOK_API_KEY  # 보안을 위한 API 키
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                webhook_url,
+                json=payload,
+                timeout=10.0,
+                headers=headers
+            )
+            response.raise_for_status()
+            logger.info(f"웹훅 전송 성공: {job_id}")
+        except Exception as e:
+            logger.error(f"웹훅 전송 실패: {e}")

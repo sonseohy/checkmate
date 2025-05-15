@@ -66,7 +66,11 @@ public enum ErrorCode {
     WEBHOOK_AUTH_FAILURE("WEBHOOK-001", HttpStatus.UNAUTHORIZED, "웹훅 인증에 실패했습니다."),
 
     NOTIFICATION_NOT_FOUND("NOTIFICATION-001", HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
-    NOTIFICATION_ACCESS_DENIED("NOTIFICATION-002", HttpStatus.UNAUTHORIZED, "해당 알림에 대한 접근 권한이 없습니다.");
+    NOTIFICATION_ACCESS_DENIED("NOTIFICATION-002", HttpStatus.UNAUTHORIZED, "해당 알림에 대한 접근 권한이 없습니다."),
+
+    ANALYSIS_FAIL("ANALYSIS-003", HttpStatus.BAD_REQUEST, "계약서 분석에 실패했습니다."),
+
+    UNKNOWN_ANALYSIS_STATUS("ANALYSIS-004", HttpStatus.BAD_REQUEST, "계약서 분석 상태를 알 수 없습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

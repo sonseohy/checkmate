@@ -9,6 +9,8 @@ import {
 import { navigateInvalidAccess } from '@/shared/utils/navigation';
 import Swal from 'sweetalert2';
 import Spinner from '@/shared/ui/Spinner';
+import { useUserInfo } from '@/features/auth';
+import { KakaoLoginModal } from '@/features/main';
 
 const AnalyzeUploadPage: React.FC = () => {
   const { mainCategorySlug } = useParams<{ mainCategorySlug: string }>();
@@ -23,6 +25,10 @@ const AnalyzeUploadPage: React.FC = () => {
 
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false); // ✅ 로그인 모달 상태
+
+  const user = useUserInfo();
+  const isLoggedIn = !!user;
 
   /* 잘못된 경로 접근 방지 */
   useEffect(() => {
@@ -35,6 +41,18 @@ const AnalyzeUploadPage: React.FC = () => {
 
   /* 업로드 → 결과 페이지 이동 */
   const onNext = async () => {
+    if (!isLoggedIn) {
+      Swal.fire({
+        icon: 'info',
+        title: '로그인이 필요합니다',
+        text: '계속하려면 로그인 해주세요.',
+        confirmButtonText: '확인',
+      }).then(() => {
+        setLoginModalOpen(true);
+      });
+      return;
+    }
+
     if (files.length === 0) {
       Swal.fire({
         icon: 'warning',
@@ -74,6 +92,11 @@ const AnalyzeUploadPage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <Spinner />
         </div>
+      )}
+
+      {/* 로그인 모달 */}
+      {loginModalOpen && (
+        <KakaoLoginModal onClose={() => setLoginModalOpen(false)} />
       )}
 
       <section className="container px-2 py-12 mx-auto text-center">

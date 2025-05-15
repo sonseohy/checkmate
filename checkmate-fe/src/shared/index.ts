@@ -9,3 +9,5 @@ export {
   categoryIdToSlugMap,
   categoryNameToSlugMap,
 } from './constants/categorySlugMap';
+
+export { categories } from './constants/categories';

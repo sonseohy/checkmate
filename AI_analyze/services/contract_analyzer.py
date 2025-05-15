@@ -124,16 +124,11 @@ async def analyze_contract_parallel(
     # 병렬 실행
     results = {}
     try:
-        start_time = time.time()
-        logger.info(f"LLM 병렬 호출 시작 - {len(analysis_tasks)}개 작업")
-
         # 각 태스크의 시작 시간 기록
         task_starts = {}
         for name, task in analysis_tasks:
             task_starts[name] = time.time()
         responses = await asyncio.gather(*[task for _, task in analysis_tasks])
-        end_time = time.time()
-        logger.info(f"LLM 병렬 호출 완료 - 총 소요시간: {end_time - start_time:.2f}초")
         # 결과 매핑
         for (name, _), response in zip(analysis_tasks, responses):
             results[name] = response

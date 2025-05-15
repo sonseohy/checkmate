@@ -76,14 +76,3 @@ class OCRCache:
 
         await self.redis.setex(key, 86400, json.dumps(value))  # 24시간 보관
 
-    async def get_job_status(self, job_id: str):
-        """작업 상태 조회"""
-        if not self.redis:
-            await self.connect()
-
-        key = f"job:{job_id}"
-        data = await self.redis.get(key)
-
-        if data:
-            return json.loads(data)
-        return None

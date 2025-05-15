@@ -259,22 +259,38 @@ async def get_contract_type_requirements(vector_store, contract_type: str, llm=N
 
 
 async def get_clause_specific_laws_parallel(structured_contract, vector_store) -> Dict[str, Dict]:
-    """모든 조항에 대한 법률 검색 (최적화된 병렬 처리)"""
+    """모든 조항에 대한 법률 검색 (배치 임베딩 처리로 최적화)"""
 
     contract_type = structured_contract.metadata.contract_type
 
-    # 모든 검색 쿼리를 동시에 실행
-    search_tasks = []
+    # 1. 모든 쿼리를 먼저 수집
+    queries = []
+    sections = []
 
     for section in structured_contract.sections:
-        # 검색 쿼리 최적화
         query = f"{contract_type} {section.title} 법적 요건"
+        queries.append(query)
+        sections.append(section)
 
-        # 비동기 검색 작업 생성
-        task = search_laws_async(vector_store, query, section)
+    logger.info(f"총 {len(queries)}개 조항에 대한 임베딩 생성 시작")
+
+    # 2. 배치로 임베딩 생성 (한 번의 API 호출로 모든 임베딩 생성)
+    try:
+        # embed_documents를 사용하여 배치 처리
+        embeddings = vector_store.embeddings.embed_documents(queries)
+        logger.info(f"임베딩 생성 완료: {len(embeddings)}개")
+    except Exception as e:
+        logger.error(f"배치 임베딩 생성 오류: {e}")
+        # 오류 발생 시 개별 처리로 폴백
+        raise
+    # 3. 각 임베딩으로 검색 (병렬 처리)
+    search_tasks = []
+
+    for section, embedding in zip(sections, embeddings):
+        task = search_by_vector_async(vector_store, embedding, section)
         search_tasks.append((section.number, task))
 
-    # 모든 검색을 동시에 실행 (최대 10개씩 배치)
+    # 4. 병렬 검색 실행 (배치로 처리)
     results = {}
     batch_size = 10
 
@@ -286,16 +302,17 @@ async def get_clause_specific_laws_parallel(structured_contract, vector_store) -
         for (clause_num, _), result in zip(batch, batch_results):
             results[clause_num] = result
 
+    logger.info(f"법률 검색 완료: {len(results)}개 조항")
     return results
 
 
-async def search_laws_async(vector_store, query: str, section) -> Dict:
-    """비동기 법률 검색"""
+async def search_by_vector_async(vector_store, embedding: List[float], section) -> Dict:
+    """벡터로 직접 검색"""
     try:
-        # 비동기 검색 수행
+        # similarity_search_by_vector 사용 (임베딩 변환 과정 없음)
         search_results = await asyncio.to_thread(
-            vector_store.similarity_search,
-            query=query,
+            vector_store.similarity_search_by_vector,
+            embedding=embedding,
             k=3
         )
 
@@ -305,7 +322,7 @@ async def search_laws_async(vector_store, query: str, section) -> Dict:
             "laws": search_results
         }
     except Exception as e:
-        logger.error(f"법률 검색 오류: {e}")
+        logger.error(f"벡터 검색 오류: {e}")
         return {
             "title": section.title,
             "content": section.content[:200],

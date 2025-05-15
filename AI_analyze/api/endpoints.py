@@ -1,6 +1,5 @@
 import asyncio
 import httpx
-from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
@@ -24,32 +23,6 @@ from config.settings import SPRINGBOOT_WEBHOOK_URL, WEBHOOK_API_KEY
 
 logger = setup_logger(__name__)
 router = APIRouter()
-
-
-@router.get("/status/{job_id}")
-async def check_job_status(
-        job_id: str,
-        ocr_cache: OCRCache = Depends(get_ocr_cache)
-):
-    """작업 상태 확인"""
-
-    # Redis 또는 DB에서 작업 상태 조회
-    job_status = await ocr_cache.get_job_status(job_id)
-
-    if not job_status:
-        return {
-            "status": "not_found",
-            "message": "작업을 찾을 수 없습니다."
-        }
-
-    return {
-        "status": job_status["status"],
-        "job_id": job_id,
-        "contract_id": job_status["contract_id"],
-        "data": job_status.get("result"),
-        "error": job_status.get("error")
-    }
-
 
 @router.post("/ocr")
 async def ocr_endpoint(
@@ -339,8 +312,7 @@ async def send_webhook_notification(
         "jobId": job_id,
         "contractId": contract_id,
         "contractCategoryId": contract_category_id,
-        "status": status,
-        "timestamp": datetime.now().isoformat()
+        "status": status
     }
 
     if status == "failed" and error:

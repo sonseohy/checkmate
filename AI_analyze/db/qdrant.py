@@ -7,7 +7,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest
 from qdrant_client.http.models import Distance, VectorParams
 
-from config.settings import QDRANT_URL
+from config.settings import QDRANT_URL, QDRANT_API_KEY
 from utils.logging import setup_logger
 
 logger = setup_logger(__name__)
@@ -22,7 +22,7 @@ class QdrantDB:
         """Qdrant 컬렉션 설정"""
 
         try:
-            self.client = QdrantClient(QDRANT_URL)
+            self.client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
 
             # 컬렉션 존재 여부 확인
             collections = self.client.get_collections().collections
@@ -68,11 +68,13 @@ class QdrantDB:
         """Qdrant 벡터 저장소 설정"""
 
         try:
-            self.vector_store = QdrantVectorStore(
-                client=self.client,
-                collection_name=collection_name,
-                embedding=embeddings
-            )
+            # API 키가 있는 경우
+            if QDRANT_API_KEY:
+                self.vector_store = QdrantVectorStore(
+                    client=self.client,  # 이미 인증된 client 사용
+                    collection_name=collection_name,
+                    embedding=embeddings
+                )
 
             logger.info("벡터 저장소 설정 완료")
             return self.vector_store

@@ -6,6 +6,11 @@ import com.checkmate.domain.contract.entity.FileCategory;
 import com.checkmate.domain.contract.entity.SignatureStatus;
 import com.checkmate.domain.contract.repository.ContractFileRepository;
 import com.checkmate.domain.contract.repository.ContractRepository;
+import com.checkmate.domain.notification.dto.response.NotificationResponse;
+import com.checkmate.domain.notification.entity.Notification;
+import com.checkmate.domain.notification.entity.NotificationType;
+import com.checkmate.domain.notification.repository.NotificationRepository;
+import com.checkmate.domain.notification.service.NotificationService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 import com.checkmate.global.common.service.KeyShareMongoService;
@@ -17,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +47,9 @@ public class HelloSignCallbackService {
     private final S3Service s3Service;
     private final KeyShareMongoService keyShareMongoService;
     private final ObjectMapper objectMapper;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     /**
      * Webhook 페이로드(JSON)와 HMAC 서명값을 받아 처리합니다.
@@ -112,6 +121,42 @@ public class HelloSignCallbackService {
 
         // 10) 키 공유 정보 저장
         keyShareMongoService.saveShareB(Long.valueOf(signedFile.getId()), result.getShareB());
+
+        Notification notification = Notification.builder()
+                .user(contract.getUser())
+                .contract(contract)
+                .type(NotificationType.SIGNATURE_COMPLETED)
+                .message(contract.getTitle() + " 계약서 서명이 완료되었습니다.")
+                .targetUrl("https://checkmate.ai.kr/api/contract/" + contract.getId())
+                .isRead(false)
+                .build();
+
+        NotificationResponse response = NotificationResponse.builder()
+                .id(notification.getId())
+                .type(notification.getType())
+                .message(notification.getMessage())
+                .targetUrl(notification.getTargetUrl())
+                .isRead(notification.isRead())
+                .createdAt(notification.getCreatedAt())
+                .userId(notification.getUser().getUserId())
+                .contractId(contract.getId())
+                .build();
+        notificationRepository.save(notification);
+
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(notification.getUser().getUserId()),
+                "/queue/notifications",
+                response
+        );
+        log.debug("알림 로그");
+
+        long updatedCount = notificationService.countUnreadNotifications(notification.getUser().getUserId());
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(notification.getUser().getUserId()),
+                "/queue/notification-count",
+                updatedCount
+        );
+        log.debug("카운트 로그");
     }
 
     /** HMAC-SHA256 계산 후 hex 비교 */

@@ -3,6 +3,7 @@ package com.checkmate.domain.contract.entity;
 import com.checkmate.domain.clause.entity.Clause;
 import com.checkmate.domain.contractfieldvalue.entity.ContractFieldValue;
 import com.checkmate.domain.contractcategory.entity.ContractCategory;
+import com.checkmate.domain.notification.entity.Notification;
 import com.checkmate.domain.question.entity.Question;
 import com.checkmate.domain.template.entity.Template;
 import com.checkmate.domain.user.entity.User;
@@ -46,6 +47,7 @@ public class Contract {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "process_status", length = 11)
+    @Builder.Default
     private ProcessStatus processStatus = ProcessStatus.IN_PROGRESS;
 
     @Enumerated(EnumType.STRING)
@@ -89,5 +91,8 @@ public class Contract {
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Clause> clauses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Notification> notifications = new ArrayList<>();
 
 }

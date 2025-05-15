@@ -2,6 +2,7 @@ package com.checkmate.domain.contract.repository;
 
 import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.entity.EditStatus;
+import com.checkmate.domain.contract.entity.SignatureStatus;
 import com.checkmate.domain.contractcategory.entity.ContractCategory;
 import com.checkmate.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +17,6 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
     Optional<Contract> findByUserAndCategoryAndEditStatus(User user, ContractCategory category, EditStatus editStatus);
 
     Optional<Contract> findBySignatureRequestId(String signatureRequestId);
+
+    boolean existsByIdAndSignatureStatus(Integer contractId, SignatureStatus signatureStatus);
 }

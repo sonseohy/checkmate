@@ -65,10 +65,10 @@ public class AiAnalysisReportService {
 		String notificationMessage = "";
 
 		if ("completed".equals(requestDto.status())) {
-			notificationMessage = " 계약서 분석이 완료되었습니다.";
+			notificationMessage = " 분석이 완료되었습니다.";
 
 		} else if ("failed".equals(requestDto.status())) {
-			notificationMessage = " 계약서 분석에 실패했습니다.";
+			notificationMessage = " 분석에 실패했습니다.";
 		}
 
 		// 알림 생성 및 저장

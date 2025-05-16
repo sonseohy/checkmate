@@ -1,11 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Header, HeaderProps } from '@/shared/ui/Header';
-import { ChatbotButton } from '@/shared/ui/ChatbotButton';
-import { ChatModal } from '@/features/chat';
 import { RootState } from '@/app/redux/store';
-import { chatService } from '@/features/chat';
-import { TopButton } from '@/shared/ui/TopButton'; // 경로는 상황에 맞게 수정
+
+import { Header, HeaderProps } from '@/shared/ui/Header';
+import Footer from '@/shared/ui/Footer';
+import { ChatbotButton } from '@/shared/ui/ChatbotButton';
+import { TopButton } from '@/shared/ui/TopButton';
+import { useAutoLogout } from '@/shared/hooks/useAutoLogout';
+
+import { ChatModal, chatService } from '@/features/chat';
 
 export interface AppLayoutProps {
   children: React.ReactNode;
@@ -16,12 +19,8 @@ export interface AppLayoutProps {
 export const AppLayout = ({
   children,
   headerProps = { className: 'bg-white shadow' },
-  mainClassName = 'snap-y snap-mandatory overflow-y-auto',
+  mainClassName = '',
 }: AppLayoutProps) => {
-  const mergedHeaderClass = `bg-white shadow ${
-    headerProps.className ?? ''
-  }`.trim();
-
   const userId =
     useSelector((state: RootState) => state.auth.user?.user_id)?.toString() ??
     null;
@@ -34,43 +33,47 @@ export const AppLayout = ({
   const [showTopButton, setShowTopButton] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
-  // 🟡 main 요소 기준으로 스크롤 감지
-  useEffect(() => {
-    const el = mainRef.current;
-    if (!el) return;
+  // 자동 로그아웃 - 사용자 활동 감지용 main 영역
+  useAutoLogout(mainRef);
 
+  // ✅ Top 버튼 표시용: window 스크롤 감지
+  useEffect(() => {
     const handleScroll = () => {
-      setShowTopButton(el.scrollTop > el.clientHeight * 0.5);
+      const threshold = 200;
+      setShowTopButton(window.scrollY > threshold);
     };
 
-    el.addEventListener('scroll', handleScroll);
-    return () => el.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ⬆️ Section1로 스크롤 이동
   const scrollToTop = () => {
-    mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const mergedHeaderClass = `bg-white shadow ${
+    headerProps.className ?? ''
+  }`.trim();
+
   return (
-    <div className="flex flex-col h-screen relative">
+    <div className="flex flex-col min-h-screen relative">
+      {/* 헤더 */}
       <Header
         {...headerProps}
         className={`sticky top-0 z-50 ${mergedHeaderClass}`}
       />
 
-      <main
-        ref={mainRef}
-        className={`flex-1 overflow-y-auto snap-y snap-mandatory ${mainClassName}`}
-      >
+      {/* 콘텐츠 영역 */}
+      <main ref={mainRef} className={`flex-grow ${mainClassName}`}>
         {children}
       </main>
 
-      {/* 챗봇 버튼 */}
+      {/* Footer 항상 하단 */}
+      <Footer />
+
+      {/* 챗봇 & Top 버튼 */}
       <ChatbotButton onClick={() => setShowChat(true)} isVisible={!showChat} />
       {showChat && <ChatModal onClose={() => setShowChat(false)} />}
-
-      {/* Top 버튼 */}
       {showTopButton && <TopButton onClick={scrollToTop} />}
     </div>
   );

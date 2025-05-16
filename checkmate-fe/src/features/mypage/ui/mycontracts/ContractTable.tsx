@@ -5,6 +5,7 @@ import ReactPaginate from 'react-paginate';
 import { useNavigate } from 'react-router-dom';
 import { LuDownload } from "react-icons/lu";
 import { getContractownload } from '@/features/detail';
+import { useMobile } from '@/shared';
 
 interface ContractTableProps {
   rowData: Contract[];
@@ -16,6 +17,7 @@ interface ContractTableProps {
 const ROW_PER_PAGE = 10;
 
 const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, toggleSelect, toggleSelectAll }) => {
+  const isMobile = useMobile();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -38,22 +40,22 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
       <table className='w-full mb-0 border-t border-b border-[#e2e8f0] text-[#4a5568] table-fixed'>
         <thead className='bg-[#F5F5F5]'>
           <tr className='align-bottom'>
-            <th className='table-head-ceil w-8 text-center'>
+            <th className={`table-head-ceil text-center ${isMobile ? 'w-5':' w-8'}`}>
               <input
                 type="checkbox"
-                className="w-5 h-5"
+                className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`}
                 checked={selectedIds.size === rowData.length}
                 onChange={toggleSelectAll}
               />
             </th>
-            <th className='table-head-ceil w-5 text-center'>분류</th>
-            <th className='table-head-ceil w-18 text-center'>계약서 명</th>
-            <th className='table-head-ceil w-10 text-center'>작성 상태</th>
-            <th className='table-head-ceil w-12 text-center'>최종 수정일</th>
+            <th className={`table-head-ceil text-center ${isMobile ? 'w-5':' w-5'}`}>분류</th>
+            <th className={`table-head-ceil text-center ${isMobile ? 'w-9':' w-18'}`}>계약서 명</th>
+            <th className={`table-head-ceil text-center ${isMobile ? 'w-9':' w-10'}`}>작성 상태</th>
+            <th className={`table-head-ceil text-center ${isMobile ? 'w-10':' w-12'}`}>최종 수정일</th>
             <th className='table-head-ceil w-8 text-center'>다운로드</th>
           </tr>
         </thead>
-        <tbody className='table-body w-8 text-center'>
+        <tbody className={`table-body text-center ${isMobile ? 'w-5' :'w-8'}`}>
           {currentRows.map((row) => {
             const isWritten = row.source_type === 'SERVICE_GENERATED';
             const isCompleted = row.edit_status === 'COMPLETED';
@@ -72,14 +74,14 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                   if (isCompleted) {
                     navigate(`/detail/${row.contract_id}`, { state: { contract: row } });
                   } else {
-                    navigate(`/write/contract/${row.contract_id}`, { state: { contract: row } });
+                    navigate(`/write/edit/${row.contract_id}`, { state: { contract: row } });
                   }
                 }}
               >
                 <td className='table-ceil text-center'>
                   <input
                     type="checkbox"
-                    className="w-5 h-5"
+                    className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`}
                     checked={selectedIds.has(row.contract_id)}
                     onChange={(e) => {
                       e.stopPropagation(); // 체크박스 클릭 시 tr 클릭 방지
@@ -89,7 +91,8 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                 </td>
                 <td className="table-ceil text-center">
                   <span
-                    className={`inline-block px-3 py-1 text-sm font-bold uppercase rounded
+                    className={`inline-block font-bold rounded
+                      ${isMobile ? 'p-1 ' : 'px-3 py-1 text-sm'}
                       ${row.source_type === 'USER_UPLOAD'
                       ? 'bg-[#B4C7FF] text-[#3053B4]'
                       : 'bg-[#FFB4B5] text-[#991B33]'}
@@ -101,7 +104,7 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                 <td className='table-ceil text-center text-[#202020]'>{row.title}</td>
                 <td className='table-ceil text-center'>
                   <span
-                    className={`inline-block px-3 py-1 text-[19px] font-bold uppercase rounded
+                    className={`inline-block px-3 py-1 font-bold uppercase rounded
                       ${row.edit_status === 'COMPLETED'
                       ? ''
                       : 'text-[#999999]'}
@@ -117,14 +120,14 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                   {isCompleted 
                   ?  <LuDownload
                         className='mx-auto'
-                        size={30}
+                        size={isMobile ? 20 : 30} 
                         onClick={(e) => {
                           e.stopPropagation();
                           handlePdfDownload(row.contract_id);
                         }}
                       />
                   : <LuDownload
-                        size={30}
+                        size={isMobile ? 20 : 30}
                         color="white"
                         onClick={(e) => {
                           e.stopPropagation();

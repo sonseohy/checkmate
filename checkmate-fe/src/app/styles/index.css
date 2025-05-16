@@ -90,9 +90,9 @@ body {
 
 @layer utilities {
   .animated-gradient {
-    background: linear-gradient(to bottom, #ffffff 65%, #e0f2fe 100%);
+    background: linear-gradient(to bottom, #ffffff 65%, #bae6fd 100%);
     background-size: 100% 200%;
-    animation: gradientMove 30s ease-in-out infinite;
+    animation: gradientMove 15s ease-in-out infinite;
   }
 }
 
@@ -108,3 +108,7 @@ body {
     background-position: 0% 0%;
   }
 }
+/* 
+.react-pdf__Page {
+  background: #CCCCCC !important;
+} */

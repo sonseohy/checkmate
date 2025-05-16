@@ -7,11 +7,13 @@ import {
     contractList,
     Contract
 } from "@/features/mypage";
+import { useMobile } from "@/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import Swal from "sweetalert2";
 
 export default function MyContracts() {
+  const isMobile = useMobile();
   //체크박스 상태 
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
@@ -113,11 +115,14 @@ export default function MyContracts() {
 
 
   return (
-    <div className="flex flex-col gap-3 m-10 p-10 rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.2)]">
-        <div className="text-3xl font-bold">내 계약서</div>
-        <div className="">
+    <div className={`flex flex-col rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.2)] ${isMobile ? '': 'm-10 p-10 gap-3 '}`}>
+        {isMobile 
+        ?  ''
+        : <div className="text-3xl font-bold">내 계약서</div>
+        }
+        <div className={` ${isMobile ? 'p-2':''}`}>
           <div className="flex flex-row justify-between items-center">
-            <div className="mt-5 w-45 mb-5 relative z-3">
+            <div className={` relative z-3 ${isMobile ? 'w-28 my-1' : ' w-45 my-5'}`}>
                 <Dropdown
                 options={options}
                 value={filter}
@@ -125,7 +130,7 @@ export default function MyContracts() {
                 />
             </div>
             <button
-              className={`text-2xl px-5 py-3 rounded-xl border-2  ${selectedIds.size ===0 ? 'text-[#cccccc] border-[#cccccc]' : 'text-[#9E9E9E] border-[#9E9E9E]'}`}
+              className={` border-1 ${isMobile ? ' px-3 py-1 rounded-lg text-sm ' :' px-4 py-2  rounded-xl text-2xl'} ${selectedIds.size ===0 ? 'text-[#cccccc] border-[#cccccc]' : 'text-[#9E9E9E] border-[#9E9E9E]'}`}
               onClick={handleDeleteContracts}
               disabled={selectedIds.size === 0} 
             >

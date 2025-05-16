@@ -22,6 +22,7 @@ const MobileMenu = ({
   toggleWrite,
   toggleAnalyze,
   handleWriteClick,
+  handleAnalyzeClick,
   closeMobile,
   showModal,
   categoryNames,
@@ -89,7 +90,7 @@ const MobileMenu = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleWriteClick(name);
+                    handleAnalyzeClick(name);
                   }}
                   className="block w-full px-4 py-2 text-left hover:bg-sky-500 hover:text-white"
                 >
@@ -103,7 +104,7 @@ const MobileMenu = ({
 
       {/* 로그인 상태에 따라 버튼 변경 */}
       {isLogIn ? (
-        <div className='flex flex-col justify-center items-center gap-3'>
+        <div className="flex flex-col justify-center items-center gap-3">
           <button
             onClick={() => {
               closeMobile();

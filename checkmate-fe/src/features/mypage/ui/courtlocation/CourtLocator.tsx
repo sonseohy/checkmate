@@ -3,8 +3,8 @@ import { KoreaMap ,
         getCourthouseList,
         Courthouse} from "@/features/mypage";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "@/app/redux/store";
+// import { useSelector } from "react-redux";
+// import { RootState } from "@/app/redux/store";
 
 const regionKeywords: Record<string, string[]> = {
   '서울특별시': ['서울', '서울특별시', '서울시'],

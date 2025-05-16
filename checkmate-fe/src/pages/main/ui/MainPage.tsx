@@ -1,4 +1,4 @@
-import { useGeolocation } from '@/features/mypage';
+
 import {
   Section1,
   Section2,
@@ -9,7 +9,6 @@ import {
 } from '@/widgets/main';
 
 const MainPage = () => {
-  useGeolocation();
   return (
     <>
       <Section1 />

@@ -11,7 +11,7 @@ interface Props {
   width?: number;
   height?: number;
 }
-const width = 800;
+const width = 600;
 const height = 400;
 
 export default function RegionMapModal({
@@ -82,7 +82,7 @@ const projection = d3
 }, [isOpen, topo]);
 
   return (
-    <div className="p-4">
+    <div className="py-4">
       <svg ref={containerRef} width={width} height={height} />
     </div>
   );

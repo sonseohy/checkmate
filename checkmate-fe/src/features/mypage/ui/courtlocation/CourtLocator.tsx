@@ -1,6 +1,5 @@
 //법원 위치 찾기
 import { KoreaMap ,
-        KakaoMap , 
         getCourthouseList,
         Courthouse} from "@/features/mypage";
 import { useEffect, useState } from "react";
@@ -27,42 +26,27 @@ export default function CourtLocation() {
     }, []);
 
     return (
-        <div>
-            <div className="flex flex-col">
-                <div className="m-10 rounded-2xl bg-white">
-                    <KoreaMap /> 
-                </div>
-                <div className="flex flex-row">
-                      <div>
-                        {location
-                            ? <div>내 위치: {location.lat}, {location.lng}</div>
-                            : <div>위치 정보 없음</div>}
-                        {/* ... */}
-                    </div>
-                    {/* <div>
-                        <KakaoMap />
-                    </div> */}
-                    <div className="flex-1 rounded-2xl bg-white h-100 overflow-y-scroll">
-                        
-                        {courts.map((court) => {
-                            return (
-                                <div key={court.courthouseId}
-                                    className="flex flex-row gap-2">
-                                    <div className="m-5 flex justify-start items-center">
-                                        <span className="text-lg font-semibold">{court.courthouseId}</span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-lg">{court.courthouseName}</span>
-                                        <span className="text-md">{court.courthouseAddress}</span>
-                                        <span className="mb-2 text-sm">{court.courthousePhoneNumber}</span>
-                                    </div>
-                                </div>  
-                            );
-                        })}
-                    </div>
-                </div>
+        <div className="w-full">
+            <div className="m-8 rounded-2xl  bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] ">
+                <KoreaMap /> 
             </div>
-            
+            <div className="rounded-2xl bg-white h-100 overflow-y-scroll">                    
+                {courts.map((court) => {
+                    return (
+                        <div key={court.courthouseId}
+                            className="flex flex-row gap-2">
+                            <div className="m-5 flex justify-start items-center">
+                                <span className="text-lg font-semibold">{court.courthouseId}</span>
+                            </div>
+                                <div className="flex flex-col">
+                                    <span className="text-lg">{court.courthouseName}</span>
+                                    <span className="text-md">{court.courthouseAddress}</span>
+                                    <span className="mb-2 text-sm">{court.courthousePhoneNumber}</span>
+                                </div>
+                            </div>  
+                        );
+                    })}
+                </div>
         </div>
     );
 };

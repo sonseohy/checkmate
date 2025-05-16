@@ -1,12 +1,14 @@
 // features/mypage/ui/courtlocation/KoreaMap.tsx
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import koreaJson from '@assets/images/map/koreamap.simple.json';
 import { feature } from 'topojson-client';
 import type { Topology, Objects } from 'topojson-specification';
 import type { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
-
 import RegionMapModal from './RegionMapModal';
+import { getRegionName } from '../../api/MyPageApi';
+import { useSelector } from 'react-redux';
+import { RootState } from "@/app/redux/store";
 
 
 // 시·도별 JSON 파일 이름 매핑
@@ -49,6 +51,7 @@ const width = 700;
 const height = 600;
 
 export default function KoreaMap() {
+  const location = useSelector((state: RootState) => state.auth.location);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [regionTopo, setRegionTopo] = useState<Topology<Objects<GeoJsonProperties>> | null>(null);
 
@@ -61,27 +64,32 @@ export default function KoreaMap() {
 
   // 지도 path만 useMemo로 생성
   const paths = useMemo(() => {
-    return mapGeo.features.map((feat, i) => {
-      const korName = (feat.properties as any).CTP_KOR_NM as string;
-      const fileBase = regionFileMap[korName];
-      return (
-        <path
-          key={i}
-          d={pathGen(feat)!}
-          fill="transparent"
-          stroke="#666"
-          strokeWidth={0.5}
-          style={{ cursor: fileBase ? 'pointer' : 'default' }}
-          onMouseOver={e => (e.currentTarget.style.fill = '#60A5FA')}
-          onMouseOut={e => (e.currentTarget.style.fill = 'transparent')}
-          onClick={() => {
-            if (!fileBase) return;
-            setSelectedRegion(fileBase);
-          }}
-        />
-      );
-    });
-  }, [pathGen]);
+  return mapGeo.features.map((feat, i) => {
+    const korName = (feat.properties as any).CTP_KOR_NM as string;
+    const fileBase = regionFileMap[korName];
+    const isActive = fileBase && selectedRegion === fileBase;
+    return (
+      <path
+        key={i}
+        d={pathGen(feat)!}
+        fill={isActive ? "#60A5FA" : "transparent"}
+        stroke="#666"
+        strokeWidth={0.5}
+        style={{ cursor: fileBase ? "pointer" : "default" }}
+        onMouseOver={e => {
+          if (!isActive) e.currentTarget.style.fill = "#60A5FA";
+        }}
+        onMouseOut={e => {
+          if (!isActive) e.currentTarget.style.fill = "transparent";
+        }}
+        onClick={() => {
+          if (!fileBase) return;
+          setSelectedRegion(fileBase);
+        }}
+      />
+    );
+  });
+}, [pathGen, selectedRegion]);
 
   // 선택된 region에 따라 regionTopo 세팅
   useMemo(() => {
@@ -90,25 +98,42 @@ export default function KoreaMap() {
     if (topo) setRegionTopo(topo);
     else setRegionTopo(null);
   }, [selectedRegion]);
+  
+  // 사용자 위도/경도 -> 지역으로 바꾸기
+  useEffect(() => {
+    if (!location) return;
+      (async () => {
+        const regionName = await getRegionName(location.lat, location.lng);
+        console.log('regionName:', regionName)
+        const fileBase = regionFileMap[regionName];
+        console.log('fileBase:', fileBase)
+        if (fileBase) setSelectedRegion(fileBase);
+      })();
+  }, [location]);
 
   return (
-    <div className='flex flex-row'>
-      <div className="py-5">
-        <svg width={width} height={height}>
-          <g className="boundary">{paths}</g>
-        </svg>
+    <div>
+      <div>
+        선택 드롭다운 영역 
       </div>
-      <div className='flex items-center'>
-        {selectedRegion && regionTopo && (
-        <RegionMapModal
-          isOpen={true}
-          topo={regionTopo}
-          onClose={() => {
-            setSelectedRegion(null);
-            setRegionTopo(null);
-          }}
-        />
-      )}
+      <div className='flex flex-row justify-center gap-10'>
+        <div className="py-5">
+          <svg width={width} height={height}>
+            <g className="boundary">{paths}</g>
+          </svg>
+        </div>
+        <div className='flex items-center'>
+          {selectedRegion && regionTopo && (
+          <RegionMapModal
+            isOpen={true}
+            topo={regionTopo}
+            onClose={() => {
+              setSelectedRegion(null);
+              setRegionTopo(null);
+            }}
+          />
+        )}
+        </div>
       </div>
     </div>
   );

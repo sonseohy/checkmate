@@ -4,6 +4,7 @@ import { AuthState, UserInfo } from '@/features/auth';
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
+  location: null,
 };
 
 const authSlice = createSlice({
@@ -17,10 +18,14 @@ const authSlice = createSlice({
     logout(state) {
       state.isAuthenticated = false; //로그아웃 시 사용자 정보 초기화
       state.user = null;
+      state.location = null;
+    },
+    setLocation(state, action: PayloadAction<{ lat: number; lng: number } | null>) {
+      state.location = action.payload;
     },
   },
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { loginSuccess, logout, setLocation } = authSlice.actions;
 
 export default authSlice.reducer;

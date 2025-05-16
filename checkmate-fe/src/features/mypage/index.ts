@@ -12,7 +12,6 @@ export {default as UserInfoModal } from "./ui/UserInfoModal";
 
 //법원 위치
 export { default as CourtLocator } from "./ui/courtlocation/CourtLocator";
-export { default as KakaoMap } from "./ui/courtlocation/KakaoMap";
 export { default as KoreaMap } from "./ui/courtlocation/KoreaMap";
 
 // 사용자 계약서 
@@ -31,4 +30,8 @@ export type {
 //api
 export { 
     contractList, 
-    getCourthouseList } from "./api/MyPageApi";
+    getCourthouseList, 
+    getRegionName } from "./api/MyPageApi";
+
+//hooks
+export { useGeolocation } from "./hooks/useGeolocation";

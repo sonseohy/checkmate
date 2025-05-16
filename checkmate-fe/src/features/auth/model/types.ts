@@ -10,4 +10,5 @@ export interface UserInfo {
 export interface AuthState {
     isAuthenticated: boolean;
     user: UserInfo | null;
+    location?: { lat: number; lng: number } | null;
 }

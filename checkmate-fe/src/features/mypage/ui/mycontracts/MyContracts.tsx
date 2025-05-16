@@ -115,7 +115,7 @@ export default function MyContracts() {
 
 
   return (
-    <div className={`flex flex-col rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.2)] ${isMobile ? '': 'm-10 p-10 gap-3 '}`}>
+    <div className={`flex flex-col rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] ${isMobile ? '': 'm-10 p-10 gap-3 '}`}>
         {isMobile 
         ?  ''
         : <div className="text-3xl font-bold">내 계약서</div>

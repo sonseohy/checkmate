@@ -93,7 +93,3 @@ app.add_middleware(
 # 라우터 등록
 app.include_router(router, prefix="/api", tags=["contract"])
 
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run("main:app", host="0.0.0.0", port=8001)

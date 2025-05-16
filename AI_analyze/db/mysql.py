@@ -26,6 +26,7 @@ class MySQLManager:
                 password=MYSQL_PASSWORD,
                 db=MYSQL_DATABASE,
                 autocommit=True,
+                connect_timeout=10,  # 연결 타임아웃 증가
                 minsize=1,
                 maxsize=10
             )

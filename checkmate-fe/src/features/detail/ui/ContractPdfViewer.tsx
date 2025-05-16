@@ -2,11 +2,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Document, Page } from 'react-pdf';
-import { deleteContractDetail, getContractDetail, getContractownload } from '@/features/detail';
+import {
+  deleteContractDetail,
+  getContractDetail,
+  getContractownload,
+} from '@/features/detail';
 import { LuDownload, LuTrash2, LuPlus, LuMinus } from 'react-icons/lu';
 import Swal from 'sweetalert2';
 import { useMobile } from '@/shared';
-
+import { SignatureRequestForm } from '@/features/e-sign';
+import { FaSignature } from 'react-icons/fa';
 
 interface Params {
   contractId: string;
@@ -21,8 +26,8 @@ const ContractPdfViewer: React.FC = () => {
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(isMobile ? 0.6 : 1);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
 
-  // 강제 리마운트를 위해 Blob URL을 key로 사용
   const documentKey = useMemo(() => {
     return pdfBlob ? URL.createObjectURL(pdfBlob) : 'empty';
   }, [pdfBlob]);
@@ -39,11 +44,9 @@ const ContractPdfViewer: React.FC = () => {
     })();
   }, [contractId]);
 
-
   useEffect(() => {
     setScale(isMobile ? 0.6 : 1);
   }, [isMobile]);
-
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -70,7 +73,11 @@ const ContractPdfViewer: React.FC = () => {
       });
       if (result.isConfirmed) {
         await deleteContractDetail(Number(contractId));
-        await Swal.fire('삭제되었습니다.', '계약서가 삭제되었습니다.', 'success');
+        await Swal.fire(
+          '삭제되었습니다.',
+          '계약서가 삭제되었습니다.',
+          'success',
+        );
         navigate('/mypage');
       }
     } catch (error) {
@@ -83,15 +90,30 @@ const ContractPdfViewer: React.FC = () => {
       {/* 컨트롤 버튼들 */}
       <div className="flex justify-between items-center my-3 gap-5 ml-3">
         {/* Zoom */}
-        <div className={`flex items-center ${isMobile ? 'space-x-1': 'space-x-2 '}`}>
-          <button onClick={() => setScale((s) => s - 0.1)} className={` py-1 bg-gray-200 rounded ${isMobile ? 'text-sm px-1':'text-md px-2'}`}>
+        <div
+          className={`flex items-center ${
+            isMobile ? 'space-x-1' : 'space-x-2'
+          }`}
+        >
+          <button
+            onClick={() => setScale((s) => s - 0.1)}
+            className={`py-1 bg-gray-200 rounded ${
+              isMobile ? 'text-sm px-1' : 'text-md px-2'
+            }`}
+          >
             <LuMinus />
           </button>
           <span>{(scale * 100).toFixed(0)}%</span>
-          <button onClick={() => setScale((s) => s + 0.1)} className={` py-1 bg-gray-200 rounded ${isMobile ? 'text-sm px-1':'text-md px-2'}`}>
+          <button
+            onClick={() => setScale((s) => s + 0.1)}
+            className={`py-1 bg-gray-200 rounded ${
+              isMobile ? 'text-sm px-1' : 'text-md px-2'
+            }`}
+          >
             <LuPlus />
           </button>
         </div>
+
         {/* Pagination */}
         <div className="flex space-x-4 items-center">
           <button
@@ -112,31 +134,58 @@ const ContractPdfViewer: React.FC = () => {
             다음
           </button>
         </div>
-        {/* Download / Delete */}
+
+        {/* Actions */}
         <div className="flex space-x-3">
-          {isMobile 
-          ?  <div className='flex flex-row'>
-              <button onClick={handlePdfDownload} className="flex items-center p-2 text-sm ">
-                <LuDownload size={25}  />
+          {isMobile ? (
+            <div className="flex flex-row">
+              <button
+                onClick={() => setShowSignatureModal(true)}
+                className="flex items-center p-2 text-sm"
+                title="전자서명"
+              >
+                <FaSignature size={25} />
               </button>
-              <button onClick={handleDeleteContract} className="flex items-center p-2 ">
-                 <LuTrash2 size={25} />
+              <button
+                onClick={handlePdfDownload}
+                className="flex items-center p-2 text-sm"
+              >
+                <LuDownload size={25} />
+              </button>
+              <button
+                onClick={handleDeleteContract}
+                className="flex items-center p-2"
+              >
+                <LuTrash2 size={25} />
               </button>
             </div>
-          : <div className='flex flew-col gap-2 '>
-              <button onClick={handlePdfDownload} className="flex items-center gap-1 p-2 border-1 rounded-lg">
-                파일 다운로드 <LuDownload size={20}  />
+          ) : (
+            <div className="flex flex-row gap-2">
+              <button
+                onClick={() => setShowSignatureModal(true)}
+                className="flex items-center p-2 border-1 rounded-lg bg-green-600 text-white hover:bg-green-700"
+              >
+                전자서명
               </button>
-              <button onClick={handleDeleteContract} className="flex items-center gap-1 p-2 border-1 rounded-lg">
+              <button
+                onClick={handlePdfDownload}
+                className="flex items-center gap-1 p-2 border-1 rounded-lg"
+              >
+                파일 다운로드 <LuDownload size={20} />
+              </button>
+              <button
+                onClick={handleDeleteContract}
+                className="flex items-center gap-1 p-2 border-1 rounded-lg"
+              >
                 파일 삭제 <LuTrash2 size={20} />
               </button>
-            </div> }
-         
+            </div>
+          )}
         </div>
       </div>
 
       {/* PDF Viewer */}
-      <div className={` ${isMobile? 'mt-1': 'mt-2 '}`}>
+      <div className={` ${isMobile ? 'mt-1' : 'mt-2'}`}>
         {!pdfBlob ? (
           <div>PDF 불러오는 중…</div>
         ) : (
@@ -146,36 +195,55 @@ const ContractPdfViewer: React.FC = () => {
             onLoadSuccess={onDocumentLoadSuccess}
             loading="로딩 중…"
           >
-            <div className={`flex ${isMobile ? 'flex-col': 'flex-row'}`}>
+            <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'}`}>
               {/* 썸네일 */}
               <div
                 className={
                   isMobile
-                    ? "w-full flex flex-row overflow-x-auto overflow-y-hidden max-w-full"
-                    : "w-60 overflow-y-auto overflow-x-hidden h-[845px] mr-3"
+                    ? 'w-full flex flex-row overflow-x-auto overflow-y-hidden max-w-full'
+                    : 'w-60 overflow-y-auto overflow-x-hidden h-[845px] mr-3'
                 }
-
               >
                 {Array.from({ length: numPages }).map((_, idx) => (
                   <div
                     key={idx}
                     onClick={() => handleThumbnailClick(idx + 1)}
-                    className={`cursor-pointer ${isMobile ?'p-2' :''} mb-2 ${pageNumber === idx + 1 ? 'border-2 border-[#cccccc]' : ''}`}
+                    className={`cursor-pointer ${isMobile ? 'p-2' : ''} mb-2 ${
+                      pageNumber === idx + 1 ? 'border-2 border-[#cccccc]' : ''
+                    }`}
                   >
-                    <Page pageNumber={idx + 1} scale={ isMobile ? 0.2 :0.4} renderAnnotationLayer={false} />
+                    <Page
+                      pageNumber={idx + 1}
+                      scale={isMobile ? 0.2 : 0.4}
+                      renderAnnotationLayer={false}
+                    />
                   </div>
                 ))}
               </div>
-              <div className="h-px bg-gray-200 mb-3" />
 
               {/* 메인 뷰 */}
-              <div className="flex-1 flex justify-center items-start ">
+              <div className="flex-1 flex justify-center items-start">
                 <Page pageNumber={pageNumber} scale={scale} />
               </div>
             </div>
           </Document>
         )}
       </div>
+
+      {/* ✅ 전자서명 모달 */}
+      {showSignatureModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative">
+            <button
+              className="absolute top-2 right-3 text-gray-500 hover:text-black"
+              onClick={() => setShowSignatureModal(false)}
+            >
+              ✕
+            </button>
+            <SignatureRequestForm contractId={Number(contractId)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

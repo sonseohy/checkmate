@@ -1,23 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Bell, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
-import { categoryNameToSlugMap } from '@/shared/constants/categorySlugMap';
-import { useMainCategories } from '@/features/categories';
-import { RootState } from '@/app/redux/store';
+import { useUserInfo, postLogout } from '@/features/auth';
 import { loginSuccess, logout } from '@/features/auth/slices/authSlice';
-import { postLogout, useUserInfo } from '@/features/auth';
+import { useMainCategories } from '@/features/categories';
+import { categoryNameToSlugMap } from '@/shared/constants/categorySlugMap';
+import { RootState } from '@/app/redux/store';
+import { getColorFromString } from '@/shared/utils/getColorFromString';
 
 import HeaderDropdown from './HeaderDropdown';
 import MobileMenu from './MobileMenu';
 import { KakaoLoginModal } from '@/features/main';
-import { getColorFromString } from '@/shared/utils/getColorFromString';
-
+import {
+  NotificationButton,
+  useNotificationSocket,
+} from '@/features/notifications';
 export interface HeaderProps {
   className?: string;
 }
-
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -30,10 +32,12 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   const isLogIn = useSelector((state: RootState) => state.auth.isAuthenticated);
   const { data: mainCategories } = useMainCategories();
   const categoryNames = mainCategories?.map((cat) => cat.name) ?? [];
+
+  // ✅ WebSocket 알림 연결
+  useNotificationSocket(isLogIn);
 
   // 로그인 상태 감지
   useEffect(() => {
@@ -45,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     }
   }, [dispatch, user]);
 
-  // 모바일 메뉴 열릴 때 분석/작성 드롭다운 초기화
+  // 모바일 메뉴 열릴 때 드롭다운 초기화
   useEffect(() => {
     if (!mobileOpen) {
       setWriteOpen(false);
@@ -85,27 +89,25 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     }
   };
 
-  const handleisLogout = async () => {
+  const handleLogout = async () => {
     await postLogout(navigate, dispatch);
   };
 
   const showModal = () => setModalIsOpen(!modalIsOpen);
 
-  const userEmail = user?.name ?? '';
-  const userInitial = userEmail.charAt(0).toUpperCase();
-  const userColor = getColorFromString(userEmail);
   const userName = user?.name ?? 'Guest';
   const trimmedName = userName.slice(0, -2);
+  const userColor = getColorFromString(userName);
 
   return (
     <header
       className={`sticky top-0 z-50 flex items-center justify-between w-full h-16 px-6 ${className}`}
     >
+      {' '}
       {/* 로고 */}
       <Link to="/" className="flex items-center gap-2">
         <img src="/icons/favicon-96x96.png" alt="logo" className="w-10 h-10" />
       </Link>
-
       {/* 데스크탑 메뉴 */}
       <div className="items-center hidden gap-8 text-sm font-semibold text-black md:flex">
         <button
@@ -139,14 +141,10 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
         {isLogIn && user ? (
           <>
-            <button
-              onClick={() => console.log('알림 클릭')}
-              className="text-gray-600 hover:text-black"
-              aria-label="알림"
-            >
-              <Bell size={20} />
-            </button>
+            {/* 알림 버튼 */}
+            <NotificationButton />
 
+            {/* 유저 아바타 */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen((prev) => !prev)}
@@ -170,7 +168,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                   </button>
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={handleisLogout}
+                    onClick={handleLogout}
                   >
                     로그아웃
                   </button>
@@ -187,23 +185,13 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           </button>
         )}
       </div>
-
       {/* 모바일 알림 + 햄버거 버튼 */}
       <div className="flex items-center gap-2 md:hidden">
-        {isLogIn && (
-          <button
-            onClick={() => console.log('알림 클릭')}
-            className="text-gray-600 hover:text-black"
-            aria-label="모바일 알림"
-          >
-            <Bell size={20} />
-          </button>
-        )}
+        {isLogIn && <NotificationButton />}
         <button className="p-2" onClick={() => setMobileOpen((m) => !m)}>
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
-
       {/* 모바일 메뉴 */}
       {mobileOpen && (
         <MobileMenu
@@ -223,14 +211,13 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           showModal={showModal}
           categoryNames={categoryNames}
           isLogIn={isLogIn}
-          isLogOut={handleisLogout}
+          isLogOut={handleLogout}
           showGuide={() => {
             setMobileOpen(false);
             navigate('/intro/write');
           }}
         />
       )}
-
       {/* 로그인 모달 */}
       {modalIsOpen && <KakaoLoginModal onClose={showModal} />}
     </header>

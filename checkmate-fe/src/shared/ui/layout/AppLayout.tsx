@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/redux/store';
+import { ToastContainer } from 'react-toastify';
 
 import { Header, HeaderProps } from '@/shared/ui/Header';
 import Footer from '@/shared/ui/Footer';
@@ -57,6 +58,8 @@ export const AppLayout = ({
 
   return (
     <div className="flex flex-col min-h-screen relative">
+      <ToastContainer />
+
       {/* 헤더 */}
       <Header
         {...headerProps}

@@ -1,7 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { useState } from 'react';
 import { LegalClauseGroup, Clause } from '@/features/write';
-import SignatureRequestForm from '@/features/e-sign/ui/SignatureRequestForm';
 
 const WritePreviewPage: React.FC = () => {
   const { state } = useLocation() as {
@@ -10,8 +8,6 @@ const WritePreviewPage: React.FC = () => {
       legalClausesBySection: LegalClauseGroup[];
     };
   };
-
-  const [showSignatureModal, setShowSignatureModal] = useState(false);
 
   if (
     !state?.legalClausesBySection ||
@@ -24,7 +20,6 @@ const WritePreviewPage: React.FC = () => {
     );
   }
 
-  const contractId = state.contractId;
   const today = new Date().toISOString().split('T')[0].replace(/-/g, '.');
 
   const sortedSections = [...state.legalClausesBySection].sort((a, b) => {
@@ -157,29 +152,7 @@ const WritePreviewPage: React.FC = () => {
         >
           PDF 다운로드
         </button>
-        <button
-          className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
-          onClick={() => setShowSignatureModal(true)}
-        >
-          전자서명
-        </button>
       </div>
-
-      {/* ✅ 전자서명 모달 */}
-      {showSignatureModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative">
-            <button
-              className="absolute top-2 right-3 text-gray-500 hover:text-black"
-              onClick={() => setShowSignatureModal(false)}
-            >
-              ✕
-            </button>
-            {/* ✅ contractId 전달 */}
-            <SignatureRequestForm contractId={contractId} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

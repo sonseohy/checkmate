@@ -25,6 +25,7 @@ import com.dropbox.sign.model.SubSignatureRequestSigner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,7 @@ public class ContractService {
     private final TemplateService templateService;
     private final SignatureRequestApi signatureRequestApi;
     private final S3Service s3Service;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Value("${hs.client.id:}")
     private String clientId;
@@ -72,6 +74,10 @@ public class ContractService {
         FileNumberResponse response = contractFileService.uploadContractFiles(contract, request.getFiles());
         contract.setPageNo(response.getPageNo());
 
+        // 트랜잭션 완료 후 분석 이벤트 발행
+        applicationEventPublisher.publishEvent(
+            new ContractUploadCompletedEvent(contract.getId(), category.getId())
+        );
 
         return ContractUploadResponse.builder()
                 .contractId(contract.getId())

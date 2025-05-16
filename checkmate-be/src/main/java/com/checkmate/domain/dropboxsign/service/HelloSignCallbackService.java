@@ -132,7 +132,6 @@ public class HelloSignCallbackService {
                 .contract(contract)
                 .type(NotificationType.SIGNATURE_COMPLETED)
                 .message(contract.getTitle() + " 계약서 서명이 완료되었습니다.")
-                .targetUrl("https://checkmate.ai.kr/api/contract/" + contract.getId())
                 .isRead(false)
                 .build();
 
@@ -140,7 +139,6 @@ public class HelloSignCallbackService {
                 .id(notification.getId())
                 .type(notification.getType())
                 .message(notification.getMessage())
-                .targetUrl(notification.getTargetUrl())
                 .isRead(notification.isRead())
                 .createdAt(notification.getCreatedAt())
                 .userId(notification.getUser().getUserId())

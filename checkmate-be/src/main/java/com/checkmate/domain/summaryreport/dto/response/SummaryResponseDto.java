@@ -1,4 +1,4 @@
-package com.checkmate.domain.summary.dto.response;
+package com.checkmate.domain.summaryreport.dto.response;
 
 import lombok.Builder;
 

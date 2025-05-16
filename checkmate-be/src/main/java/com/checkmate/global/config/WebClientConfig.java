@@ -4,10 +4,24 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.checkmate.domain.aianalysisreport.dto.request.AiContractAnalysisRequestDto;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+
 @Configuration
+@RequiredArgsConstructor
+@Slf4j
 public class WebClientConfig {
+
+	private final WebClient.Builder webClient;
+
+	@Value("${fastapi.baseUrl}")
+	private String analysisApiUrl;
 
     @Autowired
     NaverApiConfig naverApiConfig;
@@ -21,11 +35,20 @@ public class WebClientConfig {
                 .build();
     }
 
-	@Bean
-	public WebClient webClient(
-		WebClient.Builder builder,
-		@Value("${fastapi.baseUrl}") String baseUrl
-	) {
-		return builder.baseUrl(baseUrl).build();
+	public Mono<Void> analyzeContract(int contractId, int categoryId) {
+		AiContractAnalysisRequestDto request = AiContractAnalysisRequestDto.builder()
+			.contractId(contractId)
+			.contractCategoryId(categoryId)
+			.build();
+
+		return webClient.build()
+			.post()
+			.uri(analysisApiUrl + "/ocr")
+			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue(request)
+			.retrieve()
+			.bodyToMono(Void.class)
+			.doOnSuccess(v -> log.info("계약서 분석 요청 성공: contractId={}", contractId))
+			.doOnError(e -> log.error("계약서 분석 요청 실패: contractId={}, error={}", contractId, e.getMessage()));
 	}
 }

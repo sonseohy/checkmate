@@ -1,4 +1,3 @@
-// features/mypage/ui/courtlocation/KoreaMap.tsx
 import { useEffect, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import koreaJson from '@assets/images/map/koreamap.simple.json';
@@ -9,7 +8,6 @@ import RegionMapModal from './RegionMapModal';
 import { getRegionName } from '../../api/MyPageApi';
 import { useSelector } from 'react-redux';
 import { RootState } from "@/app/redux/store";
-
 
 // 시·도별 JSON 파일 이름 매핑
 const regionFileMap: Record<string, string> = {
@@ -32,16 +30,10 @@ const regionFileMap: Record<string, string> = {
   '제주특별자치도': 'Jeju',
 };
 
-// Vite 전용: glob으로 모든 region topojson 미리 불러오기
+// **eager: true 제거**
 const regionModules = import.meta.glob<{ default: Topology<Objects<GeoJsonProperties>> }>(
-  '/src/assets/images/map/*.json',
-  { eager: true }
+  '/src/assets/images/map/*.json'
 );
-const regionMap: Record<string, Topology<Objects<GeoJsonProperties>>> = {};
-for (const path in regionModules) {
-  const m = path.match(/\/([\w-]+)\.json$/);
-  if (m) regionMap[m[1]] = regionModules[path].default;
-}
 
 // 대한민국 전체 지도 데이터
 const topology = koreaJson as unknown as Topology<Objects<GeoJsonProperties>>;
@@ -55,7 +47,6 @@ interface KoreaMapProps {
   selectedRegion: string | null;
 }
 
-
 export default function KoreaMap({
   onRegionSelect,
   selectedRegion,
@@ -64,7 +55,7 @@ export default function KoreaMap({
   const [regionTopo, setRegionTopo] = useState<Topology<Objects<GeoJsonProperties>> | null>(null);
 
   // projection & path (전체 지도)
-   const projection = useMemo(
+  const projection = useMemo(
     () => d3.geoIdentity().reflectY(true).fitSize([width, height], mapGeo),
     []
   );
@@ -75,7 +66,7 @@ export default function KoreaMap({
     return mapGeo.features.map((feat, i) => {
       const korName = (feat.properties as any).CTP_KOR_NM as string;
       const fileBase = regionFileMap[korName];
-      const isActive = korName === selectedRegion; // ★ selectedRegion은 한글명!
+      const isActive = korName === selectedRegion;
 
       return (
         <path
@@ -93,23 +84,26 @@ export default function KoreaMap({
           }}
           onClick={() => {
             if (!fileBase) return;
-            onRegionSelect(korName); // ★ 시도명(한글명) 부모에 전달
+            onRegionSelect(korName);
           }}
         />
       );
     });
   }, [pathGen, selectedRegion, onRegionSelect]);
 
-  // 선택된 region에 따라 regionTopo 세팅 (fileBase가 아니라 korName 기준으로 매핑)
+  // 선택된 region에 따라 regionTopo 비동기 import로 세팅
   useEffect(() => {
     if (!selectedRegion) {
       setRegionTopo(null);
       return;
     }
     const fileBase = regionFileMap[selectedRegion];
-    const topo = regionMap[fileBase];
-    if (topo) setRegionTopo(topo);
-    else setRegionTopo(null);
+    const importer = regionModules[`/src/assets/images/map/${fileBase}.json`];
+    if (importer) {
+      importer().then(m => setRegionTopo(m.default));
+    } else {
+      setRegionTopo(null);
+    }
   }, [selectedRegion]);
 
   // 사용자 위도/경도 → 지역으로 바꾸기 (자동 선택)
@@ -117,7 +111,7 @@ export default function KoreaMap({
     if (!location) return;
     (async () => {
       const regionName = await getRegionName(location.lat, location.lng);
-      if (regionName) onRegionSelect(regionName); // 자동선택도 부모에 알림
+      if (regionName) onRegionSelect(regionName);
     })();
     // eslint-disable-next-line
   }, [location]);
@@ -125,7 +119,7 @@ export default function KoreaMap({
   return (
     <div>
       <div>
-        선택 드롭다운 영역 
+        선택 드롭다운 영역
       </div>
       <div className='flex flex-row justify-start '>
         <div className="py-5">
@@ -139,7 +133,7 @@ export default function KoreaMap({
               isOpen={true}
               topo={regionTopo}
               onClose={() => {
-                onRegionSelect(null); // close 시 region 선택 해제
+                onRegionSelect(null);
                 setRegionTopo(null);
               }}
             />

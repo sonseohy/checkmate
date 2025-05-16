@@ -20,7 +20,7 @@ export interface TemplateField {
   inputType: InputType;
   required: boolean;
   sequenceNo: number;
-  options: string[] | null;
+  options: string[] | string | null;
   dependsOn: string | null;
   description: string | null;
 }

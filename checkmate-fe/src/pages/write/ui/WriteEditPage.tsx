@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  fetchExistingContract,
-  saveContractInputs,
-  TemplateField,
-  TemplateSection,
-  ContractInputSection,
-} from '@/features/write';
+import { fetchExistingContract, saveContractInputs, useResetContractInputs,  TemplateField, TemplateSection, ContractInputSection, parseOptions } from '@/features/write';
+import { WriteStickyBar } from '@/widgets/write';
 import { LuTag } from 'react-icons/lu';
 import Swal from 'sweetalert2';
 
@@ -19,6 +14,8 @@ const WriteEditPage: React.FC = () => {
   const [dependsOnStates, setDependsOnStates] = useState<Record<string, any>>({});
   const [tooltipField, setTooltipField] = useState<number | null>(null);
 
+  const resetMutation = useResetContractInputs();
+
   useEffect(() => {
     const fetchData = async () => {
       if (!numericContractId) return;
@@ -30,6 +27,7 @@ const WriteEditPage: React.FC = () => {
     fetchData();
   }, [numericContractId]);
 
+  /* blur 자동 저장 */
   const handleFieldBlur = async (fieldId: number, sectionId: number, value: string) => {
     try {
       await saveContractInputs({
@@ -95,43 +93,117 @@ const WriteEditPage: React.FC = () => {
           </div>
         );
       }
-      case 'CHECKBOX':
+      case 'CHECKBOX': {
+        const opts = parseOptions(field.options);
+
+        /* ① 다중 선택(check list) */
+        if (opts.length) {
+          const selected: string[] = dependsOnStates[field.fieldKey]
+            ? JSON.parse(dependsOnStates[field.fieldKey])
+            : [];
+
+          const toggle = (item: string) => {
+            const next = selected.includes(item)
+              ? selected.filter((v) => v !== item)
+              : [...selected, item];
+
+            setDependsOnStates((p) => ({
+              ...p,
+              [field.fieldKey]: JSON.stringify(next),
+            }));
+            handleFieldBlur(field.id, sectionId, JSON.stringify(next));
+          };
+
+          return (
+            <div className="space-y-2">
+              {opts.map((opt) => (
+                <label key={opt} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(opt)}
+                    onChange={() => toggle(opt)}
+                  />
+                  {opt}
+                </label>
+              ))}
+            </div>
+          );
+        }
+
+        /* ② 단일 Boolean 체크박스 */
         return (
           <input
             type="checkbox"
-            id={field.fieldKey}
-            name={field.fieldKey}
+            {...commonProps}
             className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             checked={dependsOnStates[field.fieldKey] === '1'}
             onChange={() => {
-              const newValue = dependsOnStates[field.fieldKey] === '1' ? '0' : '1';
-              setDependsOnStates((prev) => ({ ...prev, [field.fieldKey]: newValue }));
-              handleFieldBlur(field.id, sectionId, newValue);
+              const v = dependsOnStates[field.fieldKey] === '1' ? '0' : '1';
+              setDependsOnStates((p) => ({ ...p, [field.fieldKey]: v }));
+              handleFieldBlur(field.id, sectionId, v);
             }}
           />
         );
+      }
+
       default:
         return <input type="text" {...commonProps} />;
     }
   };
 
+  /* 입력값 초기화 */
+  const handleReset = async () => {
+    if (!numericContractId) return;
+    const ok = await Swal.fire({
+      icon: 'question',
+      title: '모든 입력값을 초기화할까요?',
+      text: '저장된 값이 모두 삭제됩니다.',
+      showCancelButton: true,
+      confirmButtonText: '초기화',
+      cancelButtonText: '취소',
+    }).then((r) => r.isConfirmed);
+
+    if (!ok) return;
+
+    try {
+      const res = await resetMutation.mutateAsync(numericContractId);
+      setDependsOnStates({});
+      Swal.fire('완료', res.message, 'success');
+    } catch {
+      Swal.fire('실패', '초기화에 실패했습니다. 다시 시도해 주세요.', 'error');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const missingRequiredFields: string[] = [];
 
-    for (const section of templateData?.sections ?? []) {
-      for (const field of section.fields) {
-        if (!shouldShowField(field) || !field.required) continue;
-        if (!(field.fieldKey in dependsOnStates)) missingRequiredFields.push(field.label);
-      }
-    }
+    /* 2. 필수 누락 체크 보강 ★ */
+    const missing: string[] = [];
 
-    if (missingRequiredFields.length > 0) {
+    templateData?.sections.forEach((sec: TemplateSection) =>
+      sec.fields.forEach((f: TemplateField) => {
+        if (!f.required || !shouldShowField(f)) return;
+
+        const v = dependsOnStates[f.fieldKey];
+        const isEmpty =
+          v === undefined ||
+          v === '' ||
+          (f.inputType === 'CHECKBOX' &&
+            parseOptions(f.options).length > 0 &&
+            JSON.parse(v ?? '[]').length === 0);
+
+        if (isEmpty) missing.push(f.label);
+      }),
+    );
+
+    if (missing.length) {
       Swal.fire({
         icon: 'warning',
-        title: '필수 항목이 누락되었습니다.',
-        html: `<ul style="text-align:left; padding-left: 1em;">${missingRequiredFields.map((item) => `<li>• ${item}</li>`).join('')}</ul>`,
-        confirmButtonText: '확인',
+        title: '필수 항목 누락',
+        html:
+          '<ul style="text-align:left;padding-left:1em;">' +
+          missing.map((m) => `<li>• ${m}</li>`).join('') +
+          '</ul>',
       });
       return;
     }
@@ -146,7 +218,7 @@ const WriteEditPage: React.FC = () => {
     try {
       const response = await saveContractInputs({ contractId: numericContractId, inputs: inputPayload });
       navigate(`/contract/${numericContractId}/preview`, {
-        state: { contractId: numericContractId, legalClausesBySection: response },
+        state: { contractId: numericContractId, templateName: templateData?.template.name, legalClausesBySection: response },
       });
     } catch (err) {
       Swal.fire({ icon: 'error', title: '저장 실패', text: '계약서를 저장하는 중 오류가 발생했습니다. 다시 시도해주세요.' });
@@ -158,11 +230,25 @@ const WriteEditPage: React.FC = () => {
   }
 
   return (
-    <div className="container py-16 mx-auto">
-      <h1 className="mb-8 text-4xl font-bold text-center">{templateData.template.name} 작성</h1>
-      <form className="space-y-10 max-w-3xl mx-auto px-4 sm:px-6" onSubmit={handleSubmit}>
+    <div className="container py-12 mx-auto">
+      {/* 페이지 제목 */}
+      <h1 className="text-4xl font-bold text-center mb-2">
+        {templateData.template.name} 작성
+      </h1>
+
+      {/* ───── Sticky 툴바 ───── */}
+      <WriteStickyBar
+        onReset={handleReset}
+        isResetting={resetMutation.isPending}
+        submitTargetId="writeForm"
+      />
+      
+      {/* 툴바와 첫 섹션 간의 간격 */}
+      <div className="h-7" />
+
+      <form id="writeForm" className="space-y-10 max-w-3xl mx-auto px-4 sm:px-6" onSubmit={handleSubmit}>
         {templateData.sections.map((section: TemplateSection) => (
-          <section key={section.id} className="p-6 bg-[#F6F6F6] rounded-2xl shadow-xl relative">
+          <section key={section.id} className="p-5 bg-[#F6F6F6] rounded-2xl relative">
             <div className="flex items-center gap-2 mb-4 relative">
               <h2 className="text-2xl font-bold">{section.name}</h2>
               {section.description && (
@@ -194,11 +280,6 @@ const WriteEditPage: React.FC = () => {
             </div>
           </section>
         ))}
-        <div className="text-center">
-          <button type="submit" className="px-6 py-3 mt-8 font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
-            계약서 저장하기
-          </button>
-        </div>
       </form>
     </div>
   );

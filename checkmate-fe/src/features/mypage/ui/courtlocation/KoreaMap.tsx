@@ -48,67 +48,78 @@ const topology = koreaJson as unknown as Topology<Objects<GeoJsonProperties>>;
 const mapGeo = feature(topology, topology.objects['koreamap']) as FeatureCollection<Geometry, GeoJsonProperties>;
 
 const width = 700;
-const height = 600;
+const height = 550;
 
-export default function KoreaMap() {
+interface KoreaMapProps {
+  onRegionSelect: (regionName: string | null) => void;
+  selectedRegion: string | null;
+}
+
+
+export default function KoreaMap({
+  onRegionSelect,
+  selectedRegion,
+}: KoreaMapProps) {
   const location = useSelector((state: RootState) => state.auth.location);
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [regionTopo, setRegionTopo] = useState<Topology<Objects<GeoJsonProperties>> | null>(null);
 
   // projection & path (전체 지도)
-  const projection = useMemo(
+   const projection = useMemo(
     () => d3.geoIdentity().reflectY(true).fitSize([width, height], mapGeo),
     []
   );
   const pathGen = useMemo(() => d3.geoPath().projection(projection), [projection]);
 
-  // 지도 path만 useMemo로 생성
+  // 지도 path 생성
   const paths = useMemo(() => {
-  return mapGeo.features.map((feat, i) => {
-    const korName = (feat.properties as any).CTP_KOR_NM as string;
-    const fileBase = regionFileMap[korName];
-    const isActive = fileBase && selectedRegion === fileBase;
-    return (
-      <path
-        key={i}
-        d={pathGen(feat)!}
-        fill={isActive ? "#60A5FA" : "transparent"}
-        stroke="#666"
-        strokeWidth={0.5}
-        style={{ cursor: fileBase ? "pointer" : "default" }}
-        onMouseOver={e => {
-          if (!isActive) e.currentTarget.style.fill = "#60A5FA";
-        }}
-        onMouseOut={e => {
-          if (!isActive) e.currentTarget.style.fill = "transparent";
-        }}
-        onClick={() => {
-          if (!fileBase) return;
-          setSelectedRegion(fileBase);
-        }}
-      />
-    );
-  });
-}, [pathGen, selectedRegion]);
+    return mapGeo.features.map((feat, i) => {
+      const korName = (feat.properties as any).CTP_KOR_NM as string;
+      const fileBase = regionFileMap[korName];
+      const isActive = korName === selectedRegion; // ★ selectedRegion은 한글명!
 
-  // 선택된 region에 따라 regionTopo 세팅
-  useMemo(() => {
-    if (!selectedRegion) return;
-    const topo = regionMap[selectedRegion];
+      return (
+        <path
+          key={i}
+          d={pathGen(feat)!}
+          fill={isActive ? "#60A5FA" : "transparent"}
+          stroke="#666"
+          strokeWidth={0.5}
+          style={{ cursor: fileBase ? "pointer" : "default" }}
+          onMouseOver={e => {
+            if (!isActive) e.currentTarget.style.fill = "#60A5FA";
+          }}
+          onMouseOut={e => {
+            if (!isActive) e.currentTarget.style.fill = "transparent";
+          }}
+          onClick={() => {
+            if (!fileBase) return;
+            onRegionSelect(korName); // ★ 시도명(한글명) 부모에 전달
+          }}
+        />
+      );
+    });
+  }, [pathGen, selectedRegion, onRegionSelect]);
+
+  // 선택된 region에 따라 regionTopo 세팅 (fileBase가 아니라 korName 기준으로 매핑)
+  useEffect(() => {
+    if (!selectedRegion) {
+      setRegionTopo(null);
+      return;
+    }
+    const fileBase = regionFileMap[selectedRegion];
+    const topo = regionMap[fileBase];
     if (topo) setRegionTopo(topo);
     else setRegionTopo(null);
   }, [selectedRegion]);
-  
-  // 사용자 위도/경도 -> 지역으로 바꾸기
+
+  // 사용자 위도/경도 → 지역으로 바꾸기 (자동 선택)
   useEffect(() => {
     if (!location) return;
-      (async () => {
-        const regionName = await getRegionName(location.lat, location.lng);
-        console.log('regionName:', regionName)
-        const fileBase = regionFileMap[regionName];
-        console.log('fileBase:', fileBase)
-        if (fileBase) setSelectedRegion(fileBase);
-      })();
+    (async () => {
+      const regionName = await getRegionName(location.lat, location.lng);
+      if (regionName) onRegionSelect(regionName); // 자동선택도 부모에 알림
+    })();
+    // eslint-disable-next-line
   }, [location]);
 
   return (
@@ -116,7 +127,7 @@ export default function KoreaMap() {
       <div>
         선택 드롭다운 영역 
       </div>
-      <div className='flex flex-row justify-center gap-10'>
+      <div className='flex flex-row justify-start '>
         <div className="py-5">
           <svg width={width} height={height}>
             <g className="boundary">{paths}</g>
@@ -124,15 +135,15 @@ export default function KoreaMap() {
         </div>
         <div className='flex items-center'>
           {selectedRegion && regionTopo && (
-          <RegionMapModal
-            isOpen={true}
-            topo={regionTopo}
-            onClose={() => {
-              setSelectedRegion(null);
-              setRegionTopo(null);
-            }}
-          />
-        )}
+            <RegionMapModal
+              isOpen={true}
+              topo={regionTopo}
+              onClose={() => {
+                onRegionSelect(null); // close 시 region 선택 해제
+                setRegionTopo(null);
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

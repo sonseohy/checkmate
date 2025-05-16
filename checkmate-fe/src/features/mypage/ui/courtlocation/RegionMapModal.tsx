@@ -11,7 +11,7 @@ interface Props {
   width?: number;
   height?: number;
 }
-const width = 600;
+const width = 500;
 const height = 400;
 
 export default function RegionMapModal({

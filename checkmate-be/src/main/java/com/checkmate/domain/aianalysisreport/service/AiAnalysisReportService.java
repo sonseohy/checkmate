@@ -63,15 +63,12 @@ public class AiAnalysisReportService {
 			.orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 
 		String notificationMessage = "";
-		String targetUrl = "";
 
 		if ("completed".equals(requestDto.status())) {
 			notificationMessage = " 계약서 분석이 완료되었습니다.";
-			// targetUrl = "https://checkmate.io.kr/api/analysis/";
 
 		} else if ("failed".equals(requestDto.status())) {
 			notificationMessage = " 계약서 분석에 실패했습니다.";
-			// targetUrl = "https://checkmate.io.kr/api/analysis/";
 		}
 
 		// 알림 생성 및 저장
@@ -80,7 +77,6 @@ public class AiAnalysisReportService {
 			.contract(contract)
 			.type(NotificationType.CONTRACT_ANALYSIS)
 			.message(contract.getTitle() + notificationMessage)
-			.targetUrl(targetUrl + requestDto.contractId())
 			.isRead(false)
 			.build();
 
@@ -91,7 +87,6 @@ public class AiAnalysisReportService {
 			.id(notification.getId())
 			.type(notification.getType())
 			.message(notification.getMessage())
-			.targetUrl(notification.getTargetUrl())
 			.isRead(notification.isRead())
 			.createdAt(notification.getCreatedAt())
 			.userId(notification.getUser().getUserId())

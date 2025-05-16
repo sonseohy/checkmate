@@ -19,7 +19,6 @@ public class NotificationResponse {
     private Integer id;
     private NotificationType type;
     private String message;
-    private String targetUrl;
     private boolean isRead;
     private LocalDateTime createdAt;
     private Integer userId;

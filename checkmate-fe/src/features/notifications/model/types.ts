@@ -8,3 +8,11 @@ export interface Notification {
   created_at: string;
   read: boolean;
 }
+
+// ✅ 서버 응답 형식 정의
+export interface NotificationResponse {
+  success: boolean;
+  data: Notification[];
+  error: string | null;
+  timestamp: string;
+}

@@ -21,7 +21,7 @@ const notificationSlice = createSlice({
   reducers: {
     // 알림 추가
     addNotification: (state, action: PayloadAction<Notification>) => {
-      state.list.unshift(action.payload); // 최신 알림을 위에 추가
+      state.list.unshift(action.payload);
       state.hasNew = true;
     },
     // 알림 전체 삭제

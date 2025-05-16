@@ -23,7 +23,7 @@ export const useNotifications = () => {
   });
 
   return {
-    notifications: data?.data ?? [],
+    notifications: data?.data ?? [], // ✅ 여기서 .data만 넘기도록 수정
     isLoading,
     error,
     markAsRead: markAsRead.mutate,

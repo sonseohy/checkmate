@@ -19,10 +19,7 @@ const WritePreviewPage: React.FC = () => {
     };
   };
 
-  if (
-    !state?.legalClausesBySection ||
-    state.legalClausesBySection.length === 0
-  ) {
+  if (!state?.contractId || !state.legalClausesBySection?.length) {
     return (
       <div className="text-center text-gray-500">
         표시할 계약서 미리보기 내용이 없습니다.
@@ -91,60 +88,49 @@ const WritePreviewPage: React.FC = () => {
   );
 
   return (
-    <div className="container py-16 mx-auto print:py-10">
-      <h1 className="text-3xl font-bold text-center mb-10 print:text-2xl print:mb-6">
-        계약서 미리보기
-      </h1>
+    <div className="container py-16 space-y-10 max-w-3xl mx-auto px-4">
+      <div
+        id="preview-root"
+        className="content-wrapper bg-white p-6 border-2 border-gray-300 space-y-8 print:p-4"
+      >
+        {/* ===== 타이틀 ===== */}
+        <h1 className="text-3xl font-bold text-center mb-10">{templateName}</h1>
 
-      <div className="max-w-3xl mx-auto space-y-10 print:space-y-6">
-        {sortedSections.map((section, index) => {
-          const sortedClauses: Clause[] = [...section.legalClauses].sort(
-            (a, b) => {
-              const orderA = typeof a.order === 'number' ? a.order : Infinity;
-              const orderB = typeof b.order === 'number' ? b.order : Infinity;
-              return orderA - orderB;
-            },
+        {/* ===== 프린트·PDF 대상 영역 ===== */}
+        {sortedSections.map((section, idx) => {
+          const clauses: Clause[] = [...section.legalClauses].sort(
+            (a, b) => (a.order ?? Infinity) - (b.order ?? Infinity),
           );
-
-          const [headerClause, ...otherClauses] = sortedClauses;
-          const orderNumber = headerClause?.order;
+          const [header, ...others] = clauses;
+          const orderNo = header?.order;
 
           /* ── 15+16조 합치기 ── */
           if (orderNo === 15) {
             const nextClauses = sortedSections[idx + 1]?.legalClauses ?? [];
 
             return (
-              <>
-                <div className="text-center text-gray-700 font-bold text-xl mb-6 print:text-base print:mb-4">
-                  {today}.
-                </div>
-                <div
-                  key={`combined-${section.sectionId}`}
-                  className="bg-white p-6 rounded-lg border border-gray-300 shadow-sm print:shadow-none print:p-4 print:break-inside-avoid"
-                >
-                  {[...sortedClauses, ...nextClauses].map((clause, i) => (
-                    <div key={i} className="mb-6">
-                      <h3 className="font-bold text-lg print:text-base mb-2">
-                        {clause.titleText}
-                      </h3>
-                      <ul className="pl-5 text-gray-700 print:text-sm">
-                        {clause.content.map((line, j) => (
-                          <li
-                            key={j}
-                            className={
-                              /^[0-9]+[.)]/.test(line.trim())
-                                ? 'list-none pl-0'
-                                : 'list-disc list-inside'
-                            }
-                          >
-                            {line}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </>
+              <React.Fragment key={`combined-${section.groupId}`}>
+                <p className="text-center font-semibold">{today}.</p>
+                {[...clauses, ...nextClauses].map((c, i) => (
+                  <article key={`${section.groupId}-${c.order ?? i}`}>
+                    <h3 className="font-bold mb-2">{c.titleText}</h3>
+                    <ul className="pl-5 space-y-1">
+                      {c.content.map((line, j) => (
+                        <li
+                          key={j}
+                          className={
+                            /^[0-9]+[.)]/.test(line.trim())
+                              ? 'list-none pl-0'
+                              : 'list-disc list-inside'
+                          }
+                        >
+                          {prettifyLine(line)}
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </React.Fragment>
             );
           }
           if (orderNo === 16) return null;
@@ -154,9 +140,8 @@ const WritePreviewPage: React.FC = () => {
             <article key={section.groupId}>
               {header && (
                 <>
-                  <h2 className="text-xl font-bold print:text-lg">
-                    제{headerClause.order ?? '-'}조(
-                    {headerClause.titleText ?? '제목 없음'})
+                  <h2 className="font-bold mb-2">
+                    제{header.order}조 ({header.titleText})
                   </h2>
                   <ul className="pl-5 space-y-1 mb-4">
                     {header.content.map((line, i) => (
@@ -168,29 +153,23 @@ const WritePreviewPage: React.FC = () => {
                             : 'list-disc list-inside'
                         }
                       >
-                        {line.replace(
-                          /금\s?(\d{1,})(원정|원)/g,
-                          (_, amount, suffix) => {
-                            return `금 ${Number(
-                              amount,
-                            ).toLocaleString()}${suffix}`;
-                          },
-                        )}
+                        {prettifyLine(line)}
                       </li>
                     ))}
                   </ul>
                 </>
               )}
 
-              {otherClauses.map((clause, index) => (
-                <div key={index} className="space-y-2">
-                  <h3 className="text-lg font-semibold print:text-base">
-                    {clause.titleText}
-                  </h3>
-                  <ul className="pl-5 text-gray-700 print:text-sm">
-                    {clause.content.map((line, i) => (
+              {others.map((c, i) => (
+                <div
+                  key={`${section.groupId}-${c.order ?? i}`}
+                  className="mb-4"
+                >
+                  <h3 className="font-semibold mb-1">{c.titleText}</h3>
+                  <ul className="pl-5 space-y-1">
+                    {c.content.map((line, j) => (
                       <li
-                        key={i}
+                        key={j}
                         className={
                           /^[0-9]+[.)]/.test(line.trim())
                             ? 'list-none pl-0'

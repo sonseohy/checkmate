@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/redux/store';
-import { ToastContainer } from 'react-toastify';
 
 import { Header, HeaderProps } from '@/shared/ui/Header';
 import Footer from '@/shared/ui/Footer';
@@ -40,7 +39,7 @@ export const AppLayout = ({
   // ✅ Top 버튼 표시용: window 스크롤 감지
   useEffect(() => {
     const handleScroll = () => {
-      const threshold = 200;
+      const threshold = 200; // 👉 스크롤이 최소 200px 넘었을 때만 보여주자
       setShowTopButton(window.scrollY > threshold);
     };
 
@@ -58,8 +57,6 @@ export const AppLayout = ({
 
   return (
     <div className="flex flex-col min-h-screen relative">
-      <ToastContainer />
-
       {/* 헤더 */}
       <Header
         {...headerProps}

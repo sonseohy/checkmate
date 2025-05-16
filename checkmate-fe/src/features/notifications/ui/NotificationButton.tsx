@@ -2,17 +2,19 @@ import { Bell } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/app/redux/store';
-import { markAsRead } from '../model/notificationSlice';
-import NotificationList from './NotificationList'; // ✅ 새 UI 컴포넌트
+import { markAsRead } from '@/features/notifications/model/notificationSlice';
+import NotificationList from './NotificationList';
+import { useNotifications } from '../hooks/useNotifications';
 
 export const NotificationButton = () => {
   const dispatch = useDispatch();
   const hasNew = useSelector((state: RootState) => state.notifications.hasNew);
-  const notifications = useSelector(
-    (state: RootState) => state.notifications.list,
-  );
+
+  const { notifications } = useNotifications();
+
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  console.log('notifications:', notifications);
 
   const handleClick = () => {
     setOpen((prev) => !prev);

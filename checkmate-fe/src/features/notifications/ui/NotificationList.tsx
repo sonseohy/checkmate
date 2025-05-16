@@ -1,4 +1,3 @@
-// components/NotificationList.tsx
 import { useState } from 'react';
 import { formatDistanceToNowStrict, isBefore, subDays, format } from 'date-fns';
 import { Notification } from '@/features/notifications';
@@ -7,7 +6,7 @@ import { ko } from 'date-fns/locale';
 type NotificationType = 'ALL' | 'SIGNATURE_COMPLETED' | 'CONTRACT_ANALYSIS';
 
 interface Props {
-  notifications: Notification[];
+  notifications: unknown; // 💡 안전을 위해 any 대신 unknown 사용
 }
 
 const TABS: { type: NotificationType; label: string }[] = [
@@ -19,10 +18,13 @@ const TABS: { type: NotificationType; label: string }[] = [
 const NotificationList: React.FC<Props> = ({ notifications }) => {
   const [selectedType, setSelectedType] = useState<NotificationType>('ALL');
 
+  // ✅ 배열이 아닌 경우 대비
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
+
   const filtered =
     selectedType === 'ALL'
-      ? notifications
-      : notifications.filter((n) => n.type === selectedType);
+      ? safeNotifications
+      : safeNotifications.filter((n) => n.type === selectedType);
 
   const formatDate = (iso: string) => {
     const createdDate = new Date(iso);
@@ -36,7 +38,8 @@ const NotificationList: React.FC<Props> = ({ notifications }) => {
 
   return (
     <div className="w-[400px] bg-white rounded-lg shadow-md p-4">
-      <div className="flex space-x-4 border-b pb-2 mb-3">
+      {/* 탭 */}
+      <div className="flex space-x-4 border-b border-gray-200 pb-2 mb-3">
         {TABS.map((tab) => (
           <button
             key={tab.type}
@@ -52,6 +55,7 @@ const NotificationList: React.FC<Props> = ({ notifications }) => {
         ))}
       </div>
 
+      {/* 알림 목록 */}
       <div className="space-y-3 max-h-64 overflow-y-auto">
         {filtered.map((n) => (
           <a key={n.id} href={n.target_url} className="block">
@@ -70,6 +74,7 @@ const NotificationList: React.FC<Props> = ({ notifications }) => {
         )}
       </div>
 
+      {/* 전체보기 */}
       <div className="mt-4 text-right">
         <a
           href="/mypage?tab=notifications"

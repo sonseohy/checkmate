@@ -1,7 +1,11 @@
 package com.checkmate.domain.aianalysisreport.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Builder;
 
 @Builder
-public record AiContractAnalysisRequestDto(int contractId, int contractCategoryId) {
+public record AiContractAnalysisRequestDto(
+	@JsonProperty("contract_id") int contractId,
+	@JsonProperty("contract_category_id") int contractCategoryId) {
 }

@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AiAnalysisListener {
 	private final WebClientConfig webClientConfig;
 
-	@Async
+	@Async("analysisTaskExecutor")
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void handleContractUploaded(ContractUploadCompletedEvent event) {
 		log.info("계약서 업로드 완료 이벤트 수신: contractId={}", event.contractId());

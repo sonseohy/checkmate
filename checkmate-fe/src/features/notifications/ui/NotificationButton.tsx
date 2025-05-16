@@ -3,19 +3,20 @@ import { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/app/redux/store';
 import { markAsRead } from '../model/notificationSlice';
+import NotificationList from './NotificationList'; // ✅ 새 UI 컴포넌트
 
 export const NotificationButton = () => {
   const dispatch = useDispatch();
   const hasNew = useSelector((state: RootState) => state.notifications.hasNew);
-  const [open, setOpen] = useState(false);
   const notifications = useSelector(
     (state: RootState) => state.notifications.list,
   );
+  const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const handleClick = () => {
     setOpen((prev) => !prev);
-    dispatch(markAsRead());
+    if (hasNew) dispatch(markAsRead());
   };
 
   return (
@@ -30,25 +31,10 @@ export const NotificationButton = () => {
         )}
       </button>
 
-      {/* 기존 알림 드롭다운 */}
+      {/* ✅ 알림 드롭다운 UI */}
       {open && (
-        <div className="absolute right-0 mt-2 w-64 bg-white border rounded shadow-md z-50">
-          {notifications.length === 0 ? (
-            <div className="p-4 text-sm text-gray-500">
-              받은 알림이 없습니다.
-            </div>
-          ) : (
-            <ul className="max-h-64 overflow-y-auto">
-              {notifications.map((n) => (
-                <li
-                  key={n.id}
-                  className="px-4 py-2 border-b text-sm hover:bg-gray-50"
-                >
-                  {n.message}
-                </li>
-              ))}
-            </ul>
-          )}
+        <div className="absolute right-0 mt-2 z-50">
+          <NotificationList notifications={notifications} />
         </div>
       )}
     </div>

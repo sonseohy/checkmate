@@ -1,11 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Notification } from './types';
 
 // 알림 1개에 대한 타입
-export interface Notification {
-  id: number;
-  message: string;
-}
-
 // 전체 상태 구조
 export interface NotificationState {
   list: Notification[];

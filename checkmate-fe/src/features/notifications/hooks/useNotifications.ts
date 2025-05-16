@@ -1,6 +1,6 @@
 //알림 목록 조회 및 상태 변경
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { NotificationService } from '../services/notificationService';
+import { NotificationService } from '@/features/notifications';
 
 export const useNotifications = () => {
   const queryClient = useQueryClient();

@@ -9,5 +9,8 @@ export * from './api/notificationApi';
 
 export { addNotification, clearNotifications } from './model/notificationSlice';
 
+// 서비스
+export { NotificationService } from './services/notificationService';
+
 // UI 컴포넌트
 export { NotificationButton } from './ui/NotificationButton';

@@ -3,7 +3,7 @@ import {
   getUnreadNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-} from '../api/notificationApi'; // 👈 정확한 경로로 api 폴더 참조
+} from '@/features/notifications';
 
 export const NotificationService = {
   getAll: getAllNotifications,

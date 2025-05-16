@@ -20,6 +20,7 @@
     "apexcharts": "^4.7.0",
     "axios": "^1.9.0",
     "d3": "^7.9.0",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.8.2",
     "lucide-react": "^0.503.0",
     "pdfjs-dist": "^5.2.133",

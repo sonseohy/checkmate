@@ -4,11 +4,13 @@ import { KoreaMap ,
         getCourthouseList,
         Courthouse} from "@/features/mypage";
 import { useEffect, useState } from "react";
-
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 
 export default function CourtLocation() {
-        const [courts, setCourts] = useState<Courthouse[]>([]);
+    const [courts, setCourts] = useState<Courthouse[]>([]);
+    const location = useSelector((state: RootState) => state.auth.location);
 
     // 법원 목록을 API에서 가져옵니다.
     useEffect(() => {
@@ -31,9 +33,15 @@ export default function CourtLocation() {
                     <KoreaMap /> 
                 </div>
                 <div className="flex flex-row">
-                    <div>
-                        <KakaoMap />
+                      <div>
+                        {location
+                            ? <div>내 위치: {location.lat}, {location.lng}</div>
+                            : <div>위치 정보 없음</div>}
+                        {/* ... */}
                     </div>
+                    {/* <div>
+                        <KakaoMap />
+                    </div> */}
                     <div className="flex-1 rounded-2xl bg-white h-100 overflow-y-scroll">
                         
                         {courts.map((court) => {

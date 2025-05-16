@@ -32,3 +32,6 @@ export type {
 export { 
     contractList, 
     getCourthouseList } from "./api/MyPageApi";
+
+//hooks
+export { useGeolocation } from "./hooks/useGeolocation";

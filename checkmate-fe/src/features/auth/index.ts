@@ -10,4 +10,4 @@ export { useUserInfo } from './hooks/useUserInfo';
 export type { UserInfo, AuthState } from './model/types';
 
 export { default as authReducer } from './slices/authSlice';
-export * from './slices/authSlice'; // loginSuccess, logout
+export * from './slices/authSlice'; // loginSuccess, logout, setLocation

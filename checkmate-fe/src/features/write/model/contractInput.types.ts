@@ -33,7 +33,7 @@ export interface Clause {
 
 export interface LegalClauseGroup {
   contractId: number;
-  groupId: number;
+  groupId: string;
   legalClauses: Clause[];
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchExistingContract, saveContractInputs, useResetContractInputs,  TemplateField, TemplateSection, ContractInputSection } from '@/features/write';
+import { fetchExistingContract, saveContractInputs, useResetContractInputs,  TemplateField, TemplateSection, ContractInputSection, parseOptions } from '@/features/write';
 import { WriteStickyBar } from '@/widgets/write';
 import { LuTag } from 'react-icons/lu';
 import Swal from 'sweetalert2';
@@ -93,21 +93,59 @@ const WriteEditPage: React.FC = () => {
           </div>
         );
       }
-      case 'CHECKBOX':
+      case 'CHECKBOX': {
+        const opts = parseOptions(field.options);
+
+        /* ① 다중 선택(check list) */
+        if (opts.length) {
+          const selected: string[] = dependsOnStates[field.fieldKey]
+            ? JSON.parse(dependsOnStates[field.fieldKey])
+            : [];
+
+          const toggle = (item: string) => {
+            const next = selected.includes(item)
+              ? selected.filter((v) => v !== item)
+              : [...selected, item];
+
+            setDependsOnStates((p) => ({
+              ...p,
+              [field.fieldKey]: JSON.stringify(next),
+            }));
+            handleFieldBlur(field.id, sectionId, JSON.stringify(next));
+          };
+
+          return (
+            <div className="space-y-2">
+              {opts.map((opt) => (
+                <label key={opt} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(opt)}
+                    onChange={() => toggle(opt)}
+                  />
+                  {opt}
+                </label>
+              ))}
+            </div>
+          );
+        }
+
+        /* ② 단일 Boolean 체크박스 */
         return (
           <input
             type="checkbox"
-            id={field.fieldKey}
-            name={field.fieldKey}
+            {...commonProps}
             className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             checked={dependsOnStates[field.fieldKey] === '1'}
             onChange={() => {
-              const newValue = dependsOnStates[field.fieldKey] === '1' ? '0' : '1';
-              setDependsOnStates((prev) => ({ ...prev, [field.fieldKey]: newValue }));
-              handleFieldBlur(field.id, sectionId, newValue);
+              const v = dependsOnStates[field.fieldKey] === '1' ? '0' : '1';
+              setDependsOnStates((p) => ({ ...p, [field.fieldKey]: v }));
+              handleFieldBlur(field.id, sectionId, v);
             }}
           />
         );
+      }
+
       default:
         return <input type="text" {...commonProps} />;
     }
@@ -138,21 +176,34 @@ const WriteEditPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const missingRequiredFields: string[] = [];
 
-    for (const section of templateData?.sections ?? []) {
-      for (const field of section.fields) {
-        if (!shouldShowField(field) || !field.required) continue;
-        if (!(field.fieldKey in dependsOnStates)) missingRequiredFields.push(field.label);
-      }
-    }
+    /* 2. 필수 누락 체크 보강 ★ */
+    const missing: string[] = [];
 
-    if (missingRequiredFields.length > 0) {
+    templateData?.sections.forEach((sec: TemplateSection) =>
+      sec.fields.forEach((f: TemplateField) => {
+        if (!f.required || !shouldShowField(f)) return;
+
+        const v = dependsOnStates[f.fieldKey];
+        const isEmpty =
+          v === undefined ||
+          v === '' ||
+          (f.inputType === 'CHECKBOX' &&
+            parseOptions(f.options).length > 0 &&
+            JSON.parse(v ?? '[]').length === 0);
+
+        if (isEmpty) missing.push(f.label);
+      }),
+    );
+
+    if (missing.length) {
       Swal.fire({
         icon: 'warning',
-        title: '필수 항목이 누락되었습니다.',
-        html: `<ul style="text-align:left; padding-left: 1em;">${missingRequiredFields.map((item) => `<li>• ${item}</li>`).join('')}</ul>`,
-        confirmButtonText: '확인',
+        title: '필수 항목 누락',
+        html:
+          '<ul style="text-align:left;padding-left:1em;">' +
+          missing.map((m) => `<li>• ${m}</li>`).join('') +
+          '</ul>',
       });
       return;
     }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { MidCategory, SubCategory } from '@/features/categories';
-import { useChecklist, ChecklistModal, useCreateContractTemplate, TemplateField, ContractInputSection, saveContractInputs, CreateContractTemplateResponse, useResetContractInputs } from '@/features/write';
+import { useChecklist, ChecklistModal, useCreateContractTemplate, TemplateField, ContractInputSection, saveContractInputs, CreateContractTemplateResponse, useResetContractInputs, parseOptions } from '@/features/write';
 import { getUserInfo } from '@/entities/user';
 import { WriteStickyBar } from '@/widgets/write';
 import { LuTag } from 'react-icons/lu';
@@ -140,11 +140,10 @@ const WriteFillPage: React.FC = () => {
         );
 
       case 'RADIO': {
-        const opts =
-          typeof field.options === 'string' ? JSON.parse(field.options) : field.options;
+        const opts = parseOptions(field.options);
         return (
           <div className="space-x-4">
-            {opts?.map((opt: string) => (
+            {opts.map((opt) => (
               <label key={opt} className="inline-flex items-center">
                 <input
                   type="radio"
@@ -164,7 +163,45 @@ const WriteFillPage: React.FC = () => {
         );
       }
 
-      case 'CHECKBOX':
+      /* ───────── 체크박스 ───────── */
+      case 'CHECKBOX': {
+        const opts = parseOptions(field.options);
+
+        /* ① 다중 선택(check list) */
+        if (opts.length) {
+          const selected: string[] = dependsOnStates[field.fieldKey]
+            ? JSON.parse(dependsOnStates[field.fieldKey])
+            : [];
+
+          const toggle = (item: string) => {
+            const next = selected.includes(item)
+              ? selected.filter((v) => v !== item)
+              : [...selected, item];
+
+            setDependsOnStates((p) => ({
+              ...p,
+              [field.fieldKey]: JSON.stringify(next),
+            }));
+            handleFieldBlur(field.id, sectionId, JSON.stringify(next));
+          };
+
+          return (
+            <div className="space-y-2">
+              {opts.map((opt) => (
+                <label key={opt} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(opt)}
+                    onChange={() => toggle(opt)}
+                  />
+                  {opt}
+                </label>
+              ))}
+            </div>
+          );
+        }
+
+        /* ② 단일 Boolean 체크박스 */
         return (
           <input
             type="checkbox"
@@ -178,6 +215,7 @@ const WriteFillPage: React.FC = () => {
             }}
           />
         );
+      }
 
       default:
         return <input type="text" {...commonProps} />;
@@ -191,8 +229,20 @@ const WriteFillPage: React.FC = () => {
 
     templateData?.sections.forEach((sec) =>
       sec.fields.forEach((f) => {
-        if (f.required && shouldShowField(f) && !(f.fieldKey in dependsOnStates))
-          missing.push(f.label);
+        // 1) 화면에 보이는 + required 필드만 검사
+        if (!f.required || !shouldShowField(f)) return;
+
+        const v = dependsOnStates[f.fieldKey];
+
+        /* 2) 타입별 누락 판정 - 여기서 보완 */
+        const isEmpty =
+          v === undefined ||                          // 입력 안함
+          v === '' ||                                // 텍스트/넘버 등이 빈값
+          (f.inputType === 'CHECKBOX' &&
+            parseOptions(f.options).length &&        // 다중 체크박스
+            JSON.parse(v ?? '[]').length === 0);     // 선택 항목이 0개
+
+        if (isEmpty) missing.push(f.label);
       }),
     );
 
@@ -233,7 +283,7 @@ const WriteFillPage: React.FC = () => {
     );
 
 return (
-    <div className="container py-16 mx-auto">
+    <div className="container py-16 mx-auto overflow-visible">
       {/* 페이지 제목 */}
       <h1 className="text-4xl font-bold text-center mb-4">
         {templateData.template.name} 작성
@@ -253,7 +303,7 @@ return (
 
       {/* 작성 폼 */}
       <form
-        id="writeForm"               /* 툴바의 submit 버튼과 연결 */
+        id="writeForm"              
         onSubmit={handleSubmit}
         className="space-y-10 max-w-3xl mx-auto px-4 sm:px-6"
       >

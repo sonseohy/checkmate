@@ -5,10 +5,15 @@ import org.springframework.stereotype.Service;
 
 import com.checkmate.domain.aianalysisreport.dto.request.AiAnalysisWebhookRequestDto;
 import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisReportResponseDto;
-import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisWebSocketResponseDto;
 import com.checkmate.domain.aianalysisreport.entity.CompleteAiAnalysisReport;
 import com.checkmate.domain.aianalysisreport.repository.AiAnalysisReportRepository;
+import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.repository.ContractRepository;
+import com.checkmate.domain.notification.dto.response.NotificationResponse;
+import com.checkmate.domain.notification.entity.Notification;
+import com.checkmate.domain.notification.entity.NotificationType;
+import com.checkmate.domain.notification.repository.NotificationRepository;
+import com.checkmate.domain.notification.service.NotificationService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 
@@ -22,6 +27,8 @@ public class AiAnalysisReportService {
 	private final AiAnalysisReportRepository aiAnalysisReportRepository;
 	private final ContractRepository contractRepository;
 	private final SimpMessagingTemplate messagingTemplate;
+	private final NotificationRepository notificationRepository;
+	private final NotificationService notificationService;
 
 	/**
 	 * AI 분석 리포트 조회
@@ -47,33 +54,64 @@ public class AiAnalysisReportService {
 	 * @param requestDto 웹소켓 요청 DTO
 	 */
 	public void handleAnalysisWebhook(String webhookApiKey, String ApiKey , AiAnalysisWebhookRequestDto requestDto) {
+
 		if (!verifyWebhookApiKey(webhookApiKey, ApiKey)) {
 			throw new CustomException(ErrorCode.UNAUTHORIZED);
 		}
-		if (!contractRepository.existsById(requestDto.contractId())) {
-			throw new CustomException(ErrorCode.CONTRACT_NOT_FOUND);
-		}
+		// 계약서 정보 조회
+		Contract contract = contractRepository.findById(requestDto.contractId())
+			.orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
+
+		String notificationMessage = "";
+		String targetUrl = "";
+
 		if ("completed".equals(requestDto.status())) {
-			messagingTemplate.convertAndSend(
-				"/sub/contract/" + requestDto.contractId(),
-				AiAnalysisWebSocketResponseDto.completed(
-					requestDto.contractId(),
-					requestDto.jobId(),
-					requestDto.contractCategoryId()
-				)
-			);
+			notificationMessage = " 계약서 분석이 완료되었습니다.";
+			// targetUrl = "https://checkmate.io.kr/api/analysis/";
+
 		} else if ("failed".equals(requestDto.status())) {
-			messagingTemplate.convertAndSend(
-				"/sub/contract/" + requestDto.contractId(),
-				AiAnalysisWebSocketResponseDto.failed(
-					requestDto.contractId(),
-					requestDto.jobId(),
-					requestDto.error(),
-					requestDto.contractCategoryId()
-				)
-			);
+			notificationMessage = " 계약서 분석에 실패했습니다.";
+			// targetUrl = "https://checkmate.io.kr/api/analysis/";
 		}
 
+		// 알림 생성 및 저장
+		Notification notification = Notification.builder()
+			.user(contract.getUser())
+			.contract(contract)
+			.type(NotificationType.CONTRACT_ANALYSIS)
+			.message(contract.getTitle() + notificationMessage)
+			.targetUrl(targetUrl + requestDto.contractId())
+			.isRead(false)
+			.build();
+
+		notificationRepository.save(notification);
+
+		// 알림 응답 객체 생성
+		NotificationResponse response = NotificationResponse.builder()
+			.id(notification.getId())
+			.type(notification.getType())
+			.message(notification.getMessage())
+			.targetUrl(notification.getTargetUrl())
+			.isRead(notification.isRead())
+			.createdAt(notification.getCreatedAt())
+			.userId(notification.getUser().getUserId())
+			.contractId(requestDto.contractId())
+			.build();
+
+		// 개인 알림 큐로 알림 전송
+		messagingTemplate.convertAndSendToUser(
+			String.valueOf(notification.getUser().getUserId()),
+			"/queue/notifications",
+			response
+		);
+
+		// 읽지 않은 알림 수 업데이트
+		long updatedCount = notificationService.countUnreadNotifications(notification.getUser().getUserId());
+		messagingTemplate.convertAndSendToUser(
+			String.valueOf(notification.getUser().getUserId()),
+			"/queue/notification-count",
+			updatedCount
+		);
 	}
 
 	public boolean verifyWebhookApiKey(String webhookApiKey, String apiKey) {

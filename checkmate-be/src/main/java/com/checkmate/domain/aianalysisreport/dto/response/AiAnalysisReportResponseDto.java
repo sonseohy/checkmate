@@ -8,7 +8,7 @@ import com.checkmate.domain.aianalysisreport.entity.CompleteAiAnalysisReport;
 import com.checkmate.domain.improvementreport.dto.response.ImprovementResponseDto;
 import com.checkmate.domain.missingclausereport.dto.response.MissingResponseDto;
 import com.checkmate.domain.riskclausereport.dto.response.RiskClauseReportResponseDto;
-import com.checkmate.domain.summary.dto.response.SummaryResponseDto;
+import com.checkmate.domain.summaryreport.dto.response.SummaryResponseDto;
 
 import lombok.Builder;
 

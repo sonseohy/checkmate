@@ -115,4 +115,24 @@ export default defineConfig({
   define: {
     global: 'window',
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // node_modules를 기준으로 외부 라이브러리별로 청크 분리
+          if (id.includes('node_modules')) {
+            // 예: node_modules/react/ → react, node_modules/react-dom/ → react-dom
+            return id
+              .toString()
+              .split('node_modules/')[1]
+              .split('/')[0]
+              .replace('@', '')
+              .toString();
+          }
+        },
+      },
+    },
+    // 필요시 청크 경고 한도도 늘릴 수 있음 (기본 500)
+    chunkSizeWarningLimit: 1500,
+  },
 });

@@ -50,7 +50,7 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
             </th>
             <th className={`table-head-ceil text-center ${isMobile ? 'w-5':' w-5'}`}>분류</th>
             <th className={`table-head-ceil text-center ${isMobile ? 'w-9':' w-18'}`}>계약서 명</th>
-            <th className={`table-head-ceil text-center ${isMobile ? 'w-9':' w-10'}`}>작성 상태</th>
+            <th className={`table-head-ceil text-center ${isMobile ? 'w-9':' w-10'}`}>상태</th>
             <th className={`table-head-ceil text-center ${isMobile ? 'w-10':' w-12'}`}>최종 수정일</th>
             <th className='table-head-ceil w-8 text-center'>다운로드</th>
           </tr>

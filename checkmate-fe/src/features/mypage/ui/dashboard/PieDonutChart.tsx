@@ -74,8 +74,8 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({ contractList }) =>
                         },
                         total: {
                             show: true,
-                            label: 'Total',
-                            fontSize: '30px',
+                            label: '전체',
+                            fontSize: '27px',
                             fontFamily: 'Pretendard',
                             fontWeight: 800,
                             color: '#202020',

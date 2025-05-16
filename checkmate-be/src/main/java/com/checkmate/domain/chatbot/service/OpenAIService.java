@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 @Slf4j
@@ -47,6 +49,6 @@ public class OpenAIService {
 
 		// 비스트리밍 방식으로 전체 응답 가져오기
 		String response = chatModel.call(prompt).getResult().getOutput().getText();
-		return Mono.just(response);
+		return Mono.fromCallable(() -> response).subscribeOn(Schedulers.boundedElastic());
 	}
 }

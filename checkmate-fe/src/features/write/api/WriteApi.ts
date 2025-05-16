@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { customAxios } from '@/shared/api';
-import { ChecklistItem, SaveContractInputsRequest, SaveContractInputsResponse, CreateContractRequest, CreateContractResponse } from '@/features/write';
+import { ChecklistItem, SaveContractInputsRequest, SaveContractInputsResponse, CreateContractRequest, CreateContractResponse, DeleteContractInputsResponse } from '@/features/write';
 
 // Checklist 조회 API
 export const useChecklist = (categoryId?: number) => {
@@ -36,12 +36,34 @@ export const saveContractInputs = async ({
   contractId,
   inputs,
 }: SaveContractInputsRequest): Promise<SaveContractInputsResponse[]> => {
-  const response = await customAxios.post(`/api/contract/${contractId}/inputs`, { sections: inputs });
-  return response.data.data;
+  const { data } = await customAxios.post(
+    `/api/contract/${contractId}/inputs`,
+    { sections: inputs },
+  );
+
+  return data.data;
 };
 
 // 작성중인 계약서 조회
 export const fetchExistingContract = async (contractId: number) => {
   const { data } = await customAxios.get(`/api/contract/${contractId}/edit`);
   return data.data;
+};
+
+// 계약서 입력 값 초기화
+export const useResetContractInputs = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (contractId: number): Promise<DeleteContractInputsResponse> => {
+      const { data } = await customAxios.delete(`/api/contract/${contractId}/inputs`);
+      return data.data;
+    },
+    onSuccess: (_, contractId) => {
+      // 캐시된 입력값·계약서 조회 쿼리 무효화
+      queryClient.invalidateQueries({ predicate: (q) =>
+        String(q.queryKey[0]).includes(String(contractId))
+      });
+    },
+  });
 };

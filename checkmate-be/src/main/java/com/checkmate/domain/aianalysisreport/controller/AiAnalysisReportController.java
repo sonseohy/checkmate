@@ -60,25 +60,6 @@ public class AiAnalysisReportController {
 	public void handleAiAnalysisWebhook(
 		@RequestHeader("X-API-Key") String apiKey,
 		@RequestBody AiAnalysisWebhookRequestDto webhookRequestDto) {
-
-		if ("completed".equals(webhookRequestDto.status())) {
-			aiAnalysisReportService.handleAnalysisCompleted(
-				webhookApiKey,
-				apiKey,
-				webhookRequestDto.contractId(),
-				webhookRequestDto.contractCategoryId(),
-				webhookRequestDto.jobId()
-			);
-		}
-		else if ("failed".equals(webhookRequestDto.status())) {
-			aiAnalysisReportService.handleAnalysisFailed(
-				webhookApiKey,
-				apiKey,
-				webhookRequestDto.contractId(),
-				webhookRequestDto.contractCategoryId(),
-				webhookRequestDto.jobId(),
-				webhookRequestDto.error()
-			);
-		}
+		aiAnalysisReportService.handleAnalysisWebhook(webhookApiKey, apiKey, webhookRequestDto);
 	}
 }

@@ -3,6 +3,7 @@ package com.checkmate.domain.aianalysisreport.service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.checkmate.domain.aianalysisreport.dto.request.AiAnalysisWebhookRequestDto;
 import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisReportResponseDto;
 import com.checkmate.domain.aianalysisreport.dto.response.AiAnalysisWebSocketResponseDto;
 import com.checkmate.domain.aianalysisreport.entity.CompleteAiAnalysisReport;
@@ -43,54 +44,36 @@ public class AiAnalysisReportService {
 	 *
 	 * @param webhookApiKey 보안을 위한 api key
 	 * @param ApiKey 보안을 위한 api key
-	 * @param contractId 계약서 ID
-	 * @param contractCategoryId 계약서 카테고리 ID
-	 * @param jobId 계약서 분석 작업 ID
+	 * @param requestDto 웹소켓 요청 DTO
 	 */
-	public void handleAnalysisCompleted(String webhookApiKey, String ApiKey ,int contractId, int contractCategoryId, String jobId) {
+	public void handleAnalysisWebhook(String webhookApiKey, String ApiKey , AiAnalysisWebhookRequestDto requestDto) {
 		if (!verifyWebhookApiKey(webhookApiKey, ApiKey)) {
 			throw new CustomException(ErrorCode.UNAUTHORIZED);
 		}
-		if (!contractRepository.existsById(contractId)) {
+		if (!contractRepository.existsById(requestDto.contractId())) {
 			throw new CustomException(ErrorCode.CONTRACT_NOT_FOUND);
 		}
-
-		messagingTemplate.convertAndSend(
-			"/sub/contract/" + contractId,
-			AiAnalysisWebSocketResponseDto.completed(
-				contractId,
-				jobId,
-				contractCategoryId
-			)
-		);
-	}
-
-	/**
-	 *
-	 * @param webhookApiKey 보안을 위한 api key
-	 * @param ApiKey 보안을 위한 api key
-	 * @param contractId 계약서 ID
-	 * @param contractCategoryId 계약서 카테고리 ID
-	 * @param jobId 계약서 분석 작업 ID
-	 * @param error 에러 메세지
-	 */
-	public void handleAnalysisFailed(String webhookApiKey, String ApiKey ,int contractId, int contractCategoryId, String jobId, String error) {
-		if (!verifyWebhookApiKey(webhookApiKey, ApiKey)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED);
-		}
-		if (!contractRepository.existsById(contractId)) {
-			throw new CustomException(ErrorCode.CONTRACT_NOT_FOUND);
+		if ("completed".equals(requestDto.status())) {
+			messagingTemplate.convertAndSend(
+				"/sub/contract/" + requestDto.contractId(),
+				AiAnalysisWebSocketResponseDto.completed(
+					requestDto.contractId(),
+					requestDto.jobId(),
+					requestDto.contractCategoryId()
+				)
+			);
+		} else if ("failed".equals(requestDto.status())) {
+			messagingTemplate.convertAndSend(
+				"/sub/contract/" + requestDto.contractId(),
+				AiAnalysisWebSocketResponseDto.failed(
+					requestDto.contractId(),
+					requestDto.jobId(),
+					requestDto.error(),
+					requestDto.contractCategoryId()
+				)
+			);
 		}
 
-		messagingTemplate.convertAndSend(
-			"/sub/contract/" + contractId,
-			AiAnalysisWebSocketResponseDto.failed(
-				contractId,
-				jobId,
-				error,
-				contractCategoryId
-			)
-		);
 	}
 
 	public boolean verifyWebhookApiKey(String webhookApiKey, String apiKey) {

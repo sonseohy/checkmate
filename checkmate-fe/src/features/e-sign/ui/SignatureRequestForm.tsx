@@ -1,12 +1,13 @@
-import Swal from 'sweetalert2'; // 이미 있다면 생략 가능
+import Swal from 'sweetalert2';
 import { useState } from 'react';
 import { SignatureService } from '@/features/e-sign';
 
 interface Props {
   contractId: number;
+  onSuccess: () => void; // ✅ 추가
 }
 
-const SignatureRequestForm = ({ contractId }: Props) => {
+const SignatureRequestForm = ({ contractId, onSuccess }: Props) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<
@@ -20,13 +21,13 @@ const SignatureRequestForm = ({ contractId }: Props) => {
     try {
       await SignatureService.request(contractId, { name, email });
       setStatus('success');
+
+      onSuccess(); // ✅ 부모에게 성공 알림
     } catch (err: any) {
       console.error(err);
       setStatus('error');
 
-      // ✅ 에러 메시지 파악
       const code = err?.response?.data?.error?.code;
-
       if (code === 'FILE-001') {
         Swal.fire({
           icon: 'info',
@@ -81,10 +82,6 @@ const SignatureRequestForm = ({ contractId }: Props) => {
       >
         요청 보내기
       </button>
-
-      {status === 'success' && (
-        <p className="text-green-600 mt-2">요청이 성공적으로 전송되었습니다!</p>
-      )}
     </form>
   );
 };

@@ -6,18 +6,23 @@ import { markAsRead } from '@/features/notifications/model/notificationSlice';
 import NotificationList from './NotificationList';
 import { useNotifications } from '../hooks/useNotifications';
 
-export const NotificationButton = () => {
+interface NotificationButtonProps {
+  open: boolean;
+  onClick: () => void;
+}
+
+export const NotificationButton = ({
+  open,
+  onClick,
+}: NotificationButtonProps) => {
   const dispatch = useDispatch();
   const hasNew = useSelector((state: RootState) => state.notifications.hasNew);
-
   const { notifications } = useNotifications();
 
-  const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  console.log('notifications:', notifications);
 
   const handleClick = () => {
-    setOpen((prev) => !prev);
+    onClick(); // 부모가 관리하는 상태 토글
     if (hasNew) dispatch(markAsRead());
   };
 
@@ -33,7 +38,6 @@ export const NotificationButton = () => {
         )}
       </button>
 
-      {/* ✅ 알림 드롭다운 UI */}
       {open && (
         <div className="absolute right-0 mt-2 z-50">
           <NotificationList notifications={notifications} />

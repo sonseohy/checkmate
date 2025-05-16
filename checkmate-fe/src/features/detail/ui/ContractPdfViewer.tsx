@@ -1,17 +1,19 @@
-// src/features/detail/ContractPdfViewer.tsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Document, Page } from 'react-pdf';
+import { LuDownload, LuTrash2, LuPlus, LuMinus } from 'react-icons/lu';
+import { FaSignature } from 'react-icons/fa';
+import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import {
   deleteContractDetail,
   getContractDetail,
   getContractownload,
 } from '@/features/detail';
-import { LuDownload, LuTrash2, LuPlus, LuMinus } from 'react-icons/lu';
-import Swal from 'sweetalert2';
 import { useMobile } from '@/shared';
 import { SignatureRequestForm } from '@/features/e-sign';
-import { FaSignature } from 'react-icons/fa';
 
 interface Params {
   contractId: string;
@@ -89,7 +91,6 @@ const ContractPdfViewer: React.FC = () => {
     <div className="flex flex-col space-x-4">
       {/* 컨트롤 버튼들 */}
       <div className="flex justify-between items-center my-3 gap-5 ml-3">
-        {/* Zoom */}
         <div
           className={`flex items-center ${
             isMobile ? 'space-x-1' : 'space-x-2'
@@ -185,7 +186,7 @@ const ContractPdfViewer: React.FC = () => {
       </div>
 
       {/* PDF Viewer */}
-      <div className={` ${isMobile ? 'mt-1' : 'mt-2'}`}>
+      <div className={`${isMobile ? 'mt-1' : 'mt-2'}`}>
         {!pdfBlob ? (
           <div>PDF 불러오는 중…</div>
         ) : (
@@ -196,7 +197,6 @@ const ContractPdfViewer: React.FC = () => {
             loading="로딩 중…"
           >
             <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'}`}>
-              {/* 썸네일 */}
               <div
                 className={
                   isMobile
@@ -221,7 +221,6 @@ const ContractPdfViewer: React.FC = () => {
                 ))}
               </div>
 
-              {/* 메인 뷰 */}
               <div className="flex-1 flex justify-center items-start">
                 <Page pageNumber={pageNumber} scale={scale} />
               </div>
@@ -230,7 +229,7 @@ const ContractPdfViewer: React.FC = () => {
         )}
       </div>
 
-      {/* ✅ 전자서명 모달 */}
+      {/* 전자서명 모달 */}
       {showSignatureModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative">
@@ -240,7 +239,13 @@ const ContractPdfViewer: React.FC = () => {
             >
               ✕
             </button>
-            <SignatureRequestForm contractId={Number(contractId)} />
+            <SignatureRequestForm
+              contractId={Number(contractId)}
+              onSuccess={() => {
+                toast.success('서명 요청이 성공적으로 전송되었습니다!');
+                setShowSignatureModal(false);
+              }}
+            />
           </div>
         </div>
       )}

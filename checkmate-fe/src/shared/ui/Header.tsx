@@ -17,9 +17,11 @@ import {
   NotificationButton,
   useNotificationSocket,
 } from '@/features/notifications';
+
 export interface HeaderProps {
   className?: string;
 }
+
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -30,11 +32,19 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isLogIn = useSelector((state: RootState) => state.auth.isAuthenticated);
   const { data: mainCategories } = useMainCategories();
   const categoryNames = mainCategories?.map((cat) => cat.name) ?? [];
+
+  const closeAllDropdowns = () => {
+    setWriteOpen(false);
+    setAnalyzeOpen(false);
+    setDropdownOpen(false);
+    setNotificationOpen(false);
+  };
 
   // ✅ WebSocket 알림 연결
   useNotificationSocket(isLogIn);
@@ -51,10 +61,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
   // 모바일 메뉴 열릴 때 드롭다운 초기화
   useEffect(() => {
-    if (!mobileOpen) {
-      setWriteOpen(false);
-      setAnalyzeOpen(false);
-    }
+    if (!mobileOpen) closeAllDropdowns();
   }, [mobileOpen]);
 
   // 드롭다운 외부 클릭 시 닫기
@@ -103,11 +110,11 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     <header
       className={`sticky top-0 z-50 flex items-center justify-between w-full h-16 px-6 ${className}`}
     >
-      {' '}
       {/* 로고 */}
       <Link to="/" className="flex items-center gap-2">
         <img src="/icons/favicon-96x96.png" alt="logo" className="w-10 h-10" />
       </Link>
+
       {/* 데스크탑 메뉴 */}
       <div className="items-center hidden gap-8 text-sm font-semibold text-black md:flex">
         <button
@@ -121,8 +128,9 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           open={writeOpen}
           title="계약서 작성"
           onToggle={() => {
-            setWriteOpen((prev) => !prev);
-            setAnalyzeOpen(false);
+            const next = !writeOpen;
+            closeAllDropdowns();
+            setWriteOpen(next);
           }}
           onItemClick={handleWriteClick}
           categoryNames={categoryNames}
@@ -132,8 +140,9 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           open={analyzeOpen}
           title="계약서 분석"
           onToggle={() => {
-            setAnalyzeOpen((prev) => !prev);
-            setWriteOpen(false);
+            const next = !analyzeOpen;
+            closeAllDropdowns();
+            setAnalyzeOpen(next);
           }}
           onItemClick={handleAnalyzeClick}
           categoryNames={categoryNames}
@@ -142,12 +151,23 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         {isLogIn && user ? (
           <>
             {/* 알림 버튼 */}
-            <NotificationButton />
+            <NotificationButton
+              open={notificationOpen}
+              onClick={() => {
+                const next = !notificationOpen;
+                closeAllDropdowns();
+                setNotificationOpen(next);
+              }}
+            />
 
             {/* 유저 아바타 */}
             <div className="relative" ref={dropdownRef}>
               <button
-                onClick={() => setDropdownOpen((prev) => !prev)}
+                onClick={() => {
+                  const next = !dropdownOpen;
+                  closeAllDropdowns();
+                  setDropdownOpen(next);
+                }}
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold"
                 style={{ backgroundColor: userColor }}
                 title={user.name}
@@ -185,25 +205,38 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           </button>
         )}
       </div>
+
       {/* 모바일 알림 + 햄버거 버튼 */}
       <div className="flex items-center gap-2 md:hidden">
-        {isLogIn && <NotificationButton />}
+        {isLogIn && (
+          <NotificationButton
+            open={notificationOpen}
+            onClick={() => {
+              const next = !notificationOpen;
+              closeAllDropdowns();
+              setNotificationOpen(next);
+            }}
+          />
+        )}
         <button className="p-2" onClick={() => setMobileOpen((m) => !m)}>
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
+
       {/* 모바일 메뉴 */}
       {mobileOpen && (
         <MobileMenu
           writeOpen={writeOpen}
           analyzeOpen={analyzeOpen}
           toggleWrite={() => {
-            setWriteOpen((w) => !w);
-            setAnalyzeOpen(false);
+            const next = !writeOpen;
+            closeAllDropdowns();
+            setWriteOpen(next);
           }}
           toggleAnalyze={() => {
-            setAnalyzeOpen((a) => !a);
-            setWriteOpen(false);
+            const next = !analyzeOpen;
+            closeAllDropdowns();
+            setAnalyzeOpen(next);
           }}
           handleWriteClick={handleWriteClick}
           handleAnalyzeClick={handleAnalyzeClick}
@@ -218,6 +251,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           }}
         />
       )}
+
       {/* 로그인 모달 */}
       {modalIsOpen && <KakaoLoginModal onClose={showModal} />}
     </header>

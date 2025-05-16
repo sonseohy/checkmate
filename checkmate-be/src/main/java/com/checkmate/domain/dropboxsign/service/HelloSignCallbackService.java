@@ -71,14 +71,19 @@ public class HelloSignCallbackService {
         String requestId   = root.path("signature_request").path("signature_request_id").asText();
 
         // 3) PDF 다운로드 가능한 이벤트만 처리
-        if (!"signature_request_all_signed".equals(eventType)
-                && !"signature_request_downloadable".equals(eventType)) {
+        if (!"signature_request_downloadable".equals(eventType)) {
+            log.info("Ignoring event type: {}", eventType);
             return;
         }
 
         // 4) Contract 조회
         Contract contract = contractRepository.findBySignatureRequestId(requestId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND_FOR_SIGNATURE));
+
+        if (contract.getSignatureStatus() == SignatureStatus.COMPLETED) {
+            log.info("Contract {} already completed, skipping duplicate callback", contract.getId());
+            return;
+        }
 
         // 5) 서명된 PDF 다운로드
         File signedPdf = signatureRequestApi.signatureRequestFiles(requestId, "pdf");
@@ -139,7 +144,7 @@ public class HelloSignCallbackService {
                 .isRead(notification.isRead())
                 .createdAt(notification.getCreatedAt())
                 .userId(notification.getUser().getUserId())
-                .contractId(contract.getId())
+                .contractId(notification.getId())
                 .build();
         notificationRepository.save(notification);
 
@@ -148,7 +153,6 @@ public class HelloSignCallbackService {
                 "/queue/notifications",
                 response
         );
-        log.debug("알림 로그");
 
         long updatedCount = notificationService.countUnreadNotifications(notification.getUser().getUserId());
         messagingTemplate.convertAndSendToUser(
@@ -156,7 +160,6 @@ public class HelloSignCallbackService {
                 "/queue/notification-count",
                 updatedCount
         );
-        log.debug("카운트 로그");
     }
 
     /** HMAC-SHA256 계산 후 hex 비교 */

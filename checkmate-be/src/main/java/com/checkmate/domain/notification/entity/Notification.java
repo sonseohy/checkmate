@@ -42,7 +42,7 @@ public class Notification {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id", insertable = false, updatable = false)
+    @JoinColumn(name = "contract_id")
     private Contract contract;
 
     @ManyToOne(fetch = FetchType.LAZY)

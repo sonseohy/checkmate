@@ -1,6 +1,5 @@
 import asyncio
 import httpx
-from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, BackgroundTasks
@@ -114,15 +113,14 @@ async def process_contract_background(
 
     except Exception as e:
         logger.error(f"백그라운드 처리 오류: {e}", exc_info=True)
+        await cleanup_incomplete_data(req.contract_id, mongo, mysql)
         await ocr_cache.save_job_status(job_id, req.contract_id, "failed", str(e))
-
         # 실패 알림도 전송
         await send_webhook_notification(
             job_id=job_id,
             contract_id=req.contract_id,
             contract_category_id=req.contract_category_id,
-            status="failed",
-            error=str(e)
+            status="failed"
         )
 
 
@@ -156,13 +154,14 @@ async def process_contract_pipeline(
 
         # 3. 요약 생성
         if not existing_data['summary']:
-            summary_task = generate_summary(all_text, cid, mongo)
+            summary_task = lambda: generate_summary(all_text, cid, mongo)
             tasks.append(("summary", summary_task))
+
 
         # 4. 구조화 및 분석
         logger.info(f"[{cid}] 구조화 및 분석 시작")
 
-        structured_contract_task = structure_contract_with_gpt(all_text, cid, llm)
+        structured_contract_task = lambda: structure_contract_with_gpt(all_text, cid, llm)
         tasks.append(("structure", structured_contract_task))
 
         results = await execute_parallel_tasks(tasks)
@@ -183,13 +182,12 @@ async def process_contract_pipeline(
 
         # 8. 구조화 완료 후 병렬 처리할 태스크들
         second_round_tasks = [
-            ("mysql_save", mysql.save_contract_clauses(cid, sections_data)),
+            ("mysql_save", lambda: mysql.save_contract_clauses(cid, sections_data)),
             ("summary_save",
-             mongo.save_summary_report(ai_analysis_report_id, summary_result) if summary_result else None),
-            ("required_sections", get_contract_type_requirements(vector_store, contract_type, llm)),
-            ("clause_laws", get_clause_specific_laws_parallel(structured_contract, vector_store))
+             lambda: mongo.save_summary_report(ai_analysis_report_id, summary_result) if summary_result else None),
+            ("required_sections", lambda: get_contract_type_requirements(vector_store, contract_type, llm)),
+            ("clause_laws", lambda: get_clause_specific_laws_parallel(structured_contract, vector_store))
         ]
-
         # None이 아닌 작업만 필터링
         second_round_tasks = [(name, task) for name, task in second_round_tasks if task is not None]
 
@@ -232,10 +230,10 @@ async def execute_parallel_tasks(tasks):
     task_names = []
     coroutines = []
 
-    for name, coro in tasks:
-        if coro is not None:
+    for name, func  in tasks:
+        if func is not None:
             task_names.append(name)
-            coroutines.append(coro)
+            coroutines.append(func())
 
     # 병렬 실행
     if coroutines:
@@ -302,21 +300,16 @@ async def send_webhook_notification(
         job_id: str,
         contract_id: int,
         contract_category_id: int,
-        status: str,
-        error: Optional[str] = None
+        status: str
 ):
     """Spring Boot에 웹훅 전송"""
     webhook_url = SPRINGBOOT_WEBHOOK_URL
 
     payload = {
-        "jobId": job_id,
         "contractId": contract_id,
         "contractCategoryId": contract_category_id,
         "status": status
     }
-
-    if status == "failed" and error:
-        payload["error"] = error
 
     headers = {
         "Content-Type": "application/json",
@@ -335,3 +328,33 @@ async def send_webhook_notification(
             logger.info(f"웹훅 전송 성공: {job_id}")
         except Exception as e:
             logger.error(f"웹훅 전송 실패: {e}")
+
+
+# 정리 로직 함수 추가
+async def cleanup_incomplete_data(contract_id, mongo, mysql):
+    try:
+        # 1. MongoDB에서 ai_analysis_report 찾기
+        report = await mongo.db.ai_analysis_report.find_one({"contractId": contract_id})
+        if report:
+            report_id = report["_id"]
+
+            # 2. 관련 서브 문서들 삭제
+            await mongo.db.improvement_report.delete_many({"aiAnalysisReportId": report_id})
+            await mongo.db.missing_clause_report.delete_many({"aiAnalysisReportId": report_id})
+            await mongo.db.risk_clause_report.delete_many({"aiAnalysisReportId": report_id})
+            await mongo.db.summary_report.delete_many({"aiAnalysisReportId": report_id})
+
+            # 3. 메인 리포트 삭제
+            await mongo.db.ai_analysis_report.delete_one({"_id": report_id})
+
+        # 4. MySQL 관련 데이터 정리
+        async with mysql.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                # 예: 질문 삭제
+                await cur.execute("DELETE FROM question WHERE contract_id = %s", (contract_id,))
+                # 예: clause 삭제
+                await cur.execute("DELETE FROM clause WHERE contract_id = %s", (contract_id,))
+
+        logger.info(f"계약서 ID {contract_id}의 불완전한 분석 데이터 정리 완료")
+    except Exception as cleanup_error:
+        logger.error(f"데이터 정리 중 오류 발생: {cleanup_error}", exc_info=True)

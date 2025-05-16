@@ -15,15 +15,8 @@ export interface SaveContractInputsRequest {
 // 저장 응답 타입
 export interface SaveContractInputsResponse {
   contractId: number;
-  sectionId: number;
-  legalClauses: {
-    clauseId: string;
-    titleText: string;
-    introText: string;
-    content: string[];
-    order: number;
-  }[];
-  message: string;
+  groupId: string;
+  legalClauses: Clause[];
 }
 
 // 에러 응답
@@ -40,7 +33,13 @@ export interface Clause {
 
 export interface LegalClauseGroup {
   contractId: number;
-  sectionId: number;
+  groupId: number;
   legalClauses: Clause[];
+}
+
+// 입력 값 초기화 타입
+export interface DeleteContractInputsResponse {
+  contractId: number;
+  deletedCount: number;
   message: string;
 }

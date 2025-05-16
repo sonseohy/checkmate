@@ -29,7 +29,7 @@ const regionKeywords: Record<string, string[]> = {
 export default function CourtLocation() {
     const [courts, setCourts] = useState<Courthouse[]>([]);
     const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-    const location = useSelector((state: RootState) => state.auth.location);
+    // const location = useSelector((state: RootState) => state.auth.location);
 
     // 법원 목록을 API에서 가져옵니다.
     useEffect(() => {

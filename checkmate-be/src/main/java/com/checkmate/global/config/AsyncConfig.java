@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -39,5 +40,10 @@ public class AsyncConfig implements WebMvcConfigurer {
         executor.setThreadNamePrefix("mvc-async-");
         executor.initialize();
         return executor;
+    }
+
+    @Bean
+    public WebClient.Builder webClient() {
+        return WebClient.builder();
     }
 }

@@ -47,7 +47,8 @@ public class SecurityConfig {
             "/api/analysis/**",
             "/app/**",
             "/ws/**",
-            "/api/check-list/**"
+            "/api/check-list/**",
+            "/api/webhook"
     };
 
     private final JwtUtil jwtUtil;

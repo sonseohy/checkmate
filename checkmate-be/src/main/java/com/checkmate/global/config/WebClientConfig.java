@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.checkmate.domain.aianalysisreport.dto.request.AiContractAnalysisRequestDto;
+import com.checkmate.domain.question.dto.request.QuestionGenerationRequestDtp;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,5 +51,24 @@ public class WebClientConfig {
 			.bodyToMono(Void.class)
 			.doOnSuccess(v -> log.info("계약서 분석 요청 성공: contractId={}", contractId))
 			.doOnError(e -> log.error("계약서 분석 요청 실패: contractId={}, error={}", contractId, e.getMessage()));
+	}
+
+	// WebClientConfig.java에 메서드 추가
+	public Mono<Void> generateQuestions(int contractId, int categoryId) {
+		QuestionGenerationRequestDtp request = QuestionGenerationRequestDtp.builder()
+			.contractId(contractId)
+			.contractCategoryId(categoryId)
+			.build();
+
+		return webClient.build()
+			.post()
+			.uri(analysisApiUrl + "/questions/generate")
+			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue(request)
+			.retrieve()
+			.bodyToMono(Void.class)
+			.doOnSuccess(v -> log.info("계약서 질문 생성 요청 성공: contractId={}", contractId))
+			.doOnError(e -> log.error("계약서 질문 생성 요청 실패: contractId={}, error={}",
+				contractId, e.getMessage()));
 	}
 }

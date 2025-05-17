@@ -68,6 +68,11 @@ public class Contract {
     @Column(name = "signature_status", length = 20)
     private SignatureStatus signatureStatus = SignatureStatus.PENDING;
 
+    @Column(name = "question_generation_status")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private QuestionGenerationStatus questionGenerationStatus = QuestionGenerationStatus.PENDING;
+
     @Column(name = "signed_at")
     private LocalDateTime signedAt;
 

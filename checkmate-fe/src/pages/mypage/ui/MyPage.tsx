@@ -2,11 +2,13 @@ import { SideBar,
          Dashboard, 
          UserInfo, 
          CourtLocator, 
-         MyContracts } from "@/features/mypage";
+         MyContracts, 
+         useGeolocation} from "@/features/mypage";
 import { useMobile } from "@/shared";
 import { useState } from "react";
 
 export default function MyPage() {
+    useGeolocation();
     const isMobile = useMobile();
     const [selectedMenu, setSelectedMenu] = useState<string>("대시 보드");
 
@@ -50,7 +52,7 @@ export default function MyPage() {
                     </div>
                 </div>
             ):(
-            <div className="flex flex-row h-screen">
+            <div className="flex flex-row min-h-screen">
                 {/* 사이드바 */}
                 <div className="flex-shrink-0">
                     <SideBar onMenuClick={handleMenuClick} selectedMenu={selectedMenu}/>

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.checkmate.domain.clause.dto.response.ClauseResponseDto;
 import com.checkmate.domain.clause.service.ClauseService;
+import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.response.ApiResult;
 
 @RestController
@@ -28,6 +30,7 @@ public class ClauseController {
 	 * 계약서 조항 조회 기능
 	 *
 	 * @param contractId 계약서 ID
+	 * @param userDetails 유저
 	 * @return 계약서 조항들
 	 */
 	@Operation(summary = "게약서 조항 조회", description = "게약서 조항 정보를 조회합니다.")
@@ -38,8 +41,9 @@ public class ClauseController {
 	})
 	@GetMapping("{contractId}")
 	public ApiResult<List<ClauseResponseDto>> getMyContractClauses(
-		@PathVariable(value = "contractId") int contractId) {
-		List<ClauseResponseDto> data = clauseService.getMyContractClauses(contractId);
+		@PathVariable(value = "contractId") int contractId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		List<ClauseResponseDto> data = clauseService.getMyContractClauses(contractId, userDetails.getUserId());
 		return ApiResult.ok(data);
 	}
 }

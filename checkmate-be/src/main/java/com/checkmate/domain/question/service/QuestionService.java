@@ -35,9 +35,12 @@ public class QuestionService {
 	 * @return 질문 리스트 DTO
 	 */
 	@Transactional(readOnly = true)
-	public QuestionResultDto getQuestions(int contractId) {
+	public QuestionResultDto getQuestions(int contractId, int userId) {
 		Contract contract = contractRepository.findById(contractId)
 			.orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
+		if (!contract.getUser().getUserId().equals(userId)) {
+			throw new CustomException(ErrorCode.QUESTION_LIST_ACCESS_DENIED);
+		}
 		QuestionGenerationStatus status = contract.getQuestionGenerationStatus();
 		if (status == QuestionGenerationStatus.PENDING) {
 			// 생성 진행 중인 경우

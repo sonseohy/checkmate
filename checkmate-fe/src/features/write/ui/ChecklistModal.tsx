@@ -21,8 +21,8 @@ interface ChecklistModalProps {
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50">
         <div className="relative max-w-md w-full p-6 bg-white rounded-lg shadow-xl space-y-4">
           {/* 상단 타이틀 */}
-          <div className="flex justify-center border-b pb-2">
-            <h2 className="text-2xl font-bold text-blue-700">CHECK LIST</h2>
+          <div className="flex justify-center border-b border-gray-400 pb-2">
+            <h2 className="text-2xl font-bold text-gray-400">작성 전에 확인하세요!</h2>
           </div>
   
           {/* 리스트 본문 */}

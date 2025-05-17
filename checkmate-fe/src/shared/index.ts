@@ -11,3 +11,10 @@ export {
 } from './constants/categorySlugMap';
 
 export { categories } from './constants/categories';
+export { default as ResidentIdInput } from './ui/input/ResidentIdInput'
+export { default as PhoneNumberInput } from './ui/input/PhoneNumberInput'
+export { default as MoneyInput } from './ui/input/MoneyInput'
+export { default as DayInput } from './ui/input/DayInput'
+export { default as AreaInput } from './ui/input/AreaInput'
+export { default as AddressInput } from './ui/input/AddressInput'
+export { default as DateFieldInput } from './ui/input/DateFieldInput'

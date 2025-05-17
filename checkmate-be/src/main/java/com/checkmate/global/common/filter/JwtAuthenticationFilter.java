@@ -46,7 +46,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/ws/",
             "/api/analysis/webhook",
             "/api/check-list",
-            "/app"
+            "/app",
+            "/api/webhook"
     };
 
     /**

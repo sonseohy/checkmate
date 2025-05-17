@@ -4,7 +4,7 @@ import { fetchExistingContract, saveContractInputs, useResetContractInputs,  Tem
 import { WriteStickyBar } from '@/widgets/write';
 import { LuTag } from 'react-icons/lu';
 import Swal from 'sweetalert2';
-import { ResidentIdInput, PhoneNumberInput, MoneyInput } from '@/shared';
+import { ResidentIdInput, PhoneNumberInput, MoneyInput, DayInput, AreaInput, AddressInput, DateFieldInput, } from '@/shared';
 
 const WriteEditPage: React.FC = () => {
   const { contractId } = useParams();
@@ -101,9 +101,11 @@ const WriteEditPage: React.FC = () => {
       return 100;
     };
 
-    const isResidentId = includesAny(field.label, ['주민등록번호']);
-    const isPhone = includesAny(field.label, ['전화번호', '연락처']);
-    const isMoney = includesAny(field.label, ['금액', '월세', '보증금', '계약금', '잔금', '총액', '식대', '상여', '교통비', '수당', '인센티브']);
+    const isResidentIdLabel = includesAny(field.label, ['주민등록번호']);
+    const isPhoneLabel = includesAny(field.label, ['전화번호', '연락처']);
+    const isDayLabel = includesAny(field.label, ['지불일', '지급시기']);
+    const isAreaLabel = field.label.trim().endsWith('면적');
+    const isAddressLabel = includesAny(field.label, ['주소', '소재지']) && !field.label.includes('상세');
 
     // 공통 입력 속성
     const commonProps = {
@@ -116,7 +118,7 @@ const WriteEditPage: React.FC = () => {
     };
 
     // 특수 필드 분기 처리
-    if (isResidentId) {
+    if (isResidentIdLabel) {
       return (
         <ResidentIdInput
           value={value}
@@ -125,8 +127,7 @@ const WriteEditPage: React.FC = () => {
         />
       );
     }
-
-    if (isPhone) {
+    if (isPhoneLabel) {
       return (
         <PhoneNumberInput
           value={value}
@@ -135,8 +136,35 @@ const WriteEditPage: React.FC = () => {
         />
       );
     }
+    if (isDayLabel) {
+      return (
+        <DayInput
+          value={value}
+          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+        />
+      );
+    }
+    if (isAreaLabel) {
+      return (
+        <AreaInput
+          value={value}
+          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+        />
+      );
+    }
+    if (isAddressLabel) {
+      return (
+        <AddressInput
+          value={value}
+          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+        />
+      );
+    }
 
-    if (isMoney) {
+    if (['monthly_rent', 'deposit', 'earnest_money', 'balance', 'total_amount_paid', 'meal_amount', 'bonus_amount', 'transportation_fee_amount', 'other_allowances_1', 'other_allowances_2', 'incentive_amount', 'continuous_incentive_amount', 'provisional_deposit'].includes(fieldKey)) {
       return (
         <MoneyInput
           value={value}
@@ -151,14 +179,10 @@ const WriteEditPage: React.FC = () => {
       case 'NUMBER':
       case 'DATE':
         return (
-          <input
-            type={field.inputType.toLowerCase()}
-            maxLength={getMaxLength(field.label)}
-            {...commonProps}
+          <DateFieldInput
             value={value}
-            onChange={(e) =>
-              setDependsOnStates((p) => ({ ...p, [fieldKey]: e.target.value }))
-            }
+            onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+            onBlur={() => handleFieldBlur(field.id, sectionId, value)}
           />
         );
 

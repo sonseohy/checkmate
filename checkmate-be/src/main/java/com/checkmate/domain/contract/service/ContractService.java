@@ -68,6 +68,7 @@ public class ContractService {
                 .editStatus(EditStatus.COMPLETED)
                 .sourceType(SourceType.USER_UPLOAD)
                 .signatureStatus(SignatureStatus.PENDING)
+                .questionGenerationStatus(QuestionGenerationStatus.PENDING)
                 .build();
         contract = contractRepository.save(contract);
 

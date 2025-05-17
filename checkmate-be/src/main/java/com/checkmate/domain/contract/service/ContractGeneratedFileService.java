@@ -5,14 +5,19 @@ import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.entity.EditStatus;
 import com.checkmate.domain.contract.entity.FileCategory;
+import com.checkmate.domain.contract.entity.QuestionGenerationStatus;
 import com.checkmate.domain.contract.repository.ContractFileRepository;
 import com.checkmate.domain.contract.repository.ContractRepository;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 import com.checkmate.global.common.service.KeyShareMongoService;
 import com.checkmate.global.common.service.S3Service;
+import com.checkmate.global.config.WebClientConfig;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,8 +37,10 @@ public class ContractGeneratedFileService {
     private final ContractFileRepository contractFileRepository;
     private final S3Service s3Service;
     private final KeyShareMongoService keyShareMongo;
+    private final WebClientConfig webClientConfig;
 
     private static final long MAX_FILE_SIZE = 100L * 1024 * 1024;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public ContractGeneratedFileResponseDto saveGeneratedFile(Integer userId, Integer contractId, MultipartFile file, String fileName) {
@@ -100,10 +107,14 @@ public class ContractGeneratedFileService {
 
             // 9. 계약서 상태 업데이트 - EDITING → COMPLETED
             contract.setEditStatus(EditStatus.COMPLETED);
+            contract.setQuestionGenerationStatus(QuestionGenerationStatus.PENDING);
             contractRepository.save(contract);
 
             log.info("계약서 생성 파일 저장 및 상태 업데이트 완료: contractId={}, fileId={}, status=COMPLETED",
                     contractId, savedFile.getId());
+
+            webClientConfig.generateQuestions(contractId, contract.getCategory().getId())
+                .subscribe();
 
             // 10. 응답 생성
             return ContractGeneratedFileResponseDto.builder()

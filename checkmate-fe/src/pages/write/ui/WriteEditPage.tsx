@@ -99,7 +99,7 @@ const WriteEditPage: React.FC = () => {
       if (includesAny(label, ['이름', '성명'])) return 50;
       if (includesAny(label, ['주소'])) return 100;
       return 100;
-    };
+    };  
 
     const isResidentIdLabel = includesAny(field.label, ['주민등록번호']);
     const isPhoneLabel = includesAny(field.label, ['전화번호', '연락처']);
@@ -175,8 +175,35 @@ const WriteEditPage: React.FC = () => {
     }
 
     switch (field.inputType) {
-      case 'TEXT':
-      case 'NUMBER':
+      case 'TEXT': {
+        return (
+          <input
+            type="text"
+            maxLength={getMaxLength(fieldKey)}
+            {...commonProps}
+            value={value}
+            onChange={(e) =>
+              setDependsOnStates((p) => ({ ...p, [fieldKey]: e.target.value }))
+            }
+          />
+        );
+      }
+
+      case 'NUMBER': {
+        return (
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="\d*"
+            maxLength={getMaxLength(fieldKey)}
+            {...commonProps}
+            value={value}
+            onChange={(e) =>
+              setDependsOnStates((p) => ({ ...p, [fieldKey]: e.target.value }))
+            }
+          />
+        );
+      }
       case 'DATE':
         return (
           <DateFieldInput
@@ -187,10 +214,10 @@ const WriteEditPage: React.FC = () => {
         );
 
       case 'RADIO': {
-        const opts = typeof field.options === 'string' ? JSON.parse(field.options) : field.options;
+        const opts = parseOptions(field.options);
         return (
           <div className="space-x-4">
-            {opts?.map((opt: string) => (
+            {opts.map((opt) => (
               <label key={opt} className="inline-flex items-center">
                 <input
                   type="radio"
@@ -212,18 +239,22 @@ const WriteEditPage: React.FC = () => {
 
       case 'CHECKBOX': {
         const opts = parseOptions(field.options);
+
         if (opts.length) {
           const selected: string[] = value ? JSON.parse(value) : [];
+
           const toggle = (item: string) => {
             const next = selected.includes(item)
               ? selected.filter((v) => v !== item)
               : [...selected, item];
+
             setDependsOnStates((p) => ({
               ...p,
               [fieldKey]: JSON.stringify(next),
             }));
             handleFieldBlur(field.id, sectionId, JSON.stringify(next));
           };
+
           return (
             <div className="space-y-2">
               {opts.map((opt) => (
@@ -244,7 +275,6 @@ const WriteEditPage: React.FC = () => {
         return (
           <input
             type="checkbox"
-            {...commonProps}
             className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             checked={value === '1'}
             onChange={() => {

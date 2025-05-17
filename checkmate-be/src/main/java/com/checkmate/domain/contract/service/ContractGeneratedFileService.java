@@ -40,7 +40,6 @@ public class ContractGeneratedFileService {
     private final WebClientConfig webClientConfig;
 
     private static final long MAX_FILE_SIZE = 100L * 1024 * 1024;
-    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public ContractGeneratedFileResponseDto saveGeneratedFile(Integer userId, Integer contractId, MultipartFile file, String fileName) {

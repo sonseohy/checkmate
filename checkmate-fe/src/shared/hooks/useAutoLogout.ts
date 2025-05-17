@@ -8,7 +8,6 @@ export const useAutoLogout = (mainRef: React.RefObject<HTMLElement | null>) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const idleTimer = useRef<number>(0);
-  const expiryTimer = useRef<number>(0);
 
   // 로그아웃 수행 함수
   const doLogout = useCallback(() => {
@@ -59,24 +58,4 @@ export const useAutoLogout = (mainRef: React.RefObject<HTMLElement | null>) => {
       if (idleTimer.current) clearTimeout(idleTimer.current);
     };
   }, [resetIdle, mainRef]);
-
-  // 토큰 만료 타이머 설정
-  useEffect(() => {
-    const raw = localStorage.getItem('token_expires_at');
-    const accessToken = localStorage.getItem('access_token');
-    if (!raw || !accessToken) return;
-
-    const expiresAt = Number(raw);
-    const delay = expiresAt - Date.now();
-
-    if (delay <= 0) {
-      doLogout();
-    } else {
-      expiryTimer.current = window.setTimeout(doLogout, delay);
-    }
-
-    return () => {
-      if (expiryTimer.current) clearTimeout(expiryTimer.current);
-    };
-  }, [doLogout]);
 };

@@ -107,6 +107,44 @@ class MySQLManager:
 
         return await self.with_retry(operation, contract_id, sections)
 
+    async def save_questions_batch(self, contract_id: int, contract_category_id: int, questions: list):
+        """질문 목록을 일괄 저장"""
+        if not questions:
+            return 0 # 질문이 없으면 아무 작업도 하지 않음
+        async def operation(pool, cid, cat_id, detail):
+            async with self.pool.acquire() as conn:
+                async with conn.cursor() as cur:
+                    # 다중 INSERT 쿼리 준비
+                    values = []
+                    for question in questions:
+                        # 질문 형식 처리
+                        if isinstance(question, dict):
+                            question_text = question.get("question", "")
+                        else:
+                            question_text = str(question)
+
+                        if question_text.strip():
+                            values.append((
+                                contract_id,
+                                contract_category_id,
+                                question_text,
+                                datetime.now()
+                            ))
+
+                    if values:
+                        # 배치 INSERT 실행
+                        sql = """
+                              INSERT INTO question
+                                  (contract_id, contract_category_id, question_detail, created_at)
+                              VALUES (%s, %s, %s, %s) \
+                              """
+                        await cur.executemany(sql, values)
+                        logger.info(f"[{contract_id}] {len(values)}개 질문 일괄 저장 완료")
+                        return len(values)
+
+                    return 0
+
+        return await self.with_retry(operation, contract_id, contract_category_id, questions)
     def _convert_to_clause_type(self, type_str: str) -> ClauseType:
         """문자열을 ClauseType Enum으로 변환"""
         type_mapping = {

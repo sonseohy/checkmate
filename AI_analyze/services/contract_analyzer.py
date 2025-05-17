@@ -227,34 +227,15 @@ async def save_analysis_results(
         )
         save_tasks.append(task)
 
-    # 4. 질문 저장 (기존 방식 유지)
+    # 4. 질문 저장
     questions_data = results.get("questions", {}).get("questions", [])
-    question_tasks = []
 
-    for question_item in questions_data:
-        # 새로운 형식 처리
-        if isinstance(question_item, dict):
-            question_text = question_item.get("question", "")
-        else:
-            # 기존 형식 (문자열) 처리
-            question_text = str(question_item)
-
-        if question_text:
-            task = mysql_manager.save_question(
-                contract_id,
-                contract_category_id,
-                question_text
-            )
-            question_tasks.append(task)
-
-    all_tasks = save_tasks + question_tasks
-
-    if all_tasks:
+    if save_tasks:
         try:
             # 최대 10개씩 배치로 실행 (DB 부하 방지)
             batch_size = 10
-            for i in range(0, len(all_tasks), batch_size):
-                batch = all_tasks[i:i + batch_size]
+            for i in range(0, len(save_tasks), batch_size):
+                batch = save_tasks[i:i + batch_size]
 
                 # 병렬 실행
                 results = await asyncio.gather(*batch, return_exceptions=True)
@@ -264,5 +245,17 @@ async def save_analysis_results(
                     if isinstance(result, Exception):
                         logger.error(f"DB 저장 작업 {i + idx} 실패: {result}")
         except Exception as e:
-            logger.error(f"DB 저장 중 오류 발생: {e}")
+            logger.error(f"MongoDB 저장 중 오류 발생: {e}")
+
+    # MySQL 질문 배치 저장 (별도 처리)
+    if questions_data:
+        try:
+            await mysql_manager.save_questions_batch(
+                contract_id,
+                contract_category_id,
+                questions_data
+            )
+        except Exception as e:
+            logger.error(f"질문 배치 저장 실패: {e}")
+
     logger.info(f"분석 결과 저장 완료")

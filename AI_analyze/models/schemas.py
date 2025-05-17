@@ -41,3 +41,7 @@ class ContractAnalysisRequest(BaseModel):
     contract_text: str
     contract_id: Optional[int] = None
     contract_category_id: Optional[int] = None
+
+class QuestionGenerationRequest(BaseModel):
+    contract_id: int
+    contract_category_id: Optional[int] = 1

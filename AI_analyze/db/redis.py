@@ -57,22 +57,4 @@ class OCRCache:
         if self.pool:
             await self.pool.disconnect()
 
-    async def save_job_status(self, job_id: str, contract_id: int, status: str, data=None):
-        """작업 상태 저장"""
-        if not self.redis:
-            await self.connect()
-
-        key = f"job:{job_id}"
-        value = {
-            "status": status,
-            "contract_id": contract_id,
-            "timestamp": datetime.now().isoformat()
-        }
-
-        if status == "completed" and data:
-            value["result"] = data
-        elif status == "failed" and data:
-            value["error"] = data
-
-        await self.redis.setex(key, 86400, json.dumps(value))  # 24시간 보관
 

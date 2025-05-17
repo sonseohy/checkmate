@@ -78,8 +78,7 @@ async def get_sections_from_gpt(llm, contract_type: str, existing_sections_text:
     return valid_sections
 
 
-async def get_contract_type_requirements(vector_store, contract_type: str, llm=None) -> Tuple[
-    List[str], str]:
+async def get_contract_type_requirements(contract_type: str, llm=None) -> List[str]:
     """계약 유형에 따른 필수 조항 목록 및 관련 법률 정보 가져오기"""
 
     # 계약 유형별 필수 조항 (정적 매핑)

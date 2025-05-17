@@ -1,5 +1,6 @@
 import asyncio
 import httpx
+from typing import Union
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, BackgroundTasks
@@ -7,9 +8,10 @@ from fastapi import APIRouter, Depends, BackgroundTasks
 from db.mongo import MongoDBManager
 from db.mysql import MySQLManager
 from db.redis import OCRCache
-from models.schemas import OcrRequest
+from models.schemas import OcrRequest, QuestionGenerationRequest
 from nlp.llm import init_llm_model
-from services.contract_analyzer import analyze_contract_parallel
+from nlp.prompts import questions_generation_prompt
+from services.contract_analyzer import analyze_contract_parallel, analyze_with_retry
 from services.contract_parser import structure_contract_with_gpt
 from services.decryption import DecryptionService
 from services.legal_retriever import get_contract_type_requirements, get_clause_specific_laws_parallel
@@ -18,10 +20,46 @@ from services.postprocessing import postprocessing_pipeline
 from services.summarization import generate_summary
 from utils.dependencies import get_mongo, get_mysql, get_ocr_cache, get_vector_store
 from utils.logging import setup_logger
-from config.settings import SPRINGBOOT_WEBHOOK_URL, WEBHOOK_API_KEY
+from config.settings import WEBHOOK_API_KEY, SPRINGBOOT_WEBHOOK_URL
 
 logger = setup_logger(__name__)
 router = APIRouter()
+
+
+@router.post("/questions/generate")
+async def generate_questions_endpoint(
+        req: QuestionGenerationRequest,
+        background_tasks: BackgroundTasks,
+        mysql: MySQLManager = Depends(get_mysql),
+        mongo: MongoDBManager = Depends(get_mongo),
+        ocr_cache: OCRCache = Depends(get_ocr_cache),
+):
+    """계약서 질문 생성 전용 엔드포인트"""
+
+    service = DecryptionService(mysql, mongo)
+    engine = OcrEngine()
+
+    # 작업 ID 생성
+    job_id = str(uuid4())
+
+    # 백그라운드 작업 추가
+    background_tasks.add_task(
+        process_question_generation_background,
+        job_id,
+        req,
+        service,
+        engine,
+        mysql,
+        mongo,
+        ocr_cache
+    )
+
+    # 즉시 응답
+    return {
+        "status": "processing",
+        "message": "계약서 질문 생성이 시작되었습니다.",
+        "job_id": job_id
+    }
 
 @router.post("/ocr")
 async def ocr_endpoint(
@@ -51,9 +89,6 @@ async def ocr_endpoint(
     # 작업 ID 생성
     job_id = str(uuid4())
 
-    # 작업 상태 저장 (Redis 또는 DB)
-    await ocr_cache.save_job_status(job_id, req.contract_id, "processing")
-
     # 백그라운드 작업 추가
     background_tasks.add_task(
         process_contract_background,
@@ -75,6 +110,49 @@ async def ocr_endpoint(
     }
 
 
+async def process_question_generation_background(
+        job_id: str,
+        req: QuestionGenerationRequest,
+        decryption_service: DecryptionService,
+        ocr_engine: OcrEngine,
+        mysql: MySQLManager,
+        mongo: MongoDBManager,
+        ocr_cache: OCRCache
+):
+    """백그라운드에서 질문 생성만 처리"""
+    try:
+        # 수정된 파이프라인 호출 - 질문 생성 모드로
+        await process_contract_pipeline(
+            req,
+            decryption_service,
+            ocr_engine,
+            mysql,
+            ocr_cache,
+            mongo,
+            process_type="QUESTION_GENERATION"  # 질문 생성 모드
+        )
+
+        # Spring Boot에 웹훅 전송 - 성공
+        await send_webhook_notification(
+            job_id=job_id,
+            contract_id=req.contract_id,
+            contract_category_id=req.contract_category_id,
+            status="completed",
+            result_type="QUESTION_GENERATION"
+        )
+
+    except Exception as e:
+        logger.error(f"질문 생성 처리 오류: {e}", exc_info=True)
+
+        # Spring Boot에 웹훅 전송 - 실패
+        await send_webhook_notification(
+            job_id=job_id,
+            contract_id=req.contract_id,
+            contract_category_id=req.contract_category_id,
+            status="failed",
+            result_type="QUESTION_GENERATION"
+        )
+
 async def process_contract_background(
         job_id: str,
         req: OcrRequest,
@@ -89,19 +167,17 @@ async def process_contract_background(
     """백그라운드에서 계약서 처리"""
     try:
         # 기존 process_contract_pipeline 호출
-        result_data = await process_contract_pipeline(
+        await process_contract_pipeline(
             req,
             decryption_service,
             ocr_engine,
             mysql,
+            ocr_cache,
             mongo,
-            vector_store,
-            existing_data,
-            ocr_cache
+            process_type="ANALYSIS",
+            vector_store = vector_store,
+            existing_data = existing_data,
         )
-
-        # 작업 상태 업데이트
-        await ocr_cache.save_job_status(job_id, req.contract_id, "completed", result_data)
 
         # Spring Boot에 웹훅 전송
         await send_webhook_notification(
@@ -109,30 +185,32 @@ async def process_contract_background(
             contract_id=req.contract_id,
             contract_category_id=req.contract_category_id,
             status="completed",
+            result_type="ANALYSIS"
         )
 
     except Exception as e:
         logger.error(f"백그라운드 처리 오류: {e}", exc_info=True)
         await cleanup_incomplete_data(req.contract_id, mongo, mysql)
-        await ocr_cache.save_job_status(job_id, req.contract_id, "failed", str(e))
         # 실패 알림도 전송
         await send_webhook_notification(
             job_id=job_id,
             contract_id=req.contract_id,
             contract_category_id=req.contract_category_id,
-            status="failed"
+            status="failed",
+            result_type="ANALYSIS"
         )
 
 
 async def process_contract_pipeline(
-        req: OcrRequest,
+        req: Union[OcrRequest, QuestionGenerationRequest],
         decryption_service: DecryptionService,
         ocr_engine: OcrEngine,
         mysql: MySQLManager,
+        ocr_cache: OCRCache,
         mongo: MongoDBManager,
-        vector_store,
-        existing_data: dict,
-        ocr_cache: OCRCache
+        process_type: str = "ANALYSIS",
+        vector_store = None,
+        existing_data: dict = None
 ):
     """OCR → 요약 → 분석 파이프라인"""
     cid = req.contract_id
@@ -142,80 +220,112 @@ async def process_contract_pipeline(
         pages = await get_ocr_result(cid, decryption_service, ocr_engine, ocr_cache)
         all_text = "\n\n".join(p["cleaned_markdown"] for p in pages)
 
-        # 2. AI 분석 보고서 ID 생성/가져오기
-        if not existing_data['analysis']:
-            ai_analysis_report_id = await mongo.save_ai_analysis_report(cid)
-        else:
-            report = await mongo.db.ai_analysis_report.find_one({"contractId": cid})
-            ai_analysis_report_id = str(report["_id"])
-
         llm = init_llm_model(temperature=0.0)
-        tasks = []
 
-        # 3. 요약 생성
-        if not existing_data['summary']:
-            summary_task = lambda: generate_summary(all_text, cid, mongo)
-            tasks.append(("summary", summary_task))
+        if process_type == "QUESTION_GENERATION":
+            # 질문 생성만 수행
+            logger.info(f"[{cid}] 질문 생성만 수행")
+            structured_contract = await structure_contract_with_gpt(all_text, cid, llm)
+
+            # 계약서 전체 내용
+            content = "\n\n".join([f"{section.number} {section.title}\n{section.content}"
+                                   for section in structured_contract.sections])
+
+            questions_input = {
+                "title": structured_contract.metadata.title,
+                "contract_type": structured_contract.metadata.contract_type,
+                "content": content[:15000]
+            }
+
+            response = await analyze_with_retry(llm, questions_generation_prompt, questions_input)
+            questions = response.get("questions", [])
+            # MySQL에 질문 저장
+            await mysql.save_questions_batch(cid, req.contract_category_id, questions)
+
+            logger.info(f"[{cid}] 질문 생성 완료: {len(questions)}개 생성됨")
+
+            return {
+                "success": True,
+                "contract_id": cid,
+                "question_count": len(questions),
+                "question_completed": True
+            }
+        else :
+            if mongo is None or vector_store is None or existing_data is None:
+                raise ValueError("분석 모드에서는 mongo, vector_store, existing_data가 필요합니다.")
+            # 2. AI 분석 보고서 ID 생성/가져오기
+            if not existing_data['analysis']:
+                ai_analysis_report_id = await mongo.save_ai_analysis_report(cid)
+            else:
+                report = await mongo.db.ai_analysis_report.find_one({"contractId": cid})
+                ai_analysis_report_id = str(report["_id"])
+
+            tasks = []
+
+            # 3. 요약 생성
+            if not existing_data['summary']:
+                summary_task = lambda: generate_summary(all_text, cid, mongo)
+                tasks.append(("summary", summary_task))
 
 
-        # 4. 구조화 및 분석
-        logger.info(f"[{cid}] 구조화 및 분석 시작")
+            # 4. 구조화 및 분석
+            logger.info(f"[{cid}] 구조화 및 분석 시작")
 
-        structured_contract_task = lambda: structure_contract_with_gpt(all_text, cid, llm)
-        tasks.append(("structure", structured_contract_task))
+            structured_contract_task = lambda: structure_contract_with_gpt(all_text, cid, llm)
+            tasks.append(("structure", structured_contract_task))
 
-        results = await execute_parallel_tasks(tasks)
+            results = await execute_parallel_tasks(tasks)
 
-        summary_result = results.get("summary")
-        structured_contract = results.get("structure")
+            summary_result = results.get("summary")
+            structured_contract = results.get("structure")
 
-        contract_type = structured_contract.metadata.contract_type
-        # 5. MySQL에 조항 저장
-        sections_data = []
-        for section in structured_contract.sections:
-            sections_data.append({
-                'number': section.number,
-                'title': section.title,
-                'content': section.content,
-                'type': section.type,
-            })
+            contract_type = structured_contract.metadata.contract_type
+            # 5. MySQL에 조항 저장
+            sections_data = []
+            for section in structured_contract.sections:
+                sections_data.append({
+                    'number': section.number,
+                    'title': section.title,
+                    'content': section.content,
+                    'type': section.type,
+                })
 
-        # 8. 구조화 완료 후 병렬 처리할 태스크들
-        second_round_tasks = [
-            ("mysql_save", lambda: mysql.save_contract_clauses(cid, sections_data)),
-            ("summary_save",
-             lambda: mongo.save_summary_report(ai_analysis_report_id, summary_result) if summary_result else None),
-            ("required_sections", lambda: get_contract_type_requirements(vector_store, contract_type, llm)),
-            ("clause_laws", lambda: get_clause_specific_laws_parallel(structured_contract, vector_store))
-        ]
-        # None이 아닌 작업만 필터링
-        second_round_tasks = [(name, task) for name, task in second_round_tasks if task is not None]
+            # 8. 구조화 완료 후 병렬 처리할 태스크들
+            second_round_tasks = [
+                ("mysql_save", lambda: mysql.save_contract_clauses(cid, sections_data)),
+                ("summary_save",
+                 lambda: mongo.save_summary_report(ai_analysis_report_id, summary_result) if summary_result else None),
+                ("required_sections", lambda: get_contract_type_requirements(contract_type, llm)),
+                ("clause_laws", lambda: get_clause_specific_laws_parallel(structured_contract, vector_store))
+            ]
+            # None이 아닌 작업만 필터링
+            second_round_tasks = [(name, task) for name, task in second_round_tasks if task is not None]
 
-        second_results = await execute_parallel_tasks(second_round_tasks)
+            second_results = await execute_parallel_tasks(second_round_tasks)
 
-        required_sections = second_results.get("required_sections")
-        clause_specific_laws = second_results.get("clause_laws")
+            required_sections = second_results.get("required_sections")
+            clause_specific_laws = second_results.get("clause_laws")
 
-        # 10. 최종 분석 (모든 준비가 완료된 후)
-        logger.info(f"[{cid}] 최종 분석 시작")
-        await analyze_contract_parallel(
-            llm,
-            structured_contract,
-            req.contract_category_id,
-            mongo,
-            mysql,
-            ai_analysis_report_id,
-            required_sections,
-            clause_specific_laws,
-            contract_type
-        )
+            # 10. 최종 분석 (모든 준비가 완료된 후)
+            logger.info(f"[{cid}] 최종 분석 시작")
+            await analyze_contract_parallel(
+                llm,
+                structured_contract,
+                req.contract_category_id,
+                mongo,
+                mysql,
+                ai_analysis_report_id,
+                required_sections,
+                clause_specific_laws,
+                contract_type
+            )
 
-        logger.info(f"[{cid}] 전체 파이프라인 완료")
-        return {
-            "success": True,
-            "contract_id": cid,
-            "analysis_completed": True
-        }
+            logger.info(f"[{cid}] 전체 파이프라인 완료")
+            return {
+                "success": True,
+                "contract_id": cid,
+                "analysis_completed": True
+            }
 
     except Exception as e:
         logger.error(f"[{cid}] 파이프라인 오류: {e}", exc_info=True)
@@ -300,7 +410,8 @@ async def send_webhook_notification(
         job_id: str,
         contract_id: int,
         contract_category_id: int,
-        status: str
+        status: str,
+        result_type: str
 ):
     """Spring Boot에 웹훅 전송"""
     webhook_url = SPRINGBOOT_WEBHOOK_URL
@@ -308,7 +419,8 @@ async def send_webhook_notification(
     payload = {
         "contractId": contract_id,
         "contractCategoryId": contract_category_id,
-        "status": status
+        "status": status,
+        "type": result_type
     }
 
     headers = {

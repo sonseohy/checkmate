@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import * as d3 from 'd3';
 import koreaJson from '@assets/images/map/koreamap.simple.json';
 import { feature } from 'topojson-client';
 import type { Topology, Objects } from 'topojson-specification';
 import type { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
-import RegionMapModal from './RegionMapModal';
-import { getRegionName } from '../../api/MyPageApi';
 import { useSelector } from 'react-redux';
 import { RootState } from "@/app/redux/store";
+import { Dropdown, getRegionName } from '@/features/mypage';
+import { useMobile } from '@/shared';
+
 
 // 시·도별 JSON 파일 이름 매핑
 const regionFileMap: Record<string, string> = {
@@ -30,17 +31,9 @@ const regionFileMap: Record<string, string> = {
   '제주특별자치도': 'Jeju',
 };
 
-// **eager: true 제거**
-const regionModules = import.meta.glob<{ default: Topology<Objects<GeoJsonProperties>> }>(
-  '/src/assets/images/map/*.json'
-);
-
 // 대한민국 전체 지도 데이터
 const topology = koreaJson as unknown as Topology<Objects<GeoJsonProperties>>;
 const mapGeo = feature(topology, topology.objects['koreamap']) as FeatureCollection<Geometry, GeoJsonProperties>;
-
-const width = 700;
-const height = 550;
 
 interface KoreaMapProps {
   onRegionSelect: (regionName: string | null) => void;
@@ -51,37 +44,49 @@ export default function KoreaMap({
   onRegionSelect,
   selectedRegion,
 }: KoreaMapProps) {
+  const isMobile = useMobile();
   const location = useSelector((state: RootState) => state.auth.location);
-  const [regionTopo, setRegionTopo] = useState<Topology<Objects<GeoJsonProperties>> | null>(null);
+
+  
+  const width = isMobile ? 350 : 1000;
+  const height = isMobile ? 400 : 900;
+
+  // 드롭다운 옵션
+  const options = useMemo(() =>
+    Object.keys(regionFileMap).map(region => ({
+      value: region,
+      label: region,
+    })), []);
+
+  const filterOption = selectedRegion
+    ? { value: selectedRegion, label: selectedRegion }
+    : null;
 
   // projection & path (전체 지도)
   const projection = useMemo(
     () => d3.geoIdentity().reflectY(true).fitSize([width, height], mapGeo),
-    []
+    [width, height]
   );
   const pathGen = useMemo(() => d3.geoPath().projection(projection), [projection]);
 
-  // 지도 path 생성
+  // 지도 path 생성 (hover, active 모두 state 기반으로)
   const paths = useMemo(() => {
     return mapGeo.features.map((feat, i) => {
       const korName = (feat.properties as any).CTP_KOR_NM as string;
       const fileBase = regionFileMap[korName];
       const isActive = korName === selectedRegion;
 
+      let fill = "#F0F0F0";
+      if (isActive) fill = "#B4C7FF"; // 선택된 지역
+
       return (
         <path
           key={i}
           d={pathGen(feat)!}
-          fill={isActive ? "#60A5FA" : "transparent"}
+          fill={fill}
           stroke="#666"
           strokeWidth={0.5}
           style={{ cursor: fileBase ? "pointer" : "default" }}
-          onMouseOver={e => {
-            if (!isActive) e.currentTarget.style.fill = "#60A5FA";
-          }}
-          onMouseOut={e => {
-            if (!isActive) e.currentTarget.style.fill = "transparent";
-          }}
           onClick={() => {
             if (!fileBase) return;
             onRegionSelect(korName);
@@ -91,20 +96,6 @@ export default function KoreaMap({
     });
   }, [pathGen, selectedRegion, onRegionSelect]);
 
-  // 선택된 region에 따라 regionTopo 비동기 import로 세팅
-  useEffect(() => {
-    if (!selectedRegion) {
-      setRegionTopo(null);
-      return;
-    }
-    const fileBase = regionFileMap[selectedRegion];
-    const importer = regionModules[`/src/assets/images/map/${fileBase}.json`];
-    if (importer) {
-      importer().then(m => setRegionTopo(m.default));
-    } else {
-      setRegionTopo(null);
-    }
-  }, [selectedRegion]);
 
   // 사용자 위도/경도 → 지역으로 바꾸기 (자동 선택)
   useEffect(() => {
@@ -117,27 +108,19 @@ export default function KoreaMap({
   }, [location]);
 
   return (
-    <div>
-      <div>
-        선택 드롭다운 영역
+    <div className='p-5'>
+      <div className={isMobile ? 'w-35' : 'w-50'}>
+        <Dropdown
+          options={options}
+          value={filterOption}
+          onChange={opt => onRegionSelect(opt.value)}
+        />
       </div>
-      <div className='flex flex-row justify-start '>
+      <div className='flex flex-row'>
         <div className="py-5">
           <svg width={width} height={height}>
             <g className="boundary">{paths}</g>
           </svg>
-        </div>
-        <div className='flex items-center'>
-          {selectedRegion && regionTopo && (
-            <RegionMapModal
-              isOpen={true}
-              topo={regionTopo}
-              onClose={() => {
-                onRegionSelect(null);
-                setRegionTopo(null);
-              }}
-            />
-          )}
         </div>
       </div>
     </div>

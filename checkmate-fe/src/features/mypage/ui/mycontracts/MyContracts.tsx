@@ -122,6 +122,7 @@ export default function MyContracts() {
         }
         <div className={` ${isMobile ? 'p-2':''}`}>
           <div className="flex flex-row justify-between items-center">
+            {/* 드롭다운 */}
             <div className={` relative z-3 ${isMobile ? 'w-28 my-1' : ' w-45 my-5'}`}>
                 <Dropdown
                 options={options}

@@ -31,7 +31,7 @@ public class AiAnalysisReportService {
 			.orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 
 		if (!contract.getUser().getUserId().equals(userId)) {
-			throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
+			throw new CustomException(ErrorCode.AI_ANALYSIS_ACCESS_DENIED);
 		}
 		CompleteAiAnalysisReport aiAnalysisReport = aiAnalysisReportRepository
 			.getCompleteReportByContractId(contractId)

@@ -41,7 +41,7 @@ public class MissingClauseReportService {
 		Contract contract = contractRepository.findById(aiAnalysisReport.getContractId())
 			.orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 		if (!contract.getUser().getUserId().equals(userId)) {
-			throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
+			throw new CustomException(ErrorCode.MISSING_REPORT_ACCESS_DENIED);
 		}
 		List<MissingClauseReport> missingClauseReport = missingClauseReportRepository
 			.findAllByAiAnalysisReportId(aiAnalysisId);

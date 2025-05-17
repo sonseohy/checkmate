@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.checkmate.domain.missingclausereport.dto.response.MissingResponseDto;
 import com.checkmate.domain.missingclausereport.service.MissingClauseReportService;
+import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.response.ApiResult;
 
 @RestController
@@ -39,8 +41,10 @@ public class MissingClauseReportController {
 	@GetMapping("/{aiAnalysisId}")
 	@PreAuthorize("isAuthenticated()")
 	public ApiResult<List<MissingResponseDto>> getMissingClauseReportByAiAnalysisId(
-		@PathVariable("aiAnalysisId") String aiAnalysisId) {
-		List<MissingResponseDto> data = missingClauseReportService.getMissingClauseReportByAiAnalysisId(aiAnalysisId);
+		@PathVariable("aiAnalysisId") String aiAnalysisId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		List<MissingResponseDto> data =
+			missingClauseReportService.getMissingClauseReportByAiAnalysisId(aiAnalysisId, userDetails.getUserId());
 		return ApiResult.ok(data);
 	}
 }

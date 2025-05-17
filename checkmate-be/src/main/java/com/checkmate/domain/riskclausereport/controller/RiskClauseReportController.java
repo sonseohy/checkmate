@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.checkmate.domain.riskclausereport.dto.response.RiskClauseReportResponseDto;
 import com.checkmate.domain.riskclausereport.service.RiskClauseReportService;
+import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.response.ApiResult;
 
 @RestController
@@ -39,9 +41,10 @@ public class RiskClauseReportController {
 	@GetMapping("/{aiAnalysisId}")
 	@PreAuthorize("isAuthenticated()")
 	public ApiResult<List<RiskClauseReportResponseDto>> getRiskClauseReportsByAnalysisId(
-		@PathVariable(value = "aiAnalysisId") String aiAnalysisId) {
+		@PathVariable(value = "aiAnalysisId") String aiAnalysisId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		List<RiskClauseReportResponseDto> data =
-			riskClauseReportService.getImprovementReportsByAnalysisId(aiAnalysisId);
+			riskClauseReportService.getImprovementReportsByAnalysisId(aiAnalysisId, userDetails.getUserId());
 		return ApiResult.ok(data);
 	}
 }

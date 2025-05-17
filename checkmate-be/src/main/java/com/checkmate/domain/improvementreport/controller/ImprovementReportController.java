@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.checkmate.domain.improvementreport.dto.response.ImprovementResponseDto;
 import com.checkmate.domain.improvementreport.service.ImprovementReportService;
+import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.response.ApiResult;
 
 @RestController
@@ -39,8 +41,10 @@ public class ImprovementReportController {
 	@GetMapping("{aiAnalysisId}")
 	@PreAuthorize("isAuthenticated()")
 	public ApiResult<List<ImprovementResponseDto>> getImprovementReport(
-		@PathVariable(value = "aiAnalysisId") String aiAnalysisId) {
-		List<ImprovementResponseDto> data = improvementReportService.getImprovementReport(aiAnalysisId);
+		@PathVariable(value = "aiAnalysisId") String aiAnalysisId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		List<ImprovementResponseDto> data = improvementReportService.getImprovementReport(aiAnalysisId,
+			userDetails.getUserId());
 		return ApiResult.ok(data);
 	}
 

@@ -104,7 +104,7 @@ export const router = createBrowserRouter([
       },
 
       {
-        path: 'analyze/:mainCategorySlug/result/:contractId',
+        path: 'analyze/result/:contractId',
         element: <AnalyzeResultPage />,
       },
 

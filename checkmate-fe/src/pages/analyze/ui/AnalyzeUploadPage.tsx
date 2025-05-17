@@ -64,11 +64,17 @@ const AnalyzeUploadPage: React.FC = () => {
 
     try {
       setIsLoading(true);
-      await uploadContract({
+
+      const response = await uploadContract({
         title: mainCategoryName,
         categoryId,
         files,
       });
+
+      const contractId = response?.data?.contract_id;
+      if (!contractId) {
+        throw new Error('분석 결과로 이동할 contract_id가 없습니다.');
+      }
 
       await Swal.fire({
         icon: 'success',
@@ -93,7 +99,7 @@ const AnalyzeUploadPage: React.FC = () => {
 
   return (
     <>
-      {/* ✅ 로딩 오버레이 */}
+      {/* ✅ 업로드 로딩 오버레이 */}
       {isLoading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/50">
           <img
@@ -101,16 +107,18 @@ const AnalyzeUploadPage: React.FC = () => {
             alt="업로드 로딩"
             className="w-24 h-24 mx-auto mb-4"
           />
-          <p className="text-white text-lg font-semibold">
+          <p className="text-white text-lg font-semibold mb-1">
             업로드 파일을 검사하고 있어요...
           </p>
         </div>
       )}
 
+      {/* ✅ 로그인 모달 */}
       {loginModalOpen && (
         <KakaoLoginModal onClose={() => setLoginModalOpen(false)} />
       )}
 
+      {/* ✅ 업로드 UI */}
       <section className="container px-2 py-12 mx-auto text-center">
         <h1 className="mb-6 text-2xl font-bold">
           {mainCategoryName} 파일을 업로드 해주세요

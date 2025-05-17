@@ -1,12 +1,14 @@
-export type NotificationType = 'SIGN_COMPLETE' | 'ANALYSIS_DONE';
+export type NotificationType = 'SIGNATURE_COMPLETED' | 'CONTRACT_ANALYSIS';
 
 export interface Notification {
   id: number;
   message: string;
-  type: 'SIGNATURE_COMPLETED' | 'CONTRACT_ANALYSIS';
+  type: NotificationType;
   target_url: string;
   created_at: string;
   read: boolean;
+  user_id: number;
+  contract_id: number;
 }
 
 // ✅ 서버 응답 형식 정의

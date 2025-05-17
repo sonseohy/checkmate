@@ -1,5 +1,5 @@
 import { Bell } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/app/redux/store';
 import { markAsRead } from '@/features/notifications/model/notificationSlice';

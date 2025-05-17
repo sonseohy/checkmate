@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { formatDistanceToNowStrict, isBefore, subDays, format } from 'date-fns';
-import { Notification } from '@/features/notifications';
 import { ko } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
+import { Notification } from '@/features/notifications';
 
 type NotificationType = 'ALL' | 'SIGNATURE_COMPLETED' | 'CONTRACT_ANALYSIS';
 
 interface Props {
-  notifications: unknown; // 💡 안전을 위해 any 대신 unknown 사용
+  notifications: unknown;
 }
 
 const TABS: { type: NotificationType; label: string }[] = [
@@ -16,9 +17,9 @@ const TABS: { type: NotificationType; label: string }[] = [
 ];
 
 const NotificationList: React.FC<Props> = ({ notifications }) => {
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<NotificationType>('ALL');
 
-  // ✅ 배열이 아닌 경우 대비
   const safeNotifications = Array.isArray(notifications) ? notifications : [];
 
   const filtered =
@@ -34,6 +35,16 @@ const NotificationList: React.FC<Props> = ({ notifications }) => {
     return isWithin24Hours
       ? `${formatDistanceToNowStrict(createdDate, { locale: ko })} 전`
       : format(createdDate, 'yyyy.MM.dd');
+  };
+
+  const handleClick = (n: Notification) => {
+    if (!n.contract_id) return;
+
+    if (n.type === 'CONTRACT_ANALYSIS') {
+      navigate(`/analyze/result/${n.contract_id}`);
+    } else if (n.type === 'SIGNATURE_COMPLETED') {
+      navigate(`/detail/${n.contract_id}`);
+    }
   };
 
   return (
@@ -58,15 +69,20 @@ const NotificationList: React.FC<Props> = ({ notifications }) => {
       {/* 알림 목록 */}
       <div className="space-y-3 max-h-64 overflow-y-auto">
         {filtered.map((n) => (
-          <a key={n.id} href={n.target_url} className="block">
+          <div
+            key={n.id}
+            className="block cursor-pointer hover:bg-gray-50 p-2 rounded"
+            onClick={() => handleClick(n)}
+          >
             <div className="text-sm text-gray-800 line-clamp-2">
               {n.message}
             </div>
             <div className="text-xs text-gray-400 mt-1">
               {formatDate(n.created_at)}
             </div>
-          </a>
+          </div>
         ))}
+
         {filtered.length === 0 && (
           <div className="text-sm text-gray-400 text-center py-4">
             알림이 없습니다

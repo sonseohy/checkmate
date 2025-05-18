@@ -1,7 +1,5 @@
-//법원 위치 찾기
-import { KoreaMap ,
-        getCourthouseList,
-        Courthouse} from "@/features/mypage";
+import { KoreaMap, getCourthouseList, Courthouse } from "@/features/mypage";
+import { useMobile } from "@/shared";
 import { useEffect, useState } from "react";
 // import { useSelector } from "react-redux";
 // import { RootState } from "@/app/redux/store";
@@ -27,53 +25,96 @@ const regionKeywords: Record<string, string[]> = {
 };
 
 export default function CourtLocation() {
-    const [courts, setCourts] = useState<Courthouse[]>([]);
-    const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-    // const location = useSelector((state: RootState) => state.auth.location);
+  const isMobile = useMobile();
+  const [courts, setCourts] = useState<Courthouse[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
-    // 법원 목록을 API에서 가져옵니다.
-    useEffect(() => {
-        const fetchCourts = async () => {
-            try {
-                const data = await getCourthouseList();
-                setCourts(data);  
-            } catch (err) {
-                console.error('법원 리스트 불러오기 실패:', err);
-            }
-        };
+  // 법원 목록 불러오기
+  useEffect(() => {
+    const fetchCourts = async () => {
+      try {
+        const data = await getCourthouseList();
+        setCourts(data);  
+      } catch (err) {
+        console.error('법원 리스트 불러오기 실패:', err);
+      }
+    };
+    fetchCourts();
+  }, []);
 
-        fetchCourts();
-    }, []);
-
-    const filteredCourts = selectedRegion
+  const filteredCourts = selectedRegion
       ? courts.filter(court => {
           const keywords = regionKeywords[selectedRegion] || [selectedRegion];
           return keywords.some(keyword => court.courthouseAddress.includes(keyword));
         })
       : courts;
 
-    return (
-        <div className="w-full">
-            <div className="m-8 rounded-2xl  bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] ">
-                <KoreaMap 
-                  onRegionSelect={setSelectedRegion}  // ★ 지도에서 지역 선택되면 상태 업데이트
-                  selectedRegion={selectedRegion}  
-                /> 
-            </div>
-            <div className="rounded-2xl m-8 p-2 w-300 bg-white  overflow-y-scroll">
-                {filteredCourts.map((court, idx) => (
-                    <div key={court.courthouseId} className="flex flex-row gap-2">
-                        <div className="m-5 flex justify-start items-center">
-                            <span className="text-lg font-semibold">{idx+1}</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-lg">{court.courthouseName}</span>
-                            <span className="text-md">{court.courthouseAddress}</span>
-                            <span className="mb-2 text-sm">{court.courthousePhoneNumber}</span>
-                        </div>
+  return (
+    <>
+        {isMobile 
+            ?<div className="w-full flex flex-col gap-3">
+                <div className="rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)]">
+                    <KoreaMap 
+                        onRegionSelect={setSelectedRegion}  
+                        selectedRegion={selectedRegion}  
+                    /> 
+                </div>
+                <div className="flex-1 rounded-2xl p-2 bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] max-h-[300px] overflow-y-auto">
+                    <div className="font-semibold">
+                        주변 법원 목록
                     </div>
-                ))}
-            </div>
-        </div>
-    );
+                    <div className="h-px bg-gray-200" />
+                    <div className="mt-2 divide-y divide-gray-200">
+                        {filteredCourts.length === 0 && (
+                        <div className="p-5 text-gray-400">해당 지역의 법원이 없습니다.</div>
+                        )}
+                        {filteredCourts.map((court, idx) => (
+                        <div key={court.courthouseId} className="flex flex-row gap-2">
+                            <div className="m-3 flex justify-start items-center">
+                                <span className="text-lg font-semibold">{idx+1}</span>
+                            </div>
+                            <div className="flex flex-col gap-1 my-2">
+                                <span className="font-medium text-xl">{court.courthouseName}</span>
+                                <span className="text-md">{court.courthouseAddress}</span>
+                                <span className="text-sm">{court.courthousePhoneNumber}</span>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                </div>
+                </div> 
+
+            : <div className="w-full flex flex-row">
+                <div className="rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] m-8 ">
+                    <KoreaMap 
+                        onRegionSelect={setSelectedRegion}  
+                        selectedRegion={selectedRegion}  
+                    /> 
+                </div>
+                <div className="flex-1 rounded-2xl p-2 bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] max-h-[1018px] m-8 overflow-y-auto">
+                    <div className="font-semibold m-3 text-2xl">
+                        주변 법원 목록
+                    </div>
+                    <div className="h-px bg-gray-200" />
+                    <div className="mt-5 divide-y divide-gray-200">
+                        {filteredCourts.length === 0 && (
+                        <div className="p-5 text-gray-400">해당 지역의 법원이 없습니다.</div>
+                        )}
+                        {filteredCourts.map((court, idx) => (
+                        <div key={court.courthouseId} className="flex flex-row gap-2">
+                            <div className="m-5 flex justify-start items-center">
+                                <span className="text-xl font-semibold">{idx+1}</span>
+                            </div>
+                            <div className="flex flex-col gap-1 my-2">
+                                <span className="font-medium text-2xl">{court.courthouseName}</span>
+                                <span className="text-lg">{court.courthouseAddress}</span>
+                                <span className="text-md">{court.courthousePhoneNumber}</span>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                </div>
+            </div> }
+    </>
+  );
 };

@@ -16,12 +16,12 @@ export default function Dashboard() {
       });
 
     if (isLoading) {
-        return <div>Loading...</div>;
-    }
+        return <div>Loading..</div>;
+    };
 
     if (isError) {
         return <div>Error: {error instanceof Error ? error.message : 'An error occurred'}</div>;
-    }
+    };
 
     return (
         <div> 
@@ -30,7 +30,7 @@ export default function Dashboard() {
                     <div className={` text-[#202020] font-semibold ${isMobile ? 'my-3 text-xl': 'mt-5 text-2xl ml-5'}`}>
                         최근 활동
                     </div>
-                    <div className="">
+                    <div>
                         <ContractCarousel contractList={data?.contracts ?? []} />
                     </div>
                 </div>
@@ -46,7 +46,6 @@ export default function Dashboard() {
                   </div>
                 }
             </div>
-
         </div>
     );
 };

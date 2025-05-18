@@ -9,7 +9,7 @@ import { useMobile } from "@/shared";
 
 interface ContractCarouselProps {
   contractList: Contract[];
-}
+};
 
 const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => {
   const navigate = useNavigate();
@@ -24,9 +24,7 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
     }
   };
 
-  console.log(contractList)
-
-   const slidesToShow = Math.min(contractList.length, 2);
+  const slidesToShow = Math.min(contractList.length, 2);
 
   const setting = {
     dots:false,

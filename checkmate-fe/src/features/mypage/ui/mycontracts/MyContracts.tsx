@@ -68,7 +68,6 @@ export default function MyContracts() {
       });
 
       if (confirmDelete.isConfirmed) {
-        // 삭제 요청
         for (const contractId of Array.from(selectedIds)) {
           await deleteContractDetail(contractId);
         }

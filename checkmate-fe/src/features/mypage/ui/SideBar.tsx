@@ -33,12 +33,10 @@ export default function SideBar({ onMenuClick }: SideBarProps) {
     if (label === "로그아웃") {
       handleLogout();
     } else {
-      setCurrentLabel(label); // 클릭된 메뉴로 현재 선택된 메뉴 변경
-      onMenuClick(label); // 컴포넌트 변경
+      setCurrentLabel(label); 
+      onMenuClick(label); 
     }
   };
-
-
 
   // 드롭다운에 사용할 옵션들
   const dropdownOptions = menu.map((item) => ({

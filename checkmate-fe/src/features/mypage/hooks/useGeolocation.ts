@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 const CACHE_KEY = "geo_cache";
 const CACHE_EXPIRE = 1000 * 60 * 60; // 1시간(원하면 24*60*60*1000)
 
+//사용자 위치 훅
 export function useGeolocation() {
   const dispatch = useDispatch();
 

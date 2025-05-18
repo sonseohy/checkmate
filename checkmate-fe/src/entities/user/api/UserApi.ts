@@ -55,7 +55,6 @@ export const deleteUserInfo = async() => {
             localStorage.removeItem('refresh_token');
             return true;
         } else {
-            console.log('실패')
             return false;
         }
     } catch(error) {

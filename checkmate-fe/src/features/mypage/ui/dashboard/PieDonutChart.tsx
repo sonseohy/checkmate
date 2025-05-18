@@ -41,7 +41,7 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({ contractList }) =>
         states: {
             hover: {
             filter: {
-                type: 'none'    // ← hover 시 필터(밝게/어둡게) 적용 안 함
+                type: 'none'
                 }
             }
         },

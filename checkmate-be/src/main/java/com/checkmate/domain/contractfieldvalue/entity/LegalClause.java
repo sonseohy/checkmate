@@ -48,6 +48,11 @@ public class LegalClause {
         // 복합 조건 (OR, AND)
         private List<CompositeCondition> or;
         private List<CompositeCondition> and;
+
+        // SUM 조건 추가
+        private List<Integer> sumFields;
+        private String sumOperator;
+        private Object sumValue;
     }
 
     public Integer getCategoryId() {

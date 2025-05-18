@@ -2,28 +2,32 @@ import { Bell } from 'lucide-react';
 import { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/app/redux/store';
-import { markAsRead } from '@/features/notifications/model/notificationSlice';
+import { markAsRead as markDotOff } from '@/features/notifications/model/notificationSlice';
+import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 import NotificationList from './NotificationList';
-import { useNotifications } from '../hooks/useNotifications';
 
-interface NotificationButtonProps {
+interface Props {
   open: boolean;
-  onClick: () => void;
+  onClick: () => void; // 부모에서 토글 관리
 }
 
-export const NotificationButton = ({
-  open,
-  onClick,
-}: NotificationButtonProps) => {
+const NotificationButton: React.FC<Props> = ({ open, onClick }) => {
   const dispatch = useDispatch();
-  const hasNew = useSelector((state: RootState) => state.notifications.hasNew);
-  const { notifications } = useNotifications();
+  const hasNew = useSelector((s: RootState) => s.notifications.hasNew);
+
+  /* React-Query hooks (목록, 변이) */
+  const { notifications, markAllAsRead } = useNotifications();
 
   const ref = useRef<HTMLDivElement>(null);
 
   const handleClick = () => {
-    onClick(); // 부모가 관리하는 상태 토글
-    if (hasNew) dispatch(markAsRead());
+    onClick(); // 드롭다운 토글
+
+    /* 빨간 점 제거 + 서버/캐시 모두 읽음 */
+    if (hasNew) {
+      dispatch(markDotOff());
+      markAllAsRead(); // PUT /read-all
+    }
   };
 
   return (
@@ -34,15 +38,30 @@ export const NotificationButton = ({
       >
         <Bell size={20} />
         {hasNew && (
-          <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+          <>
+            <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full" />
+            <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full animate-ping" />
+          </>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 z-50">
+        <div
+          className="
+              /* ─ 모바일: 화면 전체 기준 중앙 정렬 ─ */
+              fixed top-14 left-1/2 -translate-x-1/2
+        
+              /* ─ 데스크톱: 기존 위치 ─ */
+              md:absolute md:top-auto md:right-0 md:left-auto md:translate-x-0
+        
+              z-50 mt-2
+            "
+        >
           <NotificationList notifications={notifications} />
         </div>
       )}
     </div>
   );
 };
+
+export default NotificationButton;

@@ -13,4 +13,4 @@ export { addNotification, clearNotifications } from './model/notificationSlice';
 export { NotificationService } from './services/notificationService';
 
 // UI 컴포넌트
-export { NotificationButton } from './ui/NotificationButton';
+export { default as NotificationButton } from './ui/NotificationButton';

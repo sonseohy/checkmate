@@ -60,7 +60,7 @@ export default function MyContracts() {
     try {
       const confirmDelete = await Swal.fire({
         title: "정말 삭제하시겠습니까?",
-        text: "선택한 계약서들을 삭제합니다. 삭제 후에는 복구할 수 없습니다.",
+        text: "선택한 계약서를 삭제합니다. 삭제 후에는 복구할 수 없습니다.",
         icon: "warning",
         showCancelButton: true,
         confirmButtonText: "삭제",
@@ -68,14 +68,12 @@ export default function MyContracts() {
       });
 
       if (confirmDelete.isConfirmed) {
-        // 삭제 요청
         for (const contractId of Array.from(selectedIds)) {
           await deleteContractDetail(contractId);
         }
         
-        // 삭제 후 데이터 다시 가져오기
-        await refetch();;  // 데이터를 새로고침하여 테이블을 갱신
-        Swal.fire("삭제 완료", "선택한 계약서들이 삭제되었습니다.", "success");
+        await refetch();;  
+        Swal.fire("삭제 완료", "선택한 계약서가 삭제되었습니다.", "success");
       }
     } catch (error) {
       console.error("계약서 삭제 실패:", error);
@@ -122,6 +120,7 @@ export default function MyContracts() {
         }
         <div className={` ${isMobile ? 'p-2':''}`}>
           <div className="flex flex-row justify-between items-center">
+            {/* 드롭다운 */}
             <div className={` relative z-3 ${isMobile ? 'w-28 my-1' : ' w-45 my-5'}`}>
                 <Dropdown
                 options={options}

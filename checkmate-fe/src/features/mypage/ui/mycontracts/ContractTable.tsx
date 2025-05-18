@@ -110,7 +110,13 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                       : 'text-[#999999]'}
                     `}
                   >
-                    {isCompleted ? '작성 완료' : '작성중'}
+                    {row.source_type === 'USER_UPLOAD'
+                      ? row.edit_status === 'COMPLETED'
+                        ? '분석 완료'
+                        : '분석중'
+                      : row.edit_status === 'COMPLETED'
+                        ? '작성 완료'
+                        : '작성중'}
                   </span>
                 </td>
                 <td className='table-ceil text-center text-[#202020]'>

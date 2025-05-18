@@ -13,8 +13,7 @@ const ContractDetail:React.FC = () => {
     // API 호출하여 질문 리스트 가져오기
     const fetchQuestions = async () => {
       try {
-        const data = await getContractQuestions(contract.contract_id);  // contractId로 질문 리스트 불러오기
-        console.log(data)
+        const data = await getContractQuestions(contract.contract_id);
         setQuestions(data);  // 상태 업데이트
       } catch (error) {
         console.error("질문 리스트 불러오기 실패:", error);

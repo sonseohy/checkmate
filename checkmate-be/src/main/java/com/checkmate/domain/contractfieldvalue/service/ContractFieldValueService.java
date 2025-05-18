@@ -319,7 +319,7 @@ public class ContractFieldValueService {
                                 return;
                             }
 
-                            renderedContent.add(renderText(component.getText(), fieldKeyValueMap));
+                            renderedContent.add(renderText(component.getText(), fieldKeyValueMap, fieldIdValueMap));
                         });
             }
 
@@ -353,13 +353,20 @@ public class ContractFieldValueService {
             return evaluateSingleCondition(actualValue, condition.getOperator(), condition.getValue());
         }
 
-        // 2. OR 조건 평가
+        // 2. SUM 조건 평가
+        if (condition.getSumFields() != null && !condition.getSumFields().isEmpty() &&
+                condition.getSumOperator() != null && condition.getSumValue() != null) {
+            double sum = calculateSum(condition.getSumFields(), fieldIdValueMap);
+            return evaluateSumCondition(sum, condition.getSumOperator(), condition.getSumValue());
+        }
+
+        // 3. OR 조건 평가
         if (condition.getOr() != null && !condition.getOr().isEmpty()) {
             return condition.getOr().stream()
                     .anyMatch(subCondition -> evaluateCondition(subCondition, fieldIdValueMap));
         }
 
-        // 3. AND 조건 평가
+        // 4. AND 조건 평가
         if (condition.getAnd() != null && !condition.getAnd().isEmpty()) {
             return condition.getAnd().stream()
                     .allMatch(subCondition -> evaluateCondition(subCondition, fieldIdValueMap));
@@ -409,22 +416,102 @@ public class ContractFieldValueService {
     }
 
     /**
-     * 텍스트 내의 필드 키를 값으로 치환
+     * SUM 조건 평가
      */
-    private String renderText(String text, Map<String, String> fieldKeyValueMap) {
+    private boolean evaluateSumCondition(double sum, String operator, Object targetValue) {
+        if (targetValue == null) {
+            return false;
+        }
+
+        double target;
+        try {
+            target = Double.parseDouble(targetValue.toString());
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        switch (operator) {
+            case "eq":
+                return Math.abs(sum - target) < 0.00001;
+            case "neq":
+                return Math.abs(sum - target) >= 0.00001;
+            case "gt":
+                return sum > target;
+            case "lt":
+                return sum < target;
+            case "gte":
+                return sum >= target;
+            case "lte":
+                return sum <= target;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 필드 ID 목록의 값을 합산
+     */
+    private double calculateSum(List<Integer> fieldIds, Map<Integer, String> fieldIdValueMap) {
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return 0.0;
+        }
+
+        return fieldIds.stream()
+                .filter(fieldId -> fieldIdValueMap.containsKey(fieldId))
+                .mapToDouble(fieldId -> {
+                    String value = fieldIdValueMap.get(fieldId);
+                    try {
+                        return Double.parseDouble(value);
+                    } catch (NumberFormatException | NullPointerException e) {
+                        return 0.0;
+                    }
+                })
+                .sum();
+    }
+
+    /**
+     * 텍스트 내의 필드 키와 SUM 패턴을 값으로 치환
+     */
+    private String renderText(String text, Map<String, String> fieldKeyValueMap, Map<Integer, String> fieldIdValueMap) {
         if (text == null || text.isEmpty()) {
             return "";
         }
 
         String renderedText = text;
-        Pattern pattern = Pattern.compile("\\{([^}]+)\\}");
-        Matcher matcher = pattern.matcher(text);
 
-        while (matcher.find()) {
-            String fieldKey = matcher.group(1);
-            // 필드값이 없으면 빈 문자열 사용
-            String value = fieldKeyValueMap.getOrDefault(fieldKey, "");
-            renderedText = renderedText.replace("{" + fieldKey + "}", value);
+        // SUM 패턴 처리: {SUM:1,2,3}
+        Pattern sumPattern = Pattern.compile("\\{SUM:([\\d,]+)}");
+        Matcher sumMatcher = sumPattern.matcher(renderedText);
+
+        while (sumMatcher.find()) {
+            String placeholder = sumMatcher.group(0);
+            String fieldIdsStr = sumMatcher.group(1);
+
+            // 필드 ID 목록 파싱
+            List<Integer> fieldsToSum = Arrays.stream(fieldIdsStr.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList());
+
+            // 합계 계산
+            double sum = calculateSum(fieldsToSum, fieldIdValueMap);
+            String sumValue = String.format("%.2f", sum);
+
+            // 치환
+            renderedText = renderedText.replace(placeholder, sumValue);
+        }
+
+        // 일반 필드 키 패턴 처리
+        Pattern fieldPattern = Pattern.compile("\\{([^}]+)}");
+        Matcher fieldMatcher = fieldPattern.matcher(renderedText);
+
+        while (fieldMatcher.find()) {
+            String fieldKey = fieldMatcher.group(1);
+            if (!fieldKey.startsWith("SUM:")) {  // SUM 패턴은 이미 처리됨
+                String value = fieldKeyValueMap.getOrDefault(fieldKey, "");
+                renderedText = renderedText.replace("{" + fieldKey + "}", value);
+            }
         }
 
         return renderedText;
@@ -438,7 +525,7 @@ public class ContractFieldValueService {
     @Transactional
     public int deleteAllFieldValues(Integer contractId) {
         // 계약서 존재 확인
-        Contract contract = contractRepository.findById(contractId)
+       contractRepository.findById(contractId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 
         List<ContractFieldValue> fieldValues = contractFieldValueRepository.findByContractId(contractId);

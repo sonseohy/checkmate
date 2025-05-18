@@ -16,7 +16,7 @@ export default function Dashboard() {
       });
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <div>Loading..</div>;
     };
 
     if (isError) {

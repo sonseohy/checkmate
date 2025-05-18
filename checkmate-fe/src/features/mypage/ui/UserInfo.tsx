@@ -44,7 +44,7 @@ export default function UserInfo() {
 
     return (
         <div>
-            <div className={`m-10 bg-white rounded-xl shadow-[0px_5px_15px_rgba(0,_0,_0,_0.1)] *:${ isMobile? 'w-50 p-5':' w-200 p-10'}`}>
+            <div className={` bg-white rounded-xl shadow-[0px_5px_15px_rgba(0,_0,_0,_0.1)] *:${ isMobile? 'w-50 p-5':' w-200 p-10 m-10'}`}>
                 <div className={`flex mb-3 ${isMobile? 'flex-col gap-2': 'flex-row  gap-15' }`}>
                     <div className={`font-semibold ${isMobile? 'text-2xl mb-2':'text-xl'}`}>
                         로그인 정보

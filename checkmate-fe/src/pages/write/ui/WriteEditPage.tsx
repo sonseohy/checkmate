@@ -4,6 +4,7 @@ import { fetchExistingContract, saveContractInputs, useResetContractInputs,  Tem
 import { WriteStickyBar } from '@/widgets/write';
 import { LuTag } from 'react-icons/lu';
 import Swal from 'sweetalert2';
+import { ResidentIdInput, PhoneNumberInput, MoneyInput, DayInput, AreaInput, AddressInput, DateFieldInput, } from '@/shared';
 
 const WriteEditPage: React.FC = () => {
   const { contractId } = useParams();
@@ -28,14 +29,48 @@ const WriteEditPage: React.FC = () => {
   }, [numericContractId]);
 
   /* blur 자동 저장 */
-  const handleFieldBlur = async (fieldId: number, sectionId: number, value: string) => {
+  const handleFieldBlur = async (
+    fieldId: number,
+    sectionId: number,
+    value: string
+  ) => {
+    if (!numericContractId || !templateData) return;
+
+    const normalizedValue = value ?? '';
+
+    const allFields: TemplateField[] = templateData.sections.flatMap(
+      (s: TemplateSection) => s.fields
+    );
+    const matchedField = allFields.find((f: TemplateField) => f.id === fieldId);
+    const fieldKey = matchedField?.fieldKey;
+
+    if (!fieldKey) {
+      console.warn('fieldKey를 찾을 수 없음 (fieldId:', fieldId, ')');
+      return;
+    }
+
+    setDependsOnStates((prev) => ({
+      ...prev,
+      [fieldKey]: normalizedValue,
+    }));
+
     try {
       await saveContractInputs({
         contractId: numericContractId,
-        inputs: [{ sectionId, fieldValues: [{ fieldId, value }] }],
+        inputs: [
+          {
+            sectionId,
+            fieldValues: [
+              {
+                fieldId,
+                value: normalizedValue,
+              },
+            ],
+          },
+        ],
       });
-    } catch (error) {
-      console.error('자동 저장 실패:', error);
+    } catch (err: any) {
+      console.error('자동 저장 실패:', err.response?.data || err);
     }
   };
 
@@ -50,39 +85,147 @@ const WriteEditPage: React.FC = () => {
   };
 
   const renderInputField = (field: TemplateField, sectionId: number) => {
+    const fieldKey = field.fieldKey;
+    const value = dependsOnStates[fieldKey] ?? '';
+
+    // 키워드 포함 여부 헬퍼
+    const includesAny = (label: string, keywords: string[]) =>
+      keywords.some((k) => label.includes(k));
+
+    // 최대 입력 길이 설정 (label 기준)
+    const getMaxLength = (label: string): number => {
+      if (includesAny(label, ['전화번호', '연락처'])) return 13;
+      if (includesAny(label, ['주민등록번호'])) return 13;
+      if (includesAny(label, ['이름', '성명'])) return 50;
+      if (includesAny(label, ['주소'])) return 100;
+      return 100;
+    };  
+
+    const isResidentIdLabel = includesAny(field.label, ['주민등록번호']);
+    const isPhoneLabel = includesAny(field.label, ['전화번호', '연락처']);
+    const isDayLabel = includesAny(field.label, ['지불일', '지급시기']);
+    const isAreaLabel = field.label.trim().endsWith('면적');
+    const isAddressLabel = includesAny(field.label, ['주소', '소재지']) && !field.label.includes('상세');
+
+    // 공통 입력 속성
     const commonProps = {
-      id: field.fieldKey,
-      name: field.fieldKey,
+      id: fieldKey,
+      name: fieldKey,
       required: field.required,
       className: 'w-full p-2 rounded-md border bg-white border-gray-400',
-      onBlur: (e: React.FocusEvent<HTMLInputElement>) => handleFieldBlur(field.id, sectionId, e.target.value),
+      onBlur: (e: React.FocusEvent<HTMLInputElement>) =>
+        handleFieldBlur(field.id, sectionId, e.target.value),
     };
 
+    // 특수 필드 분기 처리
+    if (isResidentIdLabel) {
+      return (
+        <ResidentIdInput
+          value={value}
+          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+          onComplete={(v) => handleFieldBlur(field.id, sectionId, v)}
+        />
+      );
+    }
+    if (isPhoneLabel) {
+      return (
+        <PhoneNumberInput
+          value={value}
+          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+        />
+      );
+    }
+    if (isDayLabel) {
+      return (
+        <DayInput
+          value={value}
+          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+        />
+      );
+    }
+    if (isAreaLabel) {
+      return (
+        <AreaInput
+          value={value}
+          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+        />
+      );
+    }
+    if (isAddressLabel) {
+      return (
+        <AddressInput
+          value={value}
+          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+        />
+      );
+    }
+
+    if (['monthly_rent', 'deposit', 'earnest_money', 'balance', 'total_amount_paid', 'meal_amount', 'bonus_amount', 'transportation_fee_amount', 'other_allowances_1', 'other_allowances_2', 'incentive_amount', 'continuous_incentive_amount', 'provisional_deposit'].includes(fieldKey)) {
+      return (
+        <MoneyInput
+          value={value}
+          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+        />
+      );
+    }
+
     switch (field.inputType) {
-      case 'TEXT':
-      case 'NUMBER':
-      case 'DATE':
+      case 'TEXT': {
         return (
           <input
-            type={field.inputType.toLowerCase()}
+            type="text"
+            maxLength={getMaxLength(fieldKey)}
             {...commonProps}
-            value={dependsOnStates[field.fieldKey] ?? ''}
-            onChange={(e) => setDependsOnStates((prev) => ({ ...prev, [field.fieldKey]: e.target.value }))}
+            value={value}
+            onChange={(e) =>
+              setDependsOnStates((p) => ({ ...p, [fieldKey]: e.target.value }))
+            }
           />
         );
+      }
+
+      case 'NUMBER': {
+        return (
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="\d*"
+            maxLength={getMaxLength(fieldKey)}
+            {...commonProps}
+            value={value}
+            onChange={(e) =>
+              setDependsOnStates((p) => ({ ...p, [fieldKey]: e.target.value }))
+            }
+          />
+        );
+      }
+      case 'DATE':
+        return (
+          <DateFieldInput
+            value={value}
+            onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
+            onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+          />
+        );
+
       case 'RADIO': {
-        const options = typeof field.options === 'string' ? JSON.parse(field.options) : field.options;
+        const opts = parseOptions(field.options);
         return (
           <div className="space-x-4">
-            {options?.map((opt: string) => (
+            {opts.map((opt) => (
               <label key={opt} className="inline-flex items-center">
                 <input
                   type="radio"
-                  name={field.fieldKey}
+                  name={fieldKey}
                   value={opt}
-                  checked={dependsOnStates[field.fieldKey] === opt}
+                  checked={value === opt}
                   onChange={() => {
-                    setDependsOnStates((prev) => ({ ...prev, [field.fieldKey]: opt }));
+                    setDependsOnStates((p) => ({ ...p, [fieldKey]: opt }));
                     handleFieldBlur(field.id, sectionId, opt);
                   }}
                   className="mr-1"
@@ -93,14 +236,12 @@ const WriteEditPage: React.FC = () => {
           </div>
         );
       }
+
       case 'CHECKBOX': {
         const opts = parseOptions(field.options);
 
-        /* ① 다중 선택(check list) */
         if (opts.length) {
-          const selected: string[] = dependsOnStates[field.fieldKey]
-            ? JSON.parse(dependsOnStates[field.fieldKey])
-            : [];
+          const selected: string[] = value ? JSON.parse(value) : [];
 
           const toggle = (item: string) => {
             const next = selected.includes(item)
@@ -109,7 +250,7 @@ const WriteEditPage: React.FC = () => {
 
             setDependsOnStates((p) => ({
               ...p,
-              [field.fieldKey]: JSON.stringify(next),
+              [fieldKey]: JSON.stringify(next),
             }));
             handleFieldBlur(field.id, sectionId, JSON.stringify(next));
           };
@@ -130,16 +271,15 @@ const WriteEditPage: React.FC = () => {
           );
         }
 
-        /* ② 단일 Boolean 체크박스 */
+        // 단일 Boolean 체크박스
         return (
           <input
             type="checkbox"
-            {...commonProps}
             className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            checked={dependsOnStates[field.fieldKey] === '1'}
+            checked={value === '1'}
             onChange={() => {
-              const v = dependsOnStates[field.fieldKey] === '1' ? '0' : '1';
-              setDependsOnStates((p) => ({ ...p, [field.fieldKey]: v }));
+              const v = value === '1' ? '0' : '1';
+              setDependsOnStates((p) => ({ ...p, [fieldKey]: v }));
               handleFieldBlur(field.id, sectionId, v);
             }}
           />
@@ -265,18 +405,51 @@ const WriteEditPage: React.FC = () => {
               )}
             </div>
             <div className="grid gap-4">
-              {section.fields.filter(shouldShowField).map((field) => (
-                <div key={field.fieldKey} className={field.inputType === 'CHECKBOX' ? 'flex items-center' : 'space-y-1'}>
-                  <label htmlFor={field.fieldKey} className={`${field.inputType === 'CHECKBOX' ? 'order-2' : 'block'} font-medium`}>
-                    {field.label}
-                  </label>
-                  {field.inputType === 'CHECKBOX' ? (
-                    <div className="order-1 mr-1">{renderInputField(field, section.id)}</div>
-                  ) : (
-                    renderInputField(field, section.id)
-                  )}
-                </div>
-              ))}
+              {section.fields.filter(shouldShowField).map((field) => {
+                const isCheckbox = field.inputType === 'CHECKBOX';
+                const options = parseOptions(field.options);
+                const isMultiCheckbox = isCheckbox && options.length > 0;
+
+                return (
+                  <div
+                    key={field.fieldKey}
+                    className={
+                      isCheckbox
+                        ? isMultiCheckbox
+                          ? 'space-y-1' // 여러 옵션: 위아래 구조
+                          : 'flex items-center' // 단일 옵션: 옆으로
+                        : 'space-y-1' // TEXT, NUMBER 등은 기존대로
+                    }
+                  >
+                    {/* ====== CHECKBOX ====== */}
+                    {isCheckbox ? (
+                      isMultiCheckbox ? (
+                        <>
+                          <label htmlFor={field.fieldKey} className="font-medium block">
+                            {field.label}
+                          </label>
+                          <div>{renderInputField(field, section.id)}</div>
+                        </>
+                      ) : (
+                        <>
+                          {renderInputField(field, section.id)}
+                          <label htmlFor={field.fieldKey} className="font-medium">
+                            {field.label}
+                          </label>
+                        </>
+                      )
+                    ) : (
+                      /* ====== 일반 필드 (TEXT, NUMBER 등) ====== */
+                      <>
+                        <label htmlFor={field.fieldKey} className="font-medium block">
+                          {field.label}
+                        </label>
+                        {renderInputField(field, section.id)}
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
         ))}

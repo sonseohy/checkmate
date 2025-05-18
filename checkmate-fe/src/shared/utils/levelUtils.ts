@@ -1,15 +1,19 @@
-import safeImg from '@/assets/images/level/safe.png';
-import cautionImg from '@/assets/images/level/caution.png';
-import dangerImg from '@/assets/images/level/danger.png';
+import safeJson from '@/assets/images/lottie/safe.json';
+import cautionJson from '@/assets/images/lottie/caution.json';
+import dangerJson from '@/assets/images/lottie/danger.json';
 import { AnalysisResult } from '@/features/analyze';
 
 export const levelLabel = { 1: '안심', 2: '주의', 3: '위험' } as const;
 export const levelColor = {
-  1: 'bg-green-500',
-  2: 'bg-yellow-400',
-  3: 'bg-red-600',
+  1: 'text-green-500',
+  2: 'text-yellow-400',
+  3: 'text-red-600',
 } as const;
-export const levelImage = { 1: safeImg, 2: cautionImg, 3: dangerImg } as const;
+export const levelLottie = {
+  1: safeJson,
+  2: cautionJson,
+  3: dangerJson,
+} as const;
 
 const map = { LOW: 1, MEDIUM: 2, HIGH: 3 } as const;
 

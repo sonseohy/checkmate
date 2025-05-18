@@ -11,9 +11,11 @@ import Spinner from '@/shared/ui/Spinner';
 import uploadImage from '@/assets/images/loading/upload.png';
 import {
   getOverallLevel,
-  levelImage,
   levelLabel,
+  levelLottie,
+  levelColor,
 } from '@/shared/utils/levelUtils';
+import Lottie from 'lottie-react'; // ✅ 변경
 
 /* Skeleton 카드 – Dashboard 카드와 높이·둥근모서리 동일 */
 const CardSkeleton = () => (
@@ -78,12 +80,11 @@ const AnalyzeResultPage: React.FC = () => {
 
   /* 단계 계산 */
   const level = result ? getOverallLevel(result) : 1;
-  const stageImg = levelImage[level];
   const stageTxt = levelLabel[level];
-
+  const stageColor = levelColor[level];
   /* showDash: 배너 애니 끝나면 true */
   const [showDash, setShowDash] = useState(false);
-
+  const stageSize = 'text-3xl md:text-4xl';
   return (
     <section className="container px-4 py-16 mx-auto space-y-12">
       <h1 className="text-3xl font-bold text-center">근로계약서 분석결과</h1>
@@ -91,20 +92,26 @@ const AnalyzeResultPage: React.FC = () => {
       {/* 배너 */}
       {!loading && (
         <motion.div
-          className="flex flex-row items-center justify-center gap-4 mt-6"
+          className="flex flex-row items-center justify-center gap-4 mt-6 
+          
+          "
           variants={bannerVar}
           initial="hidden"
           animate="visible"
           onAnimationComplete={() => setShowDash(true)}
         >
-          <img
-            src={stageImg}
-            alt={stageTxt}
+          <Lottie
+            animationData={levelLottie[level]}
+            loop={false}
             className="w-24 h-24 md:w-28 md:h-28"
           />
+
           <p className="text-xl md:text-2xl font-semibold drop-shadow-sm">
             {userName}님의 {contractTitle}는&nbsp;
-            <span className="underline">{stageTxt}</span> 단계입니다
+            <span className={`underline ${stageColor} ${stageSize}`}>
+              {stageTxt}
+            </span>
+            단계입니다
           </p>
         </motion.div>
       )}

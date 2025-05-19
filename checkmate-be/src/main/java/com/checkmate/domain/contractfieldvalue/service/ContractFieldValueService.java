@@ -486,7 +486,7 @@ public class ContractFieldValueService {
     }
 
     /**
-     * 텍스트 내의 필드 키와 연산 패턴을 값으로 치환
+     * 텍스트 내의 필드 키와 연산 패턴을 값으로 치환 (중첩 연산 지원)
      */
     private String renderText(String text, Map<String, String> fieldKeyValueMap, Map<Integer, String> fieldIdValueMap) {
         if (text == null || text.isEmpty()) {
@@ -494,72 +494,79 @@ public class ContractFieldValueService {
         }
 
         String renderedText = text;
+        boolean hasNestedOperation;
 
-        // 사칙연산 패턴 처리: {SUM:1,2,3,c:100}, {SUB:1,2,c:5}, {MUL:1,2,3,c:2}, {DIV:1,c:2}
-        Pattern operationPattern = Pattern.compile("\\{(SUM|SUB|MUL|DIV):([\\d,c:.]+)}");
-        Matcher operationMatcher = operationPattern.matcher(renderedText);
+        // 중첩 연산을 모두 처리할 때까지 반복
+        do {
+            hasNestedOperation = false;
 
-        while (operationMatcher.find()) {
-            String placeholder = operationMatcher.group(0);  // 예: {SUM:1,3,5,c:100}
-            String operation = operationMatcher.group(1);   // 예: SUM, SUB, MUL, DIV
-            String paramsStr = operationMatcher.group(2);   // 예: 1,3,5,c:100
+            // 가장 안쪽의 연산부터 처리하는 패턴
+            Pattern innerOperationPattern = Pattern.compile("\\{(SUM|SUB|MUL|DIV):([^{}]+)}");
+            Matcher innerOperationMatcher = innerOperationPattern.matcher(renderedText);
 
-            // 필드 ID 목록과 상수값 파싱
-            List<Integer> fieldIds = new ArrayList<>();
-            List<Double> constants = new ArrayList<>();
+            while (innerOperationMatcher.find()) {
+                hasNestedOperation = true;
 
-            for (String param : paramsStr.split(",")) {
-                param = param.trim();
-                if (param.startsWith("c:")) {
-                    // 상수 처리
-                    try {
-                        double constant = Double.parseDouble(param.substring(2));
-                        constants.add(constant);
-                    } catch (NumberFormatException e) {
-                    }
-                } else {
-                    // 필드 ID 처리
-                    try {
-                        int fieldId = Integer.parseInt(param);
-                        fieldIds.add(fieldId);
-                    } catch (NumberFormatException e) {
+                String placeholder = innerOperationMatcher.group(0);  // 예: {SUM:1,3,5,c:100}
+                String operation = innerOperationMatcher.group(1);   // 예: SUM, SUB, MUL, DIV
+                String paramsStr = innerOperationMatcher.group(2);   // 예: 1,3,5,c:100
+
+                // 필드 ID 목록과 상수값 파싱
+                List<Integer> fieldIds = new ArrayList<>();
+                List<Double> constants = new ArrayList<>();
+
+                for (String param : paramsStr.split(",")) {
+                    param = param.trim();
+                    if (param.startsWith("c:")) {
+                        // 상수 처리
+                        try {
+                            double constant = Double.parseDouble(param.substring(2));
+                            constants.add(constant);
+                        } catch (NumberFormatException e) {
+                        }
+                    } else {
+                        // 필드 ID 처리
+                        try {
+                            int fieldId = Integer.parseInt(param);
+                            fieldIds.add(fieldId);
+                        } catch (NumberFormatException e) {
+                        }
                     }
                 }
+
+                // 연산 수행
+                double result;
+                String formattedResult;
+
+                switch (operation) {
+                    case "SUM":
+                        result = calculateSumWithConstants(fieldIds, fieldIdValueMap, constants);
+                        formattedResult = String.format("%,d", Math.round(result));
+                        break;
+                    case "SUB":
+                        result = calculateSubtractionWithConstants(fieldIds, fieldIdValueMap, constants);
+                        formattedResult = String.format("%,d", Math.round(result));
+                        break;
+                    case "MUL":
+                        result = calculateMultiplicationWithConstants(fieldIds, fieldIdValueMap, constants);
+                        formattedResult = String.format("%,d", Math.round(result));
+                        break;
+                    case "DIV":
+                        result = calculateDivisionWithConstants(fieldIds, fieldIdValueMap, constants);
+                        formattedResult = String.format("%,.2f", result);
+                        break;
+                    default:
+                        formattedResult = "0";
+                        break;
+                }
+
+                // 치환
+                renderedText = renderedText.replace(placeholder, formattedResult);
             }
-
-            // 연산 수행
-            double result;
-            String formattedResult;
-
-            switch (operation) {
-                case "SUM":
-                    result = calculateSumWithConstants(fieldIds, fieldIdValueMap, constants);
-                    formattedResult = String.format("%,d", Math.round(result));
-                    break;
-                case "SUB":
-                    result = calculateSubtractionWithConstants(fieldIds, fieldIdValueMap, constants);
-                    formattedResult = String.format("%,d", Math.round(result));
-                    break;
-                case "MUL":
-                    result = calculateMultiplicationWithConstants(fieldIds, fieldIdValueMap, constants);
-                    formattedResult = String.format("%,d", Math.round(result));
-                    break;
-                case "DIV":
-                    result = calculateDivisionWithConstants(fieldIds, fieldIdValueMap, constants);
-                    // 소수점 둘째 자리까지 표시 (천 단위 구분 기호 포함)
-                    formattedResult = String.format("%,.2f", result);
-                    break;
-                default:
-                    formattedResult = "0";
-                    break;
-            }
-
-            // 치환
-            renderedText = renderedText.replace(placeholder, formattedResult);
-        }
+        } while (hasNestedOperation);
 
         // 일반 필드 키 패턴 처리
-        Pattern fieldPattern = Pattern.compile("\\{([^}]+)}");
+        Pattern fieldPattern = Pattern.compile("\\{([^{}]+)}");
         Matcher fieldMatcher = fieldPattern.matcher(renderedText);
 
         while (fieldMatcher.find()) {

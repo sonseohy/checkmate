@@ -44,22 +44,27 @@ public class WebhookService {
 			.orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 
 		String notificationMessage = "";
+		NotificationType type = null;
 		if ("QUESTION_GENERATION".equals(requestDto.type())) {
 			if ("completed".equals(requestDto.status())) {
 				contract.setQuestionGenerationStatus(QuestionGenerationStatus.COMPLETED);
 				notificationMessage = " 질문 생성이 완료되었습니다.";
+				type = NotificationType.QUESTION_GENERATION;
 			} else if ("failed".equals(requestDto.status())) {
 				contract.setQuestionGenerationStatus(QuestionGenerationStatus.FAILED);
 				notificationMessage = " 질문 생성에 실패했습니다.";
+				type = NotificationType.QUESTION_GENERATION;
 			}
 		} else {
 			if ("completed".equals(requestDto.status())) {
 				contract.setQuestionGenerationStatus(QuestionGenerationStatus.COMPLETED);
 				notificationMessage = " 분석이 완료되었습니다.";
+				type = NotificationType.CONTRACT_ANALYSIS;
 
 			} else if ("failed".equals(requestDto.status())) {
 				contract.setQuestionGenerationStatus(QuestionGenerationStatus.FAILED);
 				notificationMessage = " 분석에 실패했습니다.";
+				type = NotificationType.CONTRACT_ANALYSIS;
 			}
 		}
 		contractRepository.save(contract);
@@ -68,7 +73,7 @@ public class WebhookService {
 		Notification notification = Notification.builder()
 			.user(contract.getUser())
 			.contract(contract)
-			.type(NotificationType.CONTRACT_ANALYSIS)
+			.type(type)
 			.message(contract.getTitle() + notificationMessage)
 			.isRead(false)
 			.build();

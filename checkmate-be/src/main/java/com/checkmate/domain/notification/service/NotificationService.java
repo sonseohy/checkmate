@@ -3,7 +3,6 @@ package com.checkmate.domain.notification.service;
 import com.checkmate.domain.notification.dto.response.NotificationResponse;
 import com.checkmate.domain.notification.entity.Notification;
 import com.checkmate.domain.notification.repository.NotificationRepository;
-import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

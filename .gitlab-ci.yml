@@ -64,6 +64,13 @@ deploy_checkmate_be:
         -p 8080:8080 \
         --env-file .env \
         -v $PWD/cloudfront/private_key.pem:/etc/cloudfront/private_key.pem \
+        -v /usr/bin/libreoffice:/usr/bin/libreoffice:ro \
+        -v /usr/lib/libreoffice:/usr/lib/libreoffice:ro \
+        -v /usr/share/libreoffice:/usr/share/libreoffice:ro \
+        -v /etc/libreoffice:/etc/libreoffice:ro \
+        -v /usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:ro \
+        -v /etc/fonts:/etc/fonts:ro \
+        -v /tmp:/tmp \
         $DOCKER_IMAGE
   after_script:
     - |

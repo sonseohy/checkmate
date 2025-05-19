@@ -80,6 +80,8 @@ dependencies {
 
     implementation "com.dropbox.sign:dropbox-sign:2.4.0"
 
+    implementation 'io.micrometer:micrometer-core'
+
 }
 dependencyManagement {
     imports {

@@ -2,7 +2,6 @@ package com.checkmate.domain.user.dto.mapper;
 
 import com.checkmate.domain.user.dto.request.UserUpdateRequest;
 import com.checkmate.domain.user.dto.response.UserGetResponse;
-import com.checkmate.domain.user.dto.response.UserUpdateResponse;
 import com.checkmate.domain.user.entity.User;
 import org.mapstruct.*;
 
@@ -10,8 +9,6 @@ import org.mapstruct.*;
 public interface UserMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserFromRequest(UserUpdateRequest request, @MappingTarget User user);
-
-    UserUpdateResponse mapToUserUpdateResponse(User user);
 
     UserGetResponse mapToUserGetResponse(User user);
 }

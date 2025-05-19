@@ -1,17 +1,18 @@
 package com.checkmate.domain.auth.dto.request;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 import com.checkmate.domain.user.entity.Status;
 import com.checkmate.domain.user.entity.User;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.extern.slf4j.Slf4j;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Slf4j
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)

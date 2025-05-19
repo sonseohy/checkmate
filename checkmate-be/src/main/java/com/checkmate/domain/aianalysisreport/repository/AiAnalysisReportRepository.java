@@ -2,13 +2,13 @@ package com.checkmate.domain.aianalysisreport.repository;
 
 import java.util.Optional;
 
-import com.checkmate.domain.aianalysisreport.entity.AiAnalysisReport;
-import com.checkmate.domain.aianalysisreport.entity.CompleteAiAnalysisReport;
-
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+
+import com.checkmate.domain.aianalysisreport.entity.AiAnalysisReport;
+import com.checkmate.domain.aianalysisreport.entity.CompleteAiAnalysisReport;
 
 @Repository
 public interface AiAnalysisReportRepository extends MongoRepository<AiAnalysisReport, ObjectId> {

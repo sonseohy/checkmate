@@ -6,7 +6,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "legalClauses")
@@ -57,14 +56,5 @@ public class LegalClause {
 
     public Integer getCategoryId() {
         return categoryIds != null && !categoryIds.isEmpty() ? categoryIds.get(0) : null;
-    }
-
-    public void setCategoryId(Integer categoryId) {
-        if (this.categoryIds == null) {
-            this.categoryIds = new ArrayList<>();
-        }
-        if (!this.categoryIds.contains(categoryId)) {
-            this.categoryIds.add(categoryId);
-        }
     }
 }

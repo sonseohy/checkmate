@@ -46,28 +46,4 @@ public class ContractCategory {
             orphanRemoval = true,
             fetch = FetchType.LAZY)
     private List<Template> templates = new ArrayList<>();
-
-    public void addChild(ContractCategory child) {
-        children.add(child);
-        child.setParent(this);
-    }
-
-    public void addCheckList(CheckList cl) {
-        checkLists.add(cl);
-        cl.setCategory(this);
-    }
-    public void removeCheckList(CheckList cl) {
-        checkLists.remove(cl);
-        cl.setCategory(null);
-    }
-
-    public void addTemplate(Template t) {
-        templates.add(t);
-        t.setCategory(this);
-    }
-    public void removeTemplate(Template t) {
-        templates.remove(t);
-        t.setCategory(null);
-    }
-
 }

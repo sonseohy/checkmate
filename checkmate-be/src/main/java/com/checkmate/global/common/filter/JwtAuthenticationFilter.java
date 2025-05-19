@@ -87,28 +87,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 특정 조건(GET 요청의 일부 API 경로)에 대해 토큰이 있다면 처리, 없으면 통과합니다.
-     *
-     * @param request  HTTP 요청
-     * @param response HTTP 응답
-     * @return 유효하지 않은 토큰이면 false, 그 외 true
-     * @throws IOException 응답 쓰기 중 발생하는 예외
-     */
-    private boolean tryProcessToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            if (jwtUtil.validateToken(token)) {
-                processValidAccessToken(token);
-            } else {
-                writeErrorResponse(response, ErrorCode.INVALID_TOKEN);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * 유효한 액세스 토큰으로부터 사용자 정보를 추출하고 SecurityContext에 설정합니다.
      *
      * @param accessToken 검증된 액세스 토큰

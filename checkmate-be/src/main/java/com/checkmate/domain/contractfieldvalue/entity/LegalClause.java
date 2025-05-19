@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "legalClauses")
@@ -52,9 +53,33 @@ public class LegalClause {
         private List<Integer> sumFields;
         private String sumOperator;
         private Object sumValue;
+
+        // SUB 조건
+        private List<Integer> subFields;
+        private String subOperator;
+        private Object subValue;
+
+        // MUL 조건
+        private List<Integer> mulFields;
+        private String mulOperator;
+        private Object mulValue;
+
+        // DIV 조건
+        private List<Integer> divFields;
+        private String divOperator;
+        private Object divValue;
     }
 
     public Integer getCategoryId() {
         return categoryIds != null && !categoryIds.isEmpty() ? categoryIds.get(0) : null;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        if (this.categoryIds == null) {
+            this.categoryIds = new ArrayList<>();
+        }
+        if (!this.categoryIds.contains(categoryId)) {
+            this.categoryIds.add(categoryId);
+        }
     }
 }

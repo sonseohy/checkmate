@@ -27,6 +27,7 @@ RUN apt-get update \
       libreoffice-core \
       libreoffice-writer \
       libreoffice-calc \
+      libreoffice-hwp2odt \
       fonts-nanum \
       fontconfig \
  && rm -rf /var/lib/apt/lists/*

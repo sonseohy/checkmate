@@ -495,21 +495,37 @@ public class ContractFieldValueService {
 
         String renderedText = text;
 
-        // 사칙연산 패턴 처리: {SUM:1,2,3}, {SUB:1,2}, {MUL:1,2,3}, {DIV:1,2}
-        Pattern operationPattern = Pattern.compile("\\{(SUM|SUB|MUL|DIV):([\\d,]+)}");
+        // 사칙연산 패턴 처리: {SUM:1,2,3,c:100}, {SUB:1,2,c:5}, {MUL:1,2,3,c:2}, {DIV:1,c:2}
+        Pattern operationPattern = Pattern.compile("\\{(SUM|SUB|MUL|DIV):([\\d,c:.]+)}");
         Matcher operationMatcher = operationPattern.matcher(renderedText);
 
         while (operationMatcher.find()) {
-            String placeholder = operationMatcher.group(0);  // 예: {SUM:1,3,5}
+            String placeholder = operationMatcher.group(0);  // 예: {SUM:1,3,5,c:100}
             String operation = operationMatcher.group(1);   // 예: SUM, SUB, MUL, DIV
-            String fieldIdsStr = operationMatcher.group(2); // 예: 1,3,5
+            String paramsStr = operationMatcher.group(2);   // 예: 1,3,5,c:100
 
-            // 필드 ID 목록 파싱
-            List<Integer> fieldIds = Arrays.stream(fieldIdsStr.split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toList());
+            // 필드 ID 목록과 상수값 파싱
+            List<Integer> fieldIds = new ArrayList<>();
+            List<Double> constants = new ArrayList<>();
+
+            for (String param : paramsStr.split(",")) {
+                param = param.trim();
+                if (param.startsWith("c:")) {
+                    // 상수 처리
+                    try {
+                        double constant = Double.parseDouble(param.substring(2));
+                        constants.add(constant);
+                    } catch (NumberFormatException e) {
+                    }
+                } else {
+                    // 필드 ID 처리
+                    try {
+                        int fieldId = Integer.parseInt(param);
+                        fieldIds.add(fieldId);
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            }
 
             // 연산 수행
             double result;
@@ -517,19 +533,19 @@ public class ContractFieldValueService {
 
             switch (operation) {
                 case "SUM":
-                    result = calculateSum(fieldIds, fieldIdValueMap);
+                    result = calculateSumWithConstants(fieldIds, fieldIdValueMap, constants);
                     formattedResult = String.format("%,d", Math.round(result));
                     break;
                 case "SUB":
-                    result = calculateSubtraction(fieldIds, fieldIdValueMap);
+                    result = calculateSubtractionWithConstants(fieldIds, fieldIdValueMap, constants);
                     formattedResult = String.format("%,d", Math.round(result));
                     break;
                 case "MUL":
-                    result = calculateMultiplication(fieldIds, fieldIdValueMap);
+                    result = calculateMultiplicationWithConstants(fieldIds, fieldIdValueMap, constants);
                     formattedResult = String.format("%,d", Math.round(result));
                     break;
                 case "DIV":
-                    result = calculateDivision(fieldIds, fieldIdValueMap);
+                    result = calculateDivisionWithConstants(fieldIds, fieldIdValueMap, constants);
                     // 소수점 둘째 자리까지 표시 (천 단위 구분 기호 포함)
                     formattedResult = String.format("%,.2f", result);
                     break;
@@ -662,6 +678,159 @@ public class ContractFieldValueService {
                 continue;
             }
             result /= values[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * 필드 ID 목록과 상수 목록의 값을 합산
+     */
+    private double calculateSumWithConstants(List<Integer> fieldIds, Map<Integer, String> fieldIdValueMap, List<Double> constants) {
+        double sum = 0.0;
+
+        // 필드값 합산
+        if (fieldIds != null && !fieldIds.isEmpty()) {
+            sum += fieldIds.stream()
+                    .filter(fieldId -> fieldIdValueMap.containsKey(fieldId))
+                    .mapToDouble(fieldId -> {
+                        String value = fieldIdValueMap.get(fieldId);
+                        try {
+                            return Double.parseDouble(value);
+                        } catch (NumberFormatException | NullPointerException e) {
+                            return 0.0;
+                        }
+                    })
+                    .sum();
+        }
+
+        // 상수값 합산
+        if (constants != null && !constants.isEmpty()) {
+            sum += constants.stream().mapToDouble(Double::doubleValue).sum();
+        }
+
+        return sum;
+    }
+
+    /**
+     * 필드 ID 목록과 상수 목록의 값으로 뺄셈 수행
+     */
+    private double calculateSubtractionWithConstants(List<Integer> fieldIds, Map<Integer, String> fieldIdValueMap, List<Double> constants) {
+        if ((fieldIds == null || fieldIds.isEmpty()) && (constants == null || constants.isEmpty())) {
+            return 0.0;
+        }
+
+        // 모든 필드값과 상수를 배열로 모음
+        List<Double> allValues = new ArrayList<>();
+
+        // 필드값 추가
+        if (fieldIds != null) {
+            for (Integer fieldId : fieldIds) {
+                if (fieldIdValueMap.containsKey(fieldId)) {
+                    String value = fieldIdValueMap.get(fieldId);
+                    try {
+                        allValues.add(Double.parseDouble(value));
+                    } catch (NumberFormatException | NullPointerException e) {
+                        allValues.add(0.0);
+                    }
+                }
+            }
+        }
+
+        // 상수값 추가
+        if (constants != null) {
+            allValues.addAll(constants);
+        }
+
+        if (allValues.isEmpty()) {
+            return 0.0;
+        }
+
+        // 첫 번째 값에서 나머지 값 차감
+        double result = allValues.get(0);
+        for (int i = 1; i < allValues.size(); i++) {
+            result -= allValues.get(i);
+        }
+
+        return result;
+    }
+
+    /**
+     * 필드 ID 목록과 상수 목록의 값을 모두 곱함
+     */
+    private double calculateMultiplicationWithConstants(List<Integer> fieldIds, Map<Integer, String> fieldIdValueMap, List<Double> constants) {
+        if ((fieldIds == null || fieldIds.isEmpty()) && (constants == null || constants.isEmpty())) {
+            return 0.0;
+        }
+
+        double result = 1.0;
+
+        // 필드값 곱셈
+        if (fieldIds != null) {
+            for (Integer fieldId : fieldIds) {
+                if (fieldIdValueMap.containsKey(fieldId)) {
+                    String value = fieldIdValueMap.get(fieldId);
+                    try {
+                        result *= Double.parseDouble(value);
+                    } catch (NumberFormatException | NullPointerException e) {
+                        // 수치 변환 실패 시 기본값 1 사용 (곱셈에 영향 없음)
+                    }
+                }
+            }
+        }
+
+        // 상수값 곱셈
+        if (constants != null) {
+            for (Double constant : constants) {
+                result *= constant;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 필드 ID 목록과 상수 목록의 값으로 나눗셈 수행
+     */
+    private double calculateDivisionWithConstants(List<Integer> fieldIds, Map<Integer, String> fieldIdValueMap, List<Double> constants) {
+        if ((fieldIds == null || fieldIds.isEmpty()) && (constants == null || constants.isEmpty())) {
+            return 0.0;
+        }
+
+        // 모든 필드값과 상수를 배열로 모음
+        List<Double> allValues = new ArrayList<>();
+
+        // 필드값 추가
+        if (fieldIds != null) {
+            for (Integer fieldId : fieldIds) {
+                if (fieldIdValueMap.containsKey(fieldId)) {
+                    String value = fieldIdValueMap.get(fieldId);
+                    try {
+                        allValues.add(Double.parseDouble(value));
+                    } catch (NumberFormatException | NullPointerException e) {
+                        // 수치 변환 실패 시 추가하지 않음
+                    }
+                }
+            }
+        }
+
+        // 상수값 추가
+        if (constants != null) {
+            allValues.addAll(constants);
+        }
+
+        if (allValues.isEmpty()) {
+            return 0.0;
+        }
+
+        // 첫 번째 값을 나머지 값으로 순차적으로 나눔
+        double result = allValues.get(0);
+        for (int i = 1; i < allValues.size(); i++) {
+            // 0으로 나누기 방지
+            if (Math.abs(allValues.get(i)) < 0.00001) {
+                continue;
+            }
+            result /= allValues.get(i);
         }
 
         return result;

@@ -496,7 +496,9 @@ public class ContractFieldValueService {
 
             // 합계 계산
             double sum = calculateSum(fieldsToSum, fieldIdValueMap);
-            String sumValue = String.format("%.2f", sum);
+
+            // 소수점 없이 정수로 표시 (반올림)
+            String sumValue = String.format("%,d", Math.round(sum));
 
             // 치환
             renderedText = renderedText.replace(placeholder, sumValue);

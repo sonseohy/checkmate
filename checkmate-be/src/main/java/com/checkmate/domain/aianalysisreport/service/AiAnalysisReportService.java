@@ -29,13 +29,13 @@ public class AiAnalysisReportService {
 	public AiAnalysisReportResponseDto getAiAnalysisReportByContractId(int contractId, int userId) {
 		Contract contract = contractRepository.findById(contractId)
 			.orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
-
+		String categoryName = contract.getCategory().getName();
 		if (!contract.getUser().getUserId().equals(userId)) {
 			throw new CustomException(ErrorCode.AI_ANALYSIS_ACCESS_DENIED);
 		}
 		CompleteAiAnalysisReport aiAnalysisReport = aiAnalysisReportRepository
 			.getCompleteReportByContractId(contractId)
 			.orElseThrow(() -> new CustomException(ErrorCode.AI_ANALYSIS_REPORT_NOT_FOUND));
-		return AiAnalysisReportResponseDto.fromEntity(aiAnalysisReport);
+		return AiAnalysisReportResponseDto.fromEntity(aiAnalysisReport, categoryName);
 	}
 }

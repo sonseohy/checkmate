@@ -13,16 +13,19 @@ import com.checkmate.domain.summaryreport.dto.response.SummaryResponseDto;
 import lombok.Builder;
 
 @Builder
-public record AiAnalysisReportResponseDto (String aiAnalysisReportId, Integer contractId,
+public record AiAnalysisReportResponseDto (String aiAnalysisReportId,
+										   Integer contractId,
+										   String categoryName,
 										   List<ImprovementResponseDto> improvements,
 										   List<MissingResponseDto> missingClauses,
 										   List<RiskClauseReportResponseDto> riskClauses,
 										   List<SummaryResponseDto> summaries,
 										   LocalDateTime createdAt) {
-	public static AiAnalysisReportResponseDto fromEntity(CompleteAiAnalysisReport report) {
+	public static AiAnalysisReportResponseDto fromEntity(CompleteAiAnalysisReport report, String categoryName) {
 		return AiAnalysisReportResponseDto.builder()
 			.aiAnalysisReportId(report.getId().toHexString())
 			.contractId(report.getContractId())
+			.categoryName(categoryName)
 			.improvements(report.getImprovements().stream()
 				.map(ImprovementResponseDto::fromEntity)
 				.collect(Collectors.toList()))

@@ -32,6 +32,8 @@ public class CompleteAiAnalysisReport {
 
 	private Integer contractId;
 
+	private String categoryName;
+
 	@CreatedDate
 	private LocalDateTime createdAt;
 

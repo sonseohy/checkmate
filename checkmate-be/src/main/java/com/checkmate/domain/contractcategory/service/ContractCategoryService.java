@@ -22,6 +22,12 @@ public class ContractCategoryService {
 
     private final ContractCategoryRepository categoryRepository;
 
+    /**
+     * 상위 카테고리 목록 조회
+     * 부모 카테고리가 없는 최상위 카테고리 목록을 조회
+     *
+     * @return 상위 카테고리 응답 목록
+     */
     @Transactional(readOnly = true)
     public List<CategoryResponse> getMajorCategories() {
 
@@ -35,6 +41,13 @@ public class ContractCategoryService {
 
     }
 
+    /**
+     * 하위 카테고리 목록 조회
+     * 특정 부모 카테고리 하위의 카테고리 목록을 조회
+     *
+     * @param parentId 부모 카테고리 ID
+     * @return 하위 카테고리 응답 목록
+     */
     @Transactional(readOnly = true)
     public List<SubCategoryResponse> getSubCategories(Integer parentId) {
 
@@ -53,6 +66,13 @@ public class ContractCategoryService {
 
     }
 
+    /**
+     * 카테고리 ID로 카테고리 조회
+     * 지정된 ID의 카테고리를 조회
+     *
+     * @param categoryId 카테고리 ID
+     * @return 카테고리 엔티티
+     */
     @Transactional(readOnly = true)
     public ContractCategory findContractCategoryById(Integer categoryId) {
         return categoryRepository.findById(categoryId)

@@ -40,6 +40,16 @@ public class ContractGeneratedFileService {
 
     private static final long MAX_FILE_SIZE = 100L * 1024 * 1024;
 
+    /**
+     * 생성된 계약서 파일 저장
+     * 사용자가 작성 완료한 계약서 파일을 저장하고 계약서 상태를 업데이트
+     *
+     * @param userId 사용자 ID
+     * @param contractId 계약서 ID
+     * @param file 저장할 PDF 파일
+     * @param fileName 파일명 (선택사항)
+     * @return 파일 저장 결과 정보
+     */
     @Transactional
     public ContractGeneratedFileResponseDto saveGeneratedFile(Integer userId, Integer contractId, MultipartFile file, String fileName) {
         log.info("saveGeneratedFile 시작: contractId={}, userId={}", contractId, userId);
@@ -135,6 +145,12 @@ public class ContractGeneratedFileService {
         }
     }
 
+    /**
+     * PDF 파일 유효성 검사
+     * 업로드된 PDF 파일의 유효성을 검증
+     *
+     * @param file 검증할 PDF 파일
+     */
     private void validatePdfFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new CustomException(ErrorCode.FILE_NOT_FOUND);
@@ -150,6 +166,13 @@ public class ContractGeneratedFileService {
         }
     }
 
+    /**
+     * 파일명 생성
+     * 파일명이 제공되지 않은 경우 계약서 ID와 타임스탬프를 이용해 파일명 생성
+     *
+     * @param contractId 계약서 ID
+     * @return 생성된 파일명
+     */
     private String generateFileName(Integer contractId) {
         LocalDateTime now = LocalDateTime.now();
         String timestamp = now.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));

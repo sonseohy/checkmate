@@ -19,6 +19,13 @@ public class LegalClauseCustomRepositoryImpl implements LegalClauseCustomReposit
 
     private final MongoTemplate mongoTemplate;
 
+    /**
+     * 카테고리 ID로 법조항 검색
+     * 해당 카테고리에 적용 가능하고 활성화된 모든 법조항을 표시 순서대로 조회
+     *
+     * @param categoryId 계약서 카테고리 ID
+     * @return 해당 카테고리에 적용 가능한 법조항 목록
+     */
     @Override
     public List<LegalClause> findByCategoryId(Integer categoryId) {
         if (categoryId == null) {

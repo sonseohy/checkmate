@@ -24,14 +24,21 @@ public class SummaryReportController {
 
     private final SummaryReportService summaryReportService;
 
+    /**
+     * 계약서 요약 조회
+     * 특정 계약서의 AI 분석 요약 정보를 조회
+     *
+     * @param userDetails 현재 로그인한 사용자 정보
+     * @param contractId 요약을 조회할 계약서 ID
+     * @return 계약서 요약 정보
+     */
     @Operation(summary = "내 계약서 요약", description = "계약서를 요약을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "계약서 요약 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증 실패")
+            @ApiResponse(responseCode = "200", description = "계약서 요약 조회 성공")
     })
     @GetMapping("/{contractId}")
     public ApiResult<SummaryReport> getMyContractSummary (
-            @Parameter(description = "유저 ID", required = true) @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Parameter(description = "현재 로그인한 사용자 정보", required = true) @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "계약서 ID", required = true) @PathVariable Integer contractId
     ) {
         SummaryReport response = summaryReportService.getMyContractSummary(userDetails.getUserId(), contractId);

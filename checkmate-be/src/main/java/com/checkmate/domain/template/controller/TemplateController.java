@@ -8,6 +8,7 @@ import com.checkmate.domain.template.dto.response.TemplateResponseDto;
 import com.checkmate.domain.template.service.TemplateService;
 import com.checkmate.global.common.response.ApiResult;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,15 +28,22 @@ public class TemplateController {
     private final TemplateService templateService;
     private final ContractService contractService;
 
+    /**
+     * 빈 계약서 생성 또는 작성 중인 계약서 조회
+     * 카테고리 ID와 사용자 ID를 기반으로 작성 중인 계약서가 있으면 조회하고, 없으면 새로 생성
+     *
+     * @param categoryId 카테고리 ID
+     * @param request 계약서 생성 요청 정보 (사용자 ID 포함)
+     * @return 계약서 상세 정보 또는 템플릿 정보
+     */
     @Operation(summary = "빈 계약서 생성 또는 작성 중인 계약서 조회", description = "카테고리 ID와 사용자 ID를 기반으로 빈 계약서를 생성하고 템플릿 정보를 반환하거나 또는 작성 중인 계약서 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "계약서 생성 성공",
                     content = @Content(schema = @Schema(implementation = TemplateResponseDto.class))),
-            @ApiResponse(responseCode = "404", description = "카테고리를 찾을 수 없음"),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/{categoryId}/create-contract")
     public ResponseEntity<ApiResult<?>> createEmptyContract(
+            @Parameter(description = "계약서 카테고리 ID", required = true)
             @PathVariable Integer categoryId,
             @RequestBody CreateEmptyContractRequest request) {
 

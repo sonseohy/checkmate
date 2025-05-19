@@ -13,6 +13,7 @@ import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.response.ApiResult;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,17 +30,19 @@ public class QuestionController {
 	 * 각 계약서에 해당되는 질문 리스트 조회
 	 *
 	 * @param contractId 계약서 ID
+	 * @param userDetails 현재 로그인한 사용자 정보
 	 * @return 질문 내용과 질문 ID
 	 */
 	@Operation(summary = "질문 리스트 조회", description = "질문 리스트를 조회합니다.")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "질문 리스트 조회 성공"),
-		@ApiResponse(responseCode = "401", description = "인증 실패"),
-		@ApiResponse(responseCode = "404", description = "질문 리스트 없음"),
+		@ApiResponse(responseCode = "200", description = "질문 리스트 조회 성공")
 	})
 	@GetMapping("/{contractId}")
 	@PreAuthorize("isAuthenticated()")
-	public ApiResult<QuestionResultDto> getQuestions(@PathVariable(value = "contractId") int contractId,
+	public ApiResult<QuestionResultDto> getQuestions(
+		@Parameter(description = "계약서 ID", required = true)
+		@PathVariable(value = "contractId") int contractId,
+		@Parameter(description = "현재 로그인한 사용자 정보", required = true)
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		QuestionResultDto data = questionService.getQuestions(contractId, userDetails.getUserId());
 		return ApiResult.ok(data);

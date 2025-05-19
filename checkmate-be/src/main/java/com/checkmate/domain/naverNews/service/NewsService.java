@@ -20,6 +20,13 @@ public class NewsService {
     private final WebClientConfig webClient;
     private static final String CACHE_NAME = "contractNews";
 
+    /**
+     * 계약 관련 뉴스 조회
+     * 네이버 API를 통해 계약 관련 뉴스를 검색하여 반환
+     * 캐싱을 통해 반복 요청 시 성능 향상
+     *
+     * @return 계약 관련 뉴스 정보
+     */
     @Cacheable(value = CACHE_NAME, key = "'contractNews'", unless = "#result == null || #result.items.isEmpty()")
     public NewsResponse getContractNews() {
 

@@ -44,6 +44,13 @@ public class TemplateService {
     private final UserRepository userRepository;
     private final ContractCategoryRepository categoryRepository;
 
+    /**
+     * 템플릿 상세 정보 조회
+     * 템플릿 ID로 템플릿 정보, 섹션, 필드 정보를 포함한 상세 정보 조회
+     *
+     * @param templateId 템플릿 ID
+     * @return 템플릿 상세 정보
+     */
     public TemplateResponseDto getTemplate(Integer templateId) {
         // 1. 템플릿 조회
         Template template = templateRepository.findById(templateId)
@@ -53,6 +60,14 @@ public class TemplateService {
         return buildTemplateResponse(template, null);
     }
 
+    /**
+     * 빈 계약서 생성
+     * 카테고리 ID와 사용자 ID를 기반으로 빈 계약서를 생성
+     *
+     * @param categoryId 카테고리 ID
+     * @param userId 사용자 ID
+     * @return 생성된 계약서 템플릿 정보
+     */
     @Transactional
     public TemplateResponseDto createEmptyContractByCategory(Integer categoryId, String userId) {
 
@@ -92,7 +107,14 @@ public class TemplateService {
         return buildTemplateResponse(template, savedContract);
     }
 
-    // 템플릿 응답 구성을 위한 공통 메서드
+    /**
+     * 템플릿 응답 구성
+     * 템플릿과 계약서 정보를 기반으로 템플릿 응답 DTO 구성
+     *
+     * @param template 템플릿 엔티티
+     * @param contract 계약서 엔티티 (없을 수 있음)
+     * @return 템플릿 응답 DTO
+     */
     private TemplateResponseDto buildTemplateResponse(Template template, Contract contract) {
         // 1. 템플릿에 속한 모든 섹션 조회
         List<Section> sections = sectionRepository.findSectionsByTemplateId(template.getId());
@@ -154,7 +176,16 @@ public class TemplateService {
                 .build();
     }
 
-    // mapSectionToDto 메소드 수정
+    /**
+     * 섹션 정보를 DTO로 변환
+     * 섹션 엔티티와 필드 정보를 받아 응답용 DTO로 변환
+     *
+     * @param section 섹션 엔티티
+     * @param fields 섹션에 속한 필드 목록
+     * @param templateSection 템플릿-섹션 연결 정보
+     * @param categoryId 카테고리 ID
+     * @return 섹션 DTO
+     */
     private TemplateResponseDto.SectionDto mapSectionToDto(
             Section section,
             List<TemplateField> fields,
@@ -185,7 +216,14 @@ public class TemplateService {
                 .build();
     }
 
-    // 수정된 mapFieldToDto 메소드
+    /**
+     * 필드 정보를 DTO로 변환
+     * 필드 엔티티를 응답용 DTO로 변환
+     *
+     * @param field 필드 엔티티
+     * @param categoryId 카테고리 ID
+     * @return 필드 DTO
+     */
     private TemplateResponseDto.FieldDto mapFieldToDto(TemplateField field, Integer categoryId) {
         String labelToUse = field.getLabel(); // 기본 라벨
 
@@ -213,6 +251,14 @@ public class TemplateService {
                 .build();
     }
 
+    /**
+     * 작성 중인 계약서 조회
+     * 카테고리 ID와 사용자 ID를 기반으로 작성 중인 계약서가 있는지 확인
+     *
+     * @param categoryId 카테고리 ID
+     * @param userId 사용자 ID
+     * @return 작성 중인 계약서 (존재하는 경우)
+     */
     public Optional<Contract> findExistingEditingContract(Integer categoryId, String userId) {
 
         ContractCategory category = categoryRepository.findById(categoryId)

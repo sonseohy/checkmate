@@ -25,7 +25,7 @@ public class AiAnalysisReportService {
 	 * 계약서 ID를 기반으로 해당 계약서의 분석 리포트를 조회하고, 사용자 접근 권한을 확인
 	 *
 	 * @param contractId 계약서 ID
-	 * @param userId 요청한 사용자 ID
+	 * @param userId 사용자 ID
 	 * @return AI 분석 리포트 ID, 계약서 ID, 개선 사항, 위험 사항, 누락 사항, 생성 일자
 	 */
 	public AiAnalysisReportResponseDto getAiAnalysisReportByContractId(int contractId, int userId) {

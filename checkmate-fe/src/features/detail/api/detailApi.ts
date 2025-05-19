@@ -50,18 +50,26 @@ export const getContractQuestions = async (
   contractId: number,
 ): Promise<questionList> => {
   try {
-    const res = await customAxios.get(`/api/questions/${contractId}`);
+    const { data: res } = await customAxios.get(`/api/questions/${contractId}`);
 
-    /** ── 어떤 필드에 배열이 있든 안전하게 꺼내기 ── */
-    const payload = Array.isArray(res.data?.data)
-      ? res.data.data
-      : Array.isArray(res.data)
-      ? res.data
-      : []; // 예상 밖 구조면 빈배열
+    /** ①  서버가 내려줄 수 있는 모든 위치를 차례대로 검사 */
+    const arr: any =
+      /* case-A ▸ { data: { questions: [...] } } ← ❗ 새 구조 */
+      Array.isArray(res?.data?.questions)
+        ? res.data.questions
+        : /* case-B ▸ { data: [...] } */
+        Array.isArray(res?.data)
+        ? res.data
+        : /* case-C ▸ { questions: [...] } | { question: [...] } */
+          res?.questions ??
+          res?.question ??
+          /* case-D ▸ 바로 배열 */
+          (Array.isArray(res) ? res : []);
 
-    const cleaned: questions[] = payload.map((q: any) => ({
+    /** ②  타입 맞춰서 전처리 */
+    const cleaned = (arr as questions[]).map((q) => ({
       ...q,
-      questionDetail: String(q.questionDetail ?? '').replace(/"/g, ''),
+      questionDetail: q.questionDetail?.replace(/^"|"$/g, ''), // 따옴표 제거
     }));
 
     return { question: cleaned };

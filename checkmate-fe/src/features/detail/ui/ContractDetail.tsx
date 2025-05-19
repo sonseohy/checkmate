@@ -1,3 +1,4 @@
+/* src/features/detail/ui/ContractDetail.tsx */
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import {
@@ -10,16 +11,16 @@ import { categories, useMobile } from '@/shared';
 const ContractDetail: React.FC = () => {
   const isMobile = useMobile();
 
-  /* URL 파라미터 + state */
+  /* URL 파라미터 + state -------------------------------------------------- */
   const { contractId: paramId } = useParams<{ contractId: string }>();
   const { state } = useLocation() as { state?: ContractSummary };
 
-  const id = Number(paramId); // 질문 리스트 조회용
-  const contract = state ?? null; // 요약 정보(옵션)
+  const id = Number(paramId);
+  const contract = state ?? null;
 
+  /* 질문 리스트 ----------------------------------------------------------- */
   const [questions, setQuestions] = useState<questionList>({ question: [] });
 
-  /* 질문 리스트 fetch */
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -32,44 +33,56 @@ const ContractDetail: React.FC = () => {
     })();
   }, [id]);
 
-  /* ─── 렌더 가드 ─── */
   if (!id) return <p className="p-4">잘못된 접근입니다.</p>;
 
-  /* ─── 화면 ─── */
-  const category = categories.find((c) => c.id === contract?.category_id);
+  const categoryName = categories.find(
+    (c) => c.id === contract?.category_id,
+  )?.name;
 
+  /* ─────────────────────────── UI ─────────────────────────── */
   return (
-    <div>
-      {/* ── 상단 요약 ── */}
-      {contract ? (
-        <div className={isMobile ? '' : 'my-5'}>
-          <p className="font-semibold text-2xl mb-2">{contract.title}</p>
-          <p className="text-lg">
-            카테고리&nbsp;:&nbsp;{category?.name ?? contract.category_id}
-          </p>
-        </div>
-      ) : (
-        <div className="my-4 text-gray-500">제목·카테고리 정보 없음</div>
+    <div className="flex flex-col h-full">
+      {/* ▸ 제목 & 카테고리 (있을 때만) */}
+      {contract && (
+        <header className={`${isMobile ? 'mb-2' : 'mb-3'}`}>
+          <h1 className="text-2xl font-bold">{contract.title}</h1>
+          {categoryName && (
+            <p className="text-sm text-gray-600 mt-1">
+              카테고리 · {categoryName}
+            </p>
+          )}
+        </header>
       )}
 
-      <div className="h-px bg-gray-200" />
-
-      {/* ── 질문 리스트 ── */}
-      <div className="mt-3">
-        <div className="font-medium text-xl mb-2">질문 리스트</div>
+      {/* ▸ 질문 섹션 - 부모 컨테이너의 높이에 맞추기 */}
+      <section className="flex-1 overflow-y-auto rounded-lg p-4 bg-white no-scrollbar ">
+        {/* ▸ 안내 문구 - 체크메이트 문구로 변경 */}
+        <p className="text-center text-2xl text-gray-800 mb-2">
+          계약 전,&nbsp;
+          <span className="font-semibold text-blue-600">꼭! 물어볼 질문</span>
+        </p>
 
         {questions.question.length === 0 ? (
-          <p className="text-lg">질문 리스트가 존재하지 않습니다.</p>
+          <div className="flex flex-col items-center justify-center h-full py-6 text-center">
+            <p className="text-gray-500">분석 중입니다. 잠시만 기다려주세요.</p>
+          </div>
         ) : (
-          <ul className="space-y-1">
-            {questions.question.map((q) => (
-              <li key={q.questionId}>
-                <span className="font-semibold">Q.</span> {q.questionDetail}
+          <ul className="divide-y divide-gray-100">
+            {questions.question.map((q, idx) => (
+              <li key={q.questionId} className="p-3 hover:bg-gray-50">
+                <div className="flex items-baseline">
+                  <span className="text-blue-600 font-medium text-base mr-2 shrink-0">
+                    {idx + 1}.
+                  </span>
+                  <p className="text-base text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    {q.questionDetail}
+                  </p>
+                </div>
               </li>
             ))}
           </ul>
         )}
-      </div>
+      </section>
     </div>
   );
 };

@@ -493,7 +493,11 @@ public class ContractFieldValueService {
             return "";
         }
 
-        return processNestedOperations(text, fieldKeyValueMap, fieldIdValueMap, true);
+        String renderedText = text;
+        boolean isTopLevel = true; // 최상위 호출인지 여부를 추적
+
+        // 중첩 호출을 위한 재귀 함수
+        return processNestedOperations(renderedText, fieldKeyValueMap, fieldIdValueMap, isTopLevel);
     }
 
     /**
@@ -522,7 +526,10 @@ public class ContractFieldValueService {
                 String innerExpr = "{" + nestedMatcher.group(1) + "}";
                 // 중첩된 내부 표현식 처리 (재귀 호출)
                 String processed = processNestedOperations(innerExpr, fieldKeyValueMap, fieldIdValueMap, false);
-                // 처리된 결과로 치환
+                // 처리된 결과로 치환하고, 중첩 결과는 상수로 처리되도록 c: 접두사 추가
+                if (!processed.startsWith("c:") && isNumeric(processed)) {
+                    processed = "c:" + processed;
+                }
                 renderedText = renderedText.replaceFirst(Pattern.quote(innerExpr), processed);
             }
         }
@@ -543,6 +550,13 @@ public class ContractFieldValueService {
                     // 상수 처리
                     try {
                         double constant = Double.parseDouble(param.substring(2));
+                        constants.add(constant);
+                    } catch (NumberFormatException e) {
+                    }
+                } else if (isNumeric(param)) {
+                    // 숫자 문자열은 상수로 처리
+                    try {
+                        double constant = Double.parseDouble(param);
                         constants.add(constant);
                     } catch (NumberFormatException e) {
                     }
@@ -607,7 +621,7 @@ public class ContractFieldValueService {
 
         // 최상위 호출인 경우만 일반 필드 키 처리
         if (isTopLevel) {
-            Pattern fieldPattern = Pattern.compile("\\{([^{}]+)}");
+            Pattern fieldPattern = Pattern.compile("\\{([^{}]+)\\}");
             Matcher fieldMatcher = fieldPattern.matcher(renderedText);
 
             while (fieldMatcher.find()) {
@@ -620,6 +634,21 @@ public class ContractFieldValueService {
         }
 
         return renderedText;
+    }
+
+    /**
+     * 문자열이 숫자인지 확인
+     */
+    private boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        }
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     /**

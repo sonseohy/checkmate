@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 import Spinner from '@/shared/ui/Spinner';
 import { useUserInfo } from '@/features/auth';
 import { KakaoLoginModal } from '@/features/main';
+import uploadImage from '@/assets/images/loading/upload.png';
 
 const AnalyzeUploadPage: React.FC = () => {
   const { mainCategorySlug } = useParams<{ mainCategorySlug: string }>();
@@ -25,12 +26,11 @@ const AnalyzeUploadPage: React.FC = () => {
 
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false); // ✅ 로그인 모달 상태
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const user = useUserInfo();
   const isLoggedIn = !!user;
 
-  /* 잘못된 경로 접근 방지 */
   useEffect(() => {
     if (!mainCategorySlug || !selectedSub || !categoryId) {
       navigateInvalidAccess(navigate);
@@ -39,7 +39,6 @@ const AnalyzeUploadPage: React.FC = () => {
 
   if (!mainCategorySlug || !selectedSub || !categoryId) return null;
 
-  /* 업로드 → 결과 페이지 이동 */
   const onNext = async () => {
     if (!isLoggedIn) {
       Swal.fire({
@@ -65,13 +64,26 @@ const AnalyzeUploadPage: React.FC = () => {
 
     try {
       setIsLoading(true);
-      await uploadContract({
+
+      const response = await uploadContract({
         title: mainCategoryName,
         categoryId,
         files,
       });
 
-      navigate(`/analyze/${mainCategorySlug}/result`);
+      const contractId = response?.data?.contract_id;
+      if (!contractId) {
+        throw new Error('분석 결과로 이동할 contract_id가 없습니다.');
+      }
+
+      await Swal.fire({
+        icon: 'success',
+        title: '업로드가 성공했습니다',
+        text: '분석에는 최대 1~2분이 걸립니다. 분석 완료 시 알려드릴게요!',
+        confirmButtonText: '확인',
+      });
+
+      navigate('/');
     } catch (error) {
       console.error(error);
       Swal.fire({
@@ -87,18 +99,26 @@ const AnalyzeUploadPage: React.FC = () => {
 
   return (
     <>
-      {/* 로딩 오버레이 */}
+      {/* ✅ 업로드 로딩 오버레이 */}
       {isLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Spinner />
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/50">
+          <img
+            src={uploadImage}
+            alt="업로드 로딩"
+            className="w-24 h-24 mx-auto mb-4"
+          />
+          <p className="text-white text-lg font-semibold mb-1">
+            업로드 파일을 검사하고 있어요...
+          </p>
         </div>
       )}
 
-      {/* 로그인 모달 */}
+      {/* ✅ 로그인 모달 */}
       {loginModalOpen && (
         <KakaoLoginModal onClose={() => setLoginModalOpen(false)} />
       )}
 
+      {/* ✅ 업로드 UI */}
       <section className="container px-2 py-12 mx-auto text-center">
         <h1 className="mb-6 text-2xl font-bold">
           {mainCategoryName} 파일을 업로드 해주세요

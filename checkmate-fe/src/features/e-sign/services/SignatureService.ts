@@ -4,5 +4,6 @@ import {
 } from '@/features/e-sign';
 
 export const SignatureService = {
-  request: (data: SignatureRequestPayload) => sendSignatureRequest(data),
+  request: (contractId: number, data: SignatureRequestPayload) =>
+    sendSignatureRequest(contractId, data),
 };

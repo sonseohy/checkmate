@@ -73,10 +73,12 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                   }
 
                   // isCompleted에 따라 navigate 경로 변경
-                  if (isCompleted) {
+                  if (row.source_type === 'SERVICE_GENERATED' && row.edit_status === 'COMPLETED') {
                     navigate(`/detail/${row.contract_id}`, { state: { contract: row } });
-                  } else {
+                  } else if (row.source_type === 'SERVICE_GENERATED' && row.edit_status === 'EDITING') {
                     navigate(`/write/edit/${row.contract_id}`, { state: { contract: row } });
+                  } else if (row.source_type === 'USER_UPLOAD' && row.edit_status === 'COMPLETED') {
+                    navigate(`/analyze/result/${row.contract_id}`, { state: row });
                   }
                 }}
               >

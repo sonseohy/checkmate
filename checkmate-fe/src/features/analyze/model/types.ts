@@ -1,7 +1,12 @@
 export interface UploadResponse {
-  contractId: number;
-  title: string;
-  createdAt: string;
+  success: boolean;
+  data: {
+    contract_id: number;
+    title: string;
+    created_at: string;
+  };
+  error: string | null;
+  timestamp: string;
 }
 
 export interface UploadContractParams {
@@ -12,10 +17,36 @@ export interface UploadContractParams {
 
 // 분석 결과 타입
 export interface AnalysisResult {
-  contractId: string;
-  summary: string;
-  riskFactors: string[];
-  suggestions: string[];
-  score: number;
-  // 필요한 추가 필드
+  contractId: number;
+  summaries: {
+    summaryReportId: string;
+    aiAnalysisReportId: string;
+    description: string;
+  }[];
+  riskClauses: {
+    riskClauseReportId: string;
+    aiAnalysisReportId: string;
+    riskLevel: string;
+    originalText: string;
+    description: string;
+  }[];
+  improvements: {
+    improvementReportId: string;
+    aiAnalysisReportId: string;
+    description: string;
+  }[];
+  missingClauses: {
+    missingClauseReportId: string;
+    aiAnalysisReportId: string;
+    importance: string;
+    description: string;
+  }[];
+  createdAt: string;
+}
+
+export interface AnalysisResponse {
+  success: boolean;
+  data: AnalysisResult | null;
+  error: any;
+  timestamp: string;
 }

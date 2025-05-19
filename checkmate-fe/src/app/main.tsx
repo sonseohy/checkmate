@@ -6,12 +6,14 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from '@/app/routes/routes';
 import { Provider } from 'react-redux';
 import { store } from '@/app/redux/store';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // src/main.tsx
-import { pdfjs } from 'react-pdf'
-import 'react-pdf/dist/esm/Page/TextLayer.css'
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
+import { pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 // public 폴더에 복사해 둔 워커를 루트 URL로 가리킵니다.
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
+        <ToastContainer />
       </QueryClientProvider>
     </Provider>
   </StrictMode>,

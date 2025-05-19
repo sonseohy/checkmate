@@ -1,16 +1,17 @@
-import { AnalysisResult, fetchAnalysisResult } from '@/features/analyze';
+import {
+  AnalysisResult,
+  AnalysisResponse,
+  fetchAnalysisResult,
+} from '@/features/analyze';
 
 export const AnalysisService = {
   getResult: async (contractId: string): Promise<AnalysisResult> => {
-    const res = await fetchAnalysisResult(contractId);
+    const res: AnalysisResponse = await fetchAnalysisResult(contractId);
 
-    // 기본값 보정
-    return {
-      contractId: res.contractId ?? '',
-      summary: res.summary ?? '',
-      riskFactors: res.riskFactors ?? [],
-      suggestions: res.suggestions ?? [],
-      score: res.score ?? 0,
-    };
+    if (!res.success || !res.data) {
+      throw new Error('분석 결과를 찾을 수 없습니다.');
+    }
+
+    return res.data;
   },
 };

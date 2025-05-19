@@ -1,6 +1,12 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LegalClauseGroup, Clause, useGenerateContractFile, neutralizeOklch, prettifyLine } from '@/features/write';
+import {
+  LegalClauseGroup,
+  Clause,
+  useGenerateContractFile,
+  neutralizeOklch,
+  prettifyLine,
+} from '@/features/write';
 import Swal from 'sweetalert2';
 import html2pdf from 'html2pdf.js';
 
@@ -54,15 +60,16 @@ const WritePreviewPage: React.FC = () => {
         pdfBlob: blob,
         fileName,
       });
-      
-      Swal.fire('완료', 'PDF가 성공적으로 저장되었습니다.', 'success').then(() =>
-        navigate(`/detail/${contractId}`, {
-          state: {
-            contract_id: contractId,
-            fileName : res.fileName ?? '',
-          },
-          replace: true,
-        })
+
+      Swal.fire('완료', 'PDF가 성공적으로 저장되었습니다.', 'success').then(
+        () =>
+          navigate(`/detail/${contractId}`, {
+            state: {
+              contract_id: contractId,
+              fileName: res.fileName ?? '',
+            },
+            replace: true,
+          }),
       );
     } catch (err) {
       console.error(err);
@@ -77,22 +84,22 @@ const WritePreviewPage: React.FC = () => {
   const sortedSections = [...legalClauses].sort(
     (a, b) =>
       (a.legalClauses[0]?.order ?? Infinity) -
-      (b.legalClauses[0]?.order ?? Infinity)
+      (b.legalClauses[0]?.order ?? Infinity),
   );
 
-return (
-  <div className="container py-16 space-y-10 max-w-3xl mx-auto px-4">
-    <div
+  return (
+    <div className="container py-16 space-y-10 max-w-3xl mx-auto px-4">
+      <div
         id="preview-root"
         className="content-wrapper bg-white p-6 border-2 border-gray-300 space-y-8 print:p-4"
-      >  
-      {/* ===== 타이틀 ===== */}
-      <h1 className="text-3xl font-bold text-center mb-10">{templateName}</h1>
+      >
+        {/* ===== 타이틀 ===== */}
+        <h1 className="text-3xl font-bold text-center mb-10">{templateName}</h1>
 
-      {/* ===== 프린트·PDF 대상 영역 ===== */}
+        {/* ===== 프린트·PDF 대상 영역 ===== */}
         {sortedSections.map((section, idx) => {
           const clauses: Clause[] = [...section.legalClauses].sort(
-            (a, b) => (a.order ?? Infinity) - (b.order ?? Infinity)
+            (a, b) => (a.order ?? Infinity) - (b.order ?? Infinity),
           );
           const [header, ...others] = clauses;
           const orderNo = header?.order;
@@ -154,7 +161,10 @@ return (
               )}
 
               {others.map((c, i) => (
-                <div key={`${section.groupId}-${c.order ?? i}`} className="mb-4">
+                <div
+                  key={`${section.groupId}-${c.order ?? i}`}
+                  className="mb-4"
+                >
                   <h3 className="font-semibold mb-1">{c.titleText}</h3>
                   <ul className="pl-5 space-y-1">
                     {c.content.map((line, j) => (

@@ -1,4 +1,7 @@
-export type NotificationType = 'SIGNATURE_COMPLETED' | 'CONTRACT_ANALYSIS';
+export type NotificationType =
+  | 'SIGNATURE_COMPLETED'
+  | 'CONTRACT_ANALYSIS'
+  | 'QUESTION_GENERATION';
 
 export interface Notification {
   id: number;

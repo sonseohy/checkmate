@@ -20,9 +20,17 @@ RUN gradle clean build -x test
 # 2단계: 실행 단계
 FROM eclipse-temurin:17-jre
 
-# LibreOffice 및 한글 폰트 설치
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
+# 1) PPA 등록용 툴 설치
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      curl gnupg ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# 2) HamoniKR PPA 등록
+RUN curl -sL https://repo.hamonikr.org/hamonikr-app.apt | bash -E \
+  && apt-get update
+
+# 3) LibreOffice + HWP 필터 + 폰트 설치
+RUN apt-get install -y --no-install-recommends \
       libreoffice \
       libreoffice-core \
       libreoffice-writer \
@@ -30,7 +38,7 @@ RUN apt-get update \
       libreoffice-hwp2odt \
       fonts-nanum \
       fontconfig \
- && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/*
 
 # 빌드 결과물 복사
 COPY --from=build /home/app/build/libs/*.jar /app.jar

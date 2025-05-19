@@ -23,6 +23,11 @@ public enum ErrorCode {
     UNSUPPORTED_FILE_TYPE("FILE-003", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "파일 확장자를 확인할 수 없습니다."),
     FILE_TOO_LARGE("FILE-004", HttpStatus.PAYLOAD_TOO_LARGE, "파일 최대 크기를 초과했습니다."),
     FILE_UPLOAD_FAILED("FILE-005", HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 실패로 롤백 처리되었습니다."),
+    FILE_CONVERSION_QUEUE_TIMEOUT("FILE-006", HttpStatus.TOO_MANY_REQUESTS, "HWP→PDF 변환 대기열이 가득 찼습니다."),
+    FILE_CONVERSION_TIMEOUT("FILE-007", HttpStatus.REQUEST_TIMEOUT, "HWP→PDF 변환이 타임아웃되었습니다."),
+    FILE_CONVERSION_PROCESS_ERROR("FILE-008", HttpStatus.INTERNAL_SERVER_ERROR, "LibreOffice 변환 프로세스 중 오류가 발생했습니다."),
+    FILE_CONVERSION_NO_OUTPUT("FILE-009", HttpStatus.INTERNAL_SERVER_ERROR, "변환된 PDF 파일을 찾을 수 없습니다."),
+    FILE_CONVERSION_FAILED("FILE-010", HttpStatus.INTERNAL_SERVER_ERROR, "HWP→PDF 변환에 실패했습니다."),
 
     ENCRYPT_FAILED("ENCRYPT-001", HttpStatus.INTERNAL_SERVER_ERROR, "암호화에 실패했습니다."),
     DECRYPT_FAILED("ENCRYPT-002", HttpStatus.INTERNAL_SERVER_ERROR, "복호화에 실패했습니다."),

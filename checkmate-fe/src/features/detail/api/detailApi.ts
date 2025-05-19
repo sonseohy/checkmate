@@ -50,18 +50,23 @@ export const getContractQuestions = async (
   contractId: number,
 ): Promise<questionList> => {
   try {
-    const response = await customAxios.get(`/api/questions/${contractId}`);
-    console.log('API Response:', response.data);
-    const data: questions[] = response.data.data;
-    // questionDetail에서 따옴표를 제거한 후 반환
-    const cleanedQuestions = data.map((question) => ({
-      ...question,
-      questionDetail: question.questionDetail.replace(/"/g, ''), // 따옴표 제거
+    const res = await customAxios.get(`/api/questions/${contractId}`);
+
+    /** ── 어떤 필드에 배열이 있든 안전하게 꺼내기 ── */
+    const payload = Array.isArray(res.data?.data)
+      ? res.data.data
+      : Array.isArray(res.data)
+      ? res.data
+      : []; // 예상 밖 구조면 빈배열
+
+    const cleaned: questions[] = payload.map((q: any) => ({
+      ...q,
+      questionDetail: String(q.questionDetail ?? '').replace(/"/g, ''),
     }));
 
-    return { question: cleanedQuestions }; // 수정된 데이터를 반환
-  } catch (error) {
-    console.error('질문 리스트 불러오기 실패:', error);
-    return { question: [] }; // 실패 시 기본값 반환
+    return { question: cleaned };
+  } catch (e) {
+    console.error('질문 리스트 불러오기 실패:', e);
+    return { question: [] };
   }
 };

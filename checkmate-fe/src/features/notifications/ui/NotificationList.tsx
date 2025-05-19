@@ -1,3 +1,4 @@
+/* src/features/notifications/ui/NotificationList.tsx */
 import { useState } from 'react';
 import { format, formatDistanceToNowStrict, isBefore, subDays } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -5,7 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import { Notification } from '@/features/notifications';
 import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 
-type Tab = 'ALL' | 'SIGNATURE_COMPLETED' | 'CONTRACT_ANALYSIS';
+type Tab =
+  | 'ALL'
+  | 'SIGNATURE_COMPLETED'
+  | 'CONTRACT_ANALYSIS'
+  | 'QUESTION_GENERATION';
 
 interface Props {
   notifications: Notification[];
@@ -15,13 +20,14 @@ const TABS: { type: Tab; label: string }[] = [
   { type: 'ALL', label: '전체' },
   { type: 'SIGNATURE_COMPLETED', label: '전자서명' },
   { type: 'CONTRACT_ANALYSIS', label: '분석결과' },
+  { type: 'QUESTION_GENERATION', label: '질문리스트' },
 ];
 
 const NotificationList: React.FC<Props> = ({ notifications }) => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Tab>('ALL');
 
-  /* 개별 읽음 변이 */
+  /* 읽음 처리 hook */
   const { markAsRead } = useNotifications();
 
   const list =
@@ -42,14 +48,17 @@ const NotificationList: React.FC<Props> = ({ notifications }) => {
 
     if (n.type === 'CONTRACT_ANALYSIS')
       navigate(`/analyze/result/${n.contract_id}`);
-    else if (n.type === 'SIGNATURE_COMPLETED')
+    else if (
+      n.type === 'SIGNATURE_COMPLETED' ||
+      n.type === 'QUESTION_GENERATION'
+    )
       navigate(`/detail/${n.contract_id}`);
   };
 
   return (
     <div
       className="w-[90vw] max-w-xs md:w-[400px] bg-white rounded-lg shadow-lg p-4
-            max-h-[75vh] overflow-y-auto"
+                 max-h-[75vh] overflow-y-auto"
     >
       {/* 탭 */}
       <div className="flex space-x-4 border-b border-gray-200 pb-2 mb-3">
@@ -68,15 +77,19 @@ const NotificationList: React.FC<Props> = ({ notifications }) => {
         ))}
       </div>
 
-      {/* 리스트 */}
-      <div className="space-y-3 max-h-64 overflow-y-auto">
+      {/* 알림 목록 */}
+      <div className="max-h-64 overflow-y-auto divide-y divide-gray-200">
         {list.map((n) => (
           <div
             key={n.id}
             onClick={() => handleClick(n)}
-            className={`block cursor-pointer p-2 rounded hover:bg-gray-50 ${
-              n.read ? 'opacity-70' : ''
-            }`}
+            className={`block cursor-pointer p-2 rounded
+              ${
+                n.read
+                  ? 'opacity-70 hover:bg-gray-50'
+                  : 'bg-sky-50 hover:bg-sky-100'
+              }  /* ← 미읽음 파란 배경 */
+            `}
           >
             <div className="text-sm text-gray-800 line-clamp-2">
               {n.message}
@@ -94,7 +107,7 @@ const NotificationList: React.FC<Props> = ({ notifications }) => {
         )}
       </div>
 
-      {/* 전체보기 */}
+      {/* 전체 보기 */}
       <div className="mt-4 text-right">
         <a
           href="/mypage?tab=notifications"

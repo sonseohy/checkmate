@@ -13,8 +13,12 @@ export const useNotificationSocket = (enabled: boolean) => {
   useEffect(() => {
     if (!enabled) return;
 
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const WS_URL = `${protocol}://checkmate.ai.kr/app/`;
+
     const client = new Client({
-      brokerURL: 'ws://checkmate.ai.kr/app/',
+      brokerURL: WS_URL,
+
       connectHeaders: {
         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
       },

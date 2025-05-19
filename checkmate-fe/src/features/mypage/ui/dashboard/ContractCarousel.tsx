@@ -19,7 +19,7 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
   //계약서 상세조회 api 호출 및 페이지 이동
   const handleContractDetail = async(contractId:number, contract:Contract ) => {
     if (contract.edit_status === 'COMPLETED' &&  contract.source_type === 'SERVICE_GENERATED') {
-      navigate(`/detail/${contractId}`,{ state: contract });
+      navigate(`/detail/${contractId}`,{ state: { contract } });
     } else if (contract.edit_status === 'COMPLETED' &&  contract.source_type === 'USER_UPLOAD'){
       navigate(`/analyze/result/${contractId}`,{ state: contract });
     } else if (contract.edit_status === 'EDITING' &&  contract.source_type === 'SERVICE_GENERATED'){

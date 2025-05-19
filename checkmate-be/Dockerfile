@@ -20,6 +20,17 @@ RUN gradle clean build -x test
 # 2단계: 실행 단계
 FROM eclipse-temurin:17-jre
 
+# LibreOffice 및 한글 폰트 설치
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      libreoffice-core \
+      libreoffice-headless \
+      libreoffice-writer \
+      libreoffice-calc \
+      fonts-nanum \
+      fontconfig && \
+    rm -rf /var/lib/apt/lists/*
+
 # 빌드 결과물 복사
 COPY --from=build /home/app/build/libs/*.jar /app.jar
 

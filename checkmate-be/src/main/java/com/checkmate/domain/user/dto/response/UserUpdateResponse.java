@@ -8,8 +8,4 @@ import java.util.Map;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserUpdateResponse(
         Map<String, Object> updated
-) {
-    public static UserUpdateResponse of(Map<String, Object> updatedFields) {
-        return new UserUpdateResponse(updatedFields);
-    }
-}
+) {}

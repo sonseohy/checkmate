@@ -37,29 +37,12 @@ public class TemplateFieldCategory {
     private String mongoClauseId;
 
     // 기존 생성자
-    public TemplateFieldCategory(TemplateField templateField, ContractCategory contractCategory) {
-        this.templateField = templateField;
-        this.contractCategory = contractCategory;
-        this.isRequired = false;
-    }
-
-    // 기존 생성자
     public TemplateFieldCategory(TemplateField templateField, ContractCategory contractCategory,
                                  Boolean isRequired, String labelOverride) {
         this.templateField = templateField;
         this.contractCategory = contractCategory;
         this.isRequired = isRequired;
         this.labelOverride = labelOverride;
-    }
-
-    // MongoDB ID 포함 생성자
-    public TemplateFieldCategory(TemplateField templateField, ContractCategory contractCategory,
-                                 Boolean isRequired, String labelOverride, String mongoClauseId) {
-        this.templateField = templateField;
-        this.contractCategory = contractCategory;
-        this.isRequired = isRequired;
-        this.labelOverride = labelOverride;
-        this.mongoClauseId = mongoClauseId;
     }
 
     // MongoDB ID 설정 메서드

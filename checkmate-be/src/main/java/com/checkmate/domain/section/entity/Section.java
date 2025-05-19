@@ -38,15 +38,4 @@ public class Section {
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TemplateSection> templateSections = new ArrayList<>();
-
-    public void addField(TemplateField field) {
-        fields.add(field);
-        field.setSection(this);
-    }
-
-    public void removeField(TemplateField field) {
-        fields.remove(field);
-        field.setSection(null);
-    }
-
 }

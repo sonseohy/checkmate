@@ -54,15 +54,4 @@ public class TemplateField {
 
     @OneToMany(mappedBy = "templateField", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TemplateFieldCategory> categoryMappings = new ArrayList<>();
-
-    // 카테고리 추가
-    public void addCategory(ContractCategory category) {
-        TemplateFieldCategory mapping = new TemplateFieldCategory(this, category);
-        this.categoryMappings.add(mapping);
-    }
-
-    // 카테고리 제거
-    public void removeCategory(ContractCategory category) {
-        this.categoryMappings.removeIf(mapping -> mapping.getContractCategory().equals(category));
-    }
 }

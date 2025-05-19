@@ -229,7 +229,6 @@ public class ContractFileService {
      */
     @Transactional(readOnly = true)
     public ContractFile findViewerFile(int userId, int contractId) {
-        User user = userService.findUserById(userId);
         ContractFile file = contractFileRepository.findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
                 .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
 
@@ -249,7 +248,6 @@ public class ContractFileService {
      */
     @Transactional(readOnly = true)
     public PdfMetadata loadViewerPdfMetadata(int userId, int contractId) {
-        User user = userService.findUserById(userId);
 
         ContractFile file = contractFileRepository
                 .findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
@@ -288,7 +286,6 @@ public class ContractFileService {
      */
     @Transactional(readOnly = true)
     public List<ContractFilesResponse> listContractFiles(int userId, int contractId) {
-        User user = userService.findUserById(userId);
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 

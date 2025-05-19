@@ -132,7 +132,6 @@ public class ContractService {
      */
     @Transactional
     public void deleteMyContract(int userId, Integer contractId) {
-        User user = userService.findUserById(userId);
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 

@@ -738,7 +738,7 @@ public class ContractFieldValueService {
         }
 
         return fieldIds.stream()
-                .filter(fieldId -> fieldIdValueMap.containsKey(fieldId))
+                .filter(fieldIdValueMap::containsKey)
                 .mapToDouble(fieldId -> {
                     String value = fieldIdValueMap.get(fieldId);
                     try {
@@ -764,7 +764,7 @@ public class ContractFieldValueService {
         }
 
         double[] values = fieldIds.stream()
-                .filter(fieldId -> fieldIdValueMap.containsKey(fieldId))
+                .filter(fieldIdValueMap::containsKey)
                 .mapToDouble(fieldId -> {
                     String value = fieldIdValueMap.get(fieldId);
                     try {
@@ -801,7 +801,7 @@ public class ContractFieldValueService {
         }
 
         return fieldIds.stream()
-                .filter(fieldId -> fieldIdValueMap.containsKey(fieldId))
+                .filter(fieldIdValueMap::containsKey)
                 .mapToDouble(fieldId -> {
                     String value = fieldIdValueMap.get(fieldId);
                     try {
@@ -827,7 +827,7 @@ public class ContractFieldValueService {
         }
 
         double[] values = fieldIds.stream()
-                .filter(fieldId -> fieldIdValueMap.containsKey(fieldId))
+                .filter(fieldIdValueMap::containsKey)
                 .mapToDouble(fieldId -> {
                     String value = fieldIdValueMap.get(fieldId);
                     try {

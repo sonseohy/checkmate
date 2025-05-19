@@ -33,7 +33,6 @@ public class NotificationService {
      */
     @Transactional(readOnly = true)
     public List<NotificationResponse> getNotifications(int userId) {
-        User user = userService.findUserById(userId);
         List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreatedAtDesc(userId);
 
         return notifications.stream()
@@ -58,7 +57,6 @@ public class NotificationService {
      */
     @Transactional(readOnly = true)
     public List<NotificationResponse> getUnreadNotifications(int userId) {
-        User user = userService.findUserById(userId);
         List<Notification> notifications = notificationRepository.findByUserUserIdAndIsReadFalseOrderByCreatedAtDesc(userId);
 
         return notifications.stream()
@@ -84,7 +82,6 @@ public class NotificationService {
      */
     @Transactional
     public NotificationResponse NotificationRead(int userId, int notificationId) {
-        User user = userService.findUserById(userId);
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
@@ -130,7 +127,6 @@ public class NotificationService {
      */
     @Transactional(readOnly = true)
     public long countUnreadNotifications(int userId) {
-        User user = userService.findUserById(userId);
         return notificationRepository.countByUserUserIdAndIsReadFalse(userId);
     }
 
@@ -143,7 +139,6 @@ public class NotificationService {
      */
     @Transactional
     public List<NotificationResponse> markAllAsRead(int userId) {
-        User user = userService.findUserById(userId);
         List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreatedAtDesc(userId);
 
         for (Notification notification : notifications) {

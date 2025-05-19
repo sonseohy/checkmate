@@ -35,7 +35,6 @@ public class SummaryReportService {
      * @return 계약서 요약 정보
      */
     public SummaryReport getMyContractSummary(int userId, Integer contractId) {
-        User user = userService.findUserById(userId);
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 

@@ -179,23 +179,40 @@ public class ContractFieldValueService {
      */
     private void saveOrUpdateFieldValues(Contract contract, List<ContractFieldValueRequestDto.FieldValueDto> fieldValues) {
         for (ContractFieldValueRequestDto.FieldValueDto fieldValueDto : fieldValues) {
+            log.debug("필드값 저장 시도: contractId={}, fieldId={}, value={}",
+                    contract.getId(), fieldValueDto.getFieldId(), fieldValueDto.getValue());
+
             // 필드 존재 확인
             TemplateField field = findFieldById(fieldValueDto.getFieldId());
 
             // 필드 유효성 검증
             validateFieldValue(field, fieldValueDto.getValue());
 
-            // 기존 값 찾기
-            Optional<ContractFieldValue> existingValue = contractFieldValueRepository
-                    .findByContractIdAndFieldId(contract.getId(), fieldValueDto.getFieldId());
+            try {
+                // 기존 값 찾기
+                Optional<ContractFieldValue> existingValue = contractFieldValueRepository
+                        .findByContractIdAndFieldId(contract.getId(), fieldValueDto.getFieldId());
 
-            if (existingValue.isPresent()) {
-                ContractFieldValue fieldValue = existingValue.get();
-                fieldValue.setValue(fieldValueDto.getValue());
-                contractFieldValueRepository.save(fieldValue);
-            } else {
-                ContractFieldValue fieldValue = ContractFieldValue.create(contract, field, fieldValueDto.getValue());
-                contractFieldValueRepository.save(fieldValue);
+                if (existingValue.isPresent()) {
+                    log.debug("기존 필드값 업데이트: fieldId={}, oldValue={}, newValue={}",
+                            fieldValueDto.getFieldId(), existingValue.get().getValue(), fieldValueDto.getValue());
+
+                    ContractFieldValue fieldValue = existingValue.get();
+                    fieldValue.setValue(fieldValueDto.getValue());
+                    contractFieldValueRepository.save(fieldValue);
+                    log.debug("필드값 업데이트 완료: fieldId={}", fieldValueDto.getFieldId());
+                } else {
+                    log.debug("새 필드값 생성: fieldId={}, value={}",
+                            fieldValueDto.getFieldId(), fieldValueDto.getValue());
+
+                    ContractFieldValue fieldValue = ContractFieldValue.create(contract, field, fieldValueDto.getValue());
+                    contractFieldValueRepository.save(fieldValue);
+                    log.debug("새 필드값 저장 완료: fieldId={}", fieldValueDto.getFieldId());
+                }
+            } catch (Exception e) {
+                log.error("필드값 저장 중 오류 발생: fieldId={}, value={}, error={}",
+                        fieldValueDto.getFieldId(), fieldValueDto.getValue(), e.getMessage(), e);
+                throw e;
             }
         }
     }
@@ -232,25 +249,36 @@ public class ContractFieldValueService {
                     String dateValue = value.trim();
                     DateTimeFormatter formatter;
 
+                    log.debug("날짜 필드 검증: fieldId={}, value={}", field.getId(), dateValue);
+
                     if (dateValue.contains("-")) {
                         formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        log.debug("yyyy-MM-dd 형식으로 파싱 시도");
                     } else if (dateValue.contains(".")) {
                         formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+                        log.debug("yyyy.MM.dd 형식으로 파싱 시도");
                     } else {
+                        log.error("지원되지 않는 날짜 형식: {}", dateValue);
                         throw new CustomException(ErrorCode.INVALID_FIELD_VALUE);
                     }
 
-                    LocalDate.parse(dateValue, formatter);
+                    try {
+                        LocalDate parsedDate = LocalDate.parse(dateValue, formatter);
+                        log.debug("날짜 파싱 성공: {}", parsedDate);
+                    } catch (DateTimeParseException e) {
+                        log.error("날짜 파싱 실패: {}, 오류: {}", dateValue, e.getMessage());
+                        throw new CustomException(ErrorCode.INVALID_FIELD_VALUE);
+                    }
                 } catch (DateTimeParseException e) {
+                    log.error("날짜 형식 검증 실패: fieldId={}, value={}, 오류={}",
+                            field.getId(), value, e.getMessage());
                     throw new CustomException(ErrorCode.INVALID_FIELD_VALUE);
                 }
                 break;
 
             case CHECKBOX:
-                // CHECKBOX는 0, 1 값만 허용
-                if (!value.equals("0") && !value.equals("1")) {
-                    throw new CustomException(ErrorCode.INVALID_FIELD_VALUE);
-                }
+                log.debug("체크박스 필드 값 입력: fieldId={}, fieldKey={}, value={}",
+                        field.getId(), field.getFieldKey(), value);
                 break;
 
             case RADIO:

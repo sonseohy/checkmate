@@ -45,29 +45,29 @@ public class FileConversionService {
     /**
      * LibreOffice 설치 및 실행 가능 여부 확인
      */
-    @PostConstruct
-    public void validateLibreOffice() {
-        try {
-            ProcessBuilder pb = new ProcessBuilder(libreOfficePath, "--version");
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-
-            if (!process.waitFor(5, TimeUnit.SECONDS) || process.exitValue() != 0) {
-                throw new RuntimeException("LibreOffice가 설치되지 않았거나 실행할 수 없습니다");
-            }
-
-            // 버전 정보 로그
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()))) {
-                String version = reader.lines().collect(Collectors.joining(" "));
-                log.info("LibreOffice 확인 완료: {}", version);
-            }
-
-        } catch (Exception e) {
-            log.error("LibreOffice 설치 확인 실패", e);
-            throw new RuntimeException("LibreOffice 설치 확인 실패", e);
-        }
-    }
+//    @PostConstruct
+//    public void validateLibreOffice() {
+//        try {
+//            ProcessBuilder pb = new ProcessBuilder(libreOfficePath, "--version");
+//            pb.redirectErrorStream(true);
+//            Process process = pb.start();
+//
+//            if (!process.waitFor(5, TimeUnit.SECONDS) || process.exitValue() != 0) {
+//                throw new RuntimeException("LibreOffice가 설치되지 않았거나 실행할 수 없습니다");
+//            }
+//
+//            // 버전 정보 로그
+//            try (BufferedReader reader = new BufferedReader(
+//                    new InputStreamReader(process.getInputStream()))) {
+//                String version = reader.lines().collect(Collectors.joining(" "));
+//                log.info("LibreOffice 확인 완료: {}", version);
+//            }
+//
+//        } catch (Exception e) {
+//            log.error("LibreOffice 설치 확인 실패", e);
+//            throw new RuntimeException("LibreOffice 설치 확인 실패", e);
+//        }
+//    }
 
     /**
      * HWP 파일을 PDF로 변환

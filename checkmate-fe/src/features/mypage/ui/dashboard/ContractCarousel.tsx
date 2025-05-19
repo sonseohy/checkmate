@@ -14,12 +14,15 @@ interface ContractCarouselProps {
 const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => {
   const navigate = useNavigate();
   const isMobile = useMobile();
+  console.log(contractList)
 
   //계약서 상세조회 api 호출 및 페이지 이동
   const handleContractDetail = async(contractId:number, contract:Contract ) => {
-    if (contract.edit_status === 'COMPLETED') {
-       navigate(`/detail/${contractId}`,{ state: contract });
-    } else {
+    if (contract.edit_status === 'COMPLETED' &&  contract.source_type === 'SERVICE_GENERATED') {
+      navigate(`/detail/${contractId}`,{ state: contract });
+    } else if (contract.edit_status === 'COMPLETED' &&  contract.source_type === 'USER_UPLOAD'){
+      navigate(`/analyze/result/${contractId}`,{ state: contract });
+    } else if (contract.edit_status === 'EDITING' &&  contract.source_type === 'SERVICE_GENERATED'){
       navigate(`/write/edit/${contractId}`,{ state: contract });
     }
   };
@@ -55,7 +58,13 @@ const ContractCarousel: React.FC<ContractCarouselProps> = ({ contractList }) => 
                 <span className={`ml-3 text-md font-medium ${contract.edit_status === 'COMPLETED' 
                   ? 'text-[#202020]' 
                   : 'text-[#999999]'}`}>
-                  {contract.edit_status === 'COMPLETED' ? '작성 완료': '작성중'}
+                    {contract.source_type === 'USER_UPLOAD'
+                    ? contract.edit_status === 'COMPLETED'
+                    ? '분석 완료'
+                    : '분석중'
+                    : contract.edit_status === 'COMPLETED'
+                    ? '작성 완료'
+                    : '작성중'}
                 </span>
               </div>
               <h3 className="mt-3 text-lg font-semibold">{contract.title}</h3>

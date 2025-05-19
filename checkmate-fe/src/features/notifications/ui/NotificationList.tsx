@@ -5,104 +5,139 @@ import { useNavigate } from 'react-router-dom';
 import { Notification } from '@/features/notifications';
 import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 
-type Tab = 'ALL' | 'SIGNATURE_COMPLETED' | 'CONTRACT_ANALYSIS';
+/* ────────────────────────── 타입 · 상수 ────────────────────────── */
+export type Variant = 'popup' | 'page';
 
-interface Props {
-  notifications: Notification[];
-}
+type Tab =
+  | 'ALL'
+  | 'SIGNATURE_COMPLETED'
+  | 'CONTRACT_ANALYSIS'
+  | 'QUESTION_GENERATION';
 
 const TABS: { type: Tab; label: string }[] = [
   { type: 'ALL', label: '전체' },
   { type: 'SIGNATURE_COMPLETED', label: '전자서명' },
   { type: 'CONTRACT_ANALYSIS', label: '분석결과' },
+  { type: 'QUESTION_GENERATION', label: '질문리스트' },
 ];
 
-const NotificationList: React.FC<Props> = ({ notifications }) => {
+interface Props {
+  notifications: Notification[];
+  variant?: Variant; // ▸ 기본값 'popup'
+}
+
+/* ────────────────────────── 컴포넌트 ────────────────────────── */
+const NotificationList: React.FC<Props> = ({
+  notifications,
+  variant = 'popup',
+}) => {
   const navigate = useNavigate();
+  const { markAsRead, markAllAsRead } = useNotifications(); // 공통 훅
   const [selected, setSelected] = useState<Tab>('ALL');
 
-  /* 개별 읽음 변이 */
-  const { markAsRead } = useNotifications();
-
+  /* ▼ 필터링 */
   const list =
     selected === 'ALL'
       ? notifications
       : notifications.filter((n) => n.type === selected);
 
+  /* ▼ 날짜 포맷 */
   const fmtDate = (iso: string) => {
     const d = new Date(iso);
-    const now = new Date();
-    return isBefore(subDays(now, 1), d)
+    return isBefore(subDays(new Date(), 1), d)
       ? `${formatDistanceToNowStrict(d, { locale: ko })} 전`
       : format(d, 'yyyy.MM.dd');
   };
 
+  /* ▼ 클릭 내비게이션 */
   const handleClick = (n: Notification) => {
-    if (!n.read) markAsRead(n.id); // 개별 읽음 처리
+    if (!n.read) markAsRead(n.id);
 
     if (n.type === 'CONTRACT_ANALYSIS')
       navigate(`/analyze/result/${n.contract_id}`);
-    else if (n.type === 'SIGNATURE_COMPLETED')
+    else if (
+      n.type === 'SIGNATURE_COMPLETED' ||
+      n.type === 'QUESTION_GENERATION'
+    )
       navigate(`/detail/${n.contract_id}`);
   };
 
+  /* ▼ variant 에 따른 스타일 */
+  const isPopup = variant === 'popup';
+  const outerCls = isPopup
+    ? `w-[90vw] max-w-xs md:w-[400px] bg-white rounded-lg shadow-lg p-4
+       max-h-[75vh] overflow-y-auto`
+    : `w-full bg-white rounded-lg p-6`;
+
+  const listMaxH = isPopup ? 'max-h-64' : 'max-h-[70vh]';
+
   return (
-    <div
-      className="w-[90vw] max-w-xs md:w-[400px] bg-white rounded-lg shadow-lg p-4
-            max-h-[75vh] overflow-y-auto"
-    >
-      {/* 탭 */}
-      <div className="flex space-x-4 border-b border-gray-200 pb-2 mb-3">
+    <div className={outerCls}>
+      {/* ── 탭 ─────────────────────────────────── */}
+      <div className="flex space-x-4 border-b border-gray-200 pb-2 mb-4">
         {TABS.map((t) => (
           <button
             key={t.type}
+            onClick={() => setSelected(t.type)}
             className={`text-sm font-semibold ${
               selected === t.type
                 ? 'text-black border-b-2 border-blue-500'
                 : 'text-gray-400'
             }`}
-            onClick={() => setSelected(t.type)}
           >
             {t.label}
           </button>
         ))}
       </div>
 
-      {/* 리스트 */}
-      <div className="space-y-3 max-h-64 overflow-y-auto">
+      {/* ── 알림 목록 ─────────────────────────── */}
+      <div
+        className={`${listMaxH} overflow-y-auto divide-y divide-gray-200 space-y-0`}
+      >
         {list.map((n) => (
           <div
             key={n.id}
             onClick={() => handleClick(n)}
-            className={`block cursor-pointer p-2 rounded hover:bg-gray-50 ${
-              n.read ? 'opacity-70' : ''
+            className={`p-3 cursor-pointer rounded ${
+              n.read
+                ? 'opacity-70 hover:bg-gray-50'
+                : 'bg-sky-50 hover:bg-sky-100'
             }`}
           >
-            <div className="text-sm text-gray-800 line-clamp-2">
-              {n.message}
-            </div>
-            <div className="text-xs text-gray-400 mt-1">
+            <p className="text-sm text-gray-800 line-clamp-2">{n.message}</p>
+            <p className="text-xs text-gray-400 mt-1">
               {fmtDate(n.created_at)}
-            </div>
+            </p>
           </div>
         ))}
 
         {list.length === 0 && (
-          <div className="text-sm text-gray-400 text-center py-4">
+          <p className="py-6 text-center text-sm text-gray-400">
             알림이 없습니다
-          </div>
+          </p>
         )}
       </div>
 
-      {/* 전체보기 */}
-      <div className="mt-4 text-right">
-        <a
-          href="/mypage?tab=notifications"
-          className="text-sm text-blue-600 font-semibold"
-        >
-          알림 전체 보기
-        </a>
-      </div>
+      {/* ── 하단 액션 (variant 별) ───────────────── */}
+      {isPopup ? (
+        <div className="mt-4 text-right">
+          <a
+            href="/mypage?tab=notifications"
+            className="text-sm text-blue-600 font-semibold"
+          >
+            알림 전체 보기
+          </a>
+        </div>
+      ) : (
+        <div className="mt-6 text-right">
+          <button
+            onClick={() => markAllAsRead()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm"
+          >
+            모두 읽음
+          </button>
+        </div>
+      )}
     </div>
   );
 };

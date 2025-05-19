@@ -15,8 +15,10 @@ export const getContractDetail = async (contractId: number): Promise<Blob> => {
 };
 
 // 계약서 다운로드
-export const getContractownload = async (contractId: number, fileName: string ) => {
-
+export const getContractownload = async (
+  contractId: number,
+  fileName: string,
+) => {
   try {
     const response = await customAxios.get(
       `/api/files/${contractId}/download`,
@@ -28,7 +30,7 @@ export const getContractownload = async (contractId: number, fileName: string ) 
 
     const link = document.createElement('a');
     link.href = downloadUrl;
-     link.setAttribute('download', fileName);
+    link.setAttribute('download', fileName);
     document.body.appendChild(link);
     link.click();
   } catch (error) {
@@ -51,17 +53,31 @@ export const getContractQuestions = async (
   contractId: number,
 ): Promise<questionList> => {
   try {
-    const response = await customAxios.get(`/api/questions/${contractId}`);
-    const data: questions[] = response.data.data;
-    // questionDetail에서 따옴표를 제거한 후 반환
-    const cleanedQuestions = data.map((question) => ({
-      ...question,
-      questionDetail: question.questionDetail.replace(/"/g, ''), // 따옴표 제거
+    const { data: res } = await customAxios.get(`/api/questions/${contractId}`);
+
+    /** ①  서버가 내려줄 수 있는 모든 위치를 차례대로 검사 */
+    const arr: any =
+      /* case-A ▸ { data: { questions: [...] } } ← ❗ 새 구조 */
+      Array.isArray(res?.data?.questions)
+        ? res.data.questions
+        : /* case-B ▸ { data: [...] } */
+        Array.isArray(res?.data)
+        ? res.data
+        : /* case-C ▸ { questions: [...] } | { question: [...] } */
+          res?.questions ??
+          res?.question ??
+          /* case-D ▸ 바로 배열 */
+          (Array.isArray(res) ? res : []);
+
+    /** ②  타입 맞춰서 전처리 */
+    const cleaned = (arr as questions[]).map((q) => ({
+      ...q,
+      questionDetail: q.questionDetail?.replace(/^"|"$/g, ''), // 따옴표 제거
     }));
 
-    return { question: cleanedQuestions }; // 수정된 데이터를 반환
-  } catch (error) {
-    console.error('질문 리스트 불러오기 실패:', error);
-    return { question: [] }; // 실패 시 기본값 반환
+    return { question: cleaned };
+  } catch (e) {
+    console.error('질문 리스트 불러오기 실패:', e);
+    return { question: [] };
   }
 };

@@ -14,3 +14,6 @@ export { NotificationService } from './services/notificationService';
 
 // UI 컴포넌트
 export { default as NotificationButton } from './ui/NotificationButton';
+export { default as NotificationList } from './ui/NotificationList';
+
+export * from './hooks/useNotifications';

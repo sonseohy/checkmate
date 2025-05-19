@@ -17,14 +17,17 @@ export const levelLottie = {
 
 const map = { LOW: 1, MEDIUM: 2, HIGH: 3 } as const;
 
-export const getOverallLevel = (r: AnalysisResult) =>
-  Math.max(
-    r.missingClauses.reduce(
-      (m, v) => Math.max(m, map[v.importance as keyof typeof map]),
-      1,
-    ),
-    r.riskClauses.reduce(
-      (m, v) => Math.max(m, map[v.riskLevel as keyof typeof map]),
-      1,
-    ),
-  ) as 1 | 2 | 3;
+export const getOverallLevel = (r: AnalysisResult) => {
+  const scores = [
+    /* 누락 조항 importance → 1 · 2 · 3 */
+    ...r.missingClauses.map((c) => map[c.importance as keyof typeof map]),
+    /* 위험 조항 riskLevel → 1 · 2 · 3 */
+    ...r.riskClauses.map((c) => map[c.riskLevel as keyof typeof map]),
+  ];
+
+  /* 조항이 전혀 없으면 기본값 1(안심) */
+  if (scores.length === 0) return 1 as 1 | 2 | 3;
+
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length; // 평균
+  return Math.round(avg) as 1 | 2 | 3; // 1.4→1, 1.5→2 …
+};

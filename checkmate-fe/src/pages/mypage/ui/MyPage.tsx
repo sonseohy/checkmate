@@ -33,7 +33,9 @@ export default function MyPage() {
       displayComponent = <MyContracts />;
       break;
     case '알림':
-      displayComponent = <NotificationList notifications={notifications} />;
+      displayComponent = (
+        <NotificationList variant="page" notifications={notifications} />
+      );
       break;
     case '주변 법원':
       displayComponent = <CourtLocator />;

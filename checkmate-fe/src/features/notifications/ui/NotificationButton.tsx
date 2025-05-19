@@ -57,7 +57,7 @@ const NotificationButton: React.FC<Props> = ({ open, onClick }) => {
               z-50 mt-2
             "
         >
-          <NotificationList notifications={notifications} />
+          <NotificationList variant="popup" notifications={notifications} />
         </div>
       )}
     </div>

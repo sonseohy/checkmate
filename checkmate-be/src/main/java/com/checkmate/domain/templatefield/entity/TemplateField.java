@@ -2,7 +2,6 @@ package com.checkmate.domain.templatefield.entity;
 
 import com.checkmate.domain.section.entity.Section;
 import com.checkmate.domain.templatefieldcategory.entity.TemplateFieldCategory;
-import com.checkmate.domain.contractcategory.entity.ContractCategory;
 import jakarta.persistence.*;
 import lombok.*;
 

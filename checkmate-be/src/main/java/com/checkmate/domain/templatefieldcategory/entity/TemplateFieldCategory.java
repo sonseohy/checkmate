@@ -44,9 +44,4 @@ public class TemplateFieldCategory {
         this.isRequired = isRequired;
         this.labelOverride = labelOverride;
     }
-
-    // MongoDB ID 설정 메서드
-    public void setMongoClauseId(String mongoClauseId) {
-        this.mongoClauseId = mongoClauseId;
-    }
 }

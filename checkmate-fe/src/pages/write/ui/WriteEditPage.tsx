@@ -6,15 +6,18 @@ import { LuTag } from 'react-icons/lu';
 import Swal from 'sweetalert2';
 import { ResidentIdInput, PhoneNumberInput, MoneyInput, DayInput, AreaInput, AddressInput, DateFieldInput, } from '@/shared';
 
+// multi-checkbox helper
+const isMultiCheckboxField = (field: TemplateField) =>
+  field.inputType === 'CHECKBOX' && parseOptions(field.options).length > 0;
+
 const WriteEditPage: React.FC = () => {
   const { contractId } = useParams();
   const numericContractId = Number(contractId);
   const navigate = useNavigate();
 
-  const [templateData, setTemplateData] = useState<any>(null);
+  const [templateData, setTemplateData] = useState<{ contract: any; template: any; sections: TemplateSection[] } | null>(null);
   const [dependsOnStates, setDependsOnStates] = useState<Record<string, any>>({});
   const [tooltipField, setTooltipField] = useState<number | null>(null);
-
   const resetMutation = useResetContractInputs();
 
   useEffect(() => {
@@ -28,118 +31,90 @@ const WriteEditPage: React.FC = () => {
     fetchData();
   }, [numericContractId]);
 
+  const saveMultiCheckbox = async (
+    field: TemplateField,
+    sectionId: number,
+    selected: string[]
+  ) => {
+    if (!contractId) return;
+    // 선택된 옵션마다 fieldValues 항목을 하나씩 생성
+    const fieldValues = selected.map((opt) => ({
+      fieldId: field.id,
+      value: opt,
+    }));
+    try {
+      await saveContractInputs({
+        contractId: numericContractId,
+        inputs: [{ sectionId, fieldValues }],
+      });
+    } catch (e: any) {
+      console.error('멀티체크박스 저장 실패:', e.response?.data || e);
+    }
+  };
+
   /* blur 자동 저장 */
   const handleFieldBlur = async (
-  fieldId: number,
-  sectionId: number,
-  value: string | number
-) => {
-  if (!contractId || !templateData) return;
-
-  const allFields: TemplateField[] = templateData.sections.flatMap(
-    (s: TemplateSection) => s.fields
-  );
-  const matchedField = allFields.find((f) => f.id === fieldId);
-  const fieldKey = matchedField?.fieldKey;
-
-  if (!fieldKey) {
-    console.warn('fieldKey를 찾을 수 없음 (fieldId:', fieldId, ')');
-    return;
-  }
-
-  // 숫자 입력 필드일 경우, 숫자만 추출해서 문자열로 변환
-  const normalizedValue =
-    matchedField?.inputType === 'NUMBER'
-      ? String(value).replace(/[^0-9]/g, '') || '0'
-      : String(value ?? '');
-
-  setDependsOnStates((prev) => ({
-    ...prev,
-    [fieldKey]: normalizedValue,
-  }));
-
-  // 로그 추가: 서버에 보낼 실제 데이터 확인
-  console.log('자동 저장 요청 payload', {
-    contractId,
-    inputs: [
-      {
-        sectionId,
-        fieldValues: [
+    fieldId: number,
+    sectionId: number,
+    value: string,
+  ) => {
+    if (!contractId || !templateData) return;
+    const allFields: TemplateField[] = templateData.sections.flatMap((s) => s.fields);
+    const matchedField = allFields.find((f) => f.id === fieldId);
+    const fieldKey = matchedField?.fieldKey;
+    if (!fieldKey) return;
+    const normalizedValue: string =
+      matchedField?.inputType === 'NUMBER' ? value.replace(/[^0-9]/g, '') : value;
+    setDependsOnStates((prev) => ({ ...prev, [fieldKey]: normalizedValue }));
+    try {
+      await saveContractInputs({
+        contractId: numericContractId,
+        inputs: [
           {
-            fieldId,
-            value: normalizedValue,
+            sectionId,
+            fieldValues: [
+              { fieldId, value: normalizedValue },
+            ],
           },
         ],
-      },
-    ],
-  });
-
-  try {
-    await saveContractInputs({
-      contractId: numericContractId,
-      inputs: [
-        {
-          sectionId,
-          fieldValues: [
-            {
-              fieldId,
-              value: normalizedValue,
-            },
-          ],
-        },
-      ],
-    });
-  } catch (err: any) {
-    console.error('자동 저장 실패:', err.response?.data || err);
-  }
-};
+      });
+    } catch (err: any) {
+      console.error('자동 저장 실패:', err.response?.data || err);
+    }
+  };
 
   const shouldShowField = (field: TemplateField) => {
     if (!field.dependsOn) return true;
-
-    // checkbox의 다중 선택에 대응하기 위한 로직
-    const [key, expected] = field.dependsOn.includes('!=')
-      ? field.dependsOn.split('!=')
-      : field.dependsOn.split('=');
-
-    const fieldValue = dependsOnStates[key];
-
-    // JSON 배열이면 checkbox 멀티 선택값으로 가정
-    if (fieldValue?.startsWith?.('[')) {
-      try {
-        const values = JSON.parse(fieldValue);
-        return Array.isArray(values)
-          ? field.dependsOn.includes('!=')
-            ? !values.includes(expected)
-            : values.includes(expected)
-          : false;
-      } catch {
-        return false;
+      const [key, expected] = field.dependsOn.includes('!=')
+        ? field.dependsOn.split('!=')
+        : field.dependsOn.split('=');
+      const fieldValue = dependsOnStates[key];
+      if (typeof fieldValue === 'string' && fieldValue.startsWith('[')) {
+        try {
+          const arr: string[] = JSON.parse(fieldValue);
+          return field.dependsOn.includes('!=')
+            ? !arr.includes(expected)
+            : arr.includes(expected);
+        } catch {
+          return false;
+        }
       }
-    }
-
-    // 일반 문자열 비교 (RADIO 등)
-    return field.dependsOn.includes('!=')
-      ? fieldValue !== expected
-      : fieldValue === expected;
-  };
+      return field.dependsOn.includes('!=')
+        ? fieldValue !== expected
+        : fieldValue === expected;
+    };
 
   const renderInputField = (field: TemplateField, sectionId: number) => {
     const fieldKey = field.fieldKey;
     const value = dependsOnStates[fieldKey] ?? '';
-
-    // 키워드 포함 여부 헬퍼
-    const includesAny = (label: string, keywords: string[]) =>
-      keywords.some((k) => label.includes(k));
-
-    // 최대 입력 길이 설정 (label 기준)
-    const getMaxLength = (label: string): number => {
+    const includesAny = (label: string, keywords: string[]) => keywords.some(k => label.includes(k));
+    const getMaxLength = (label: string) => {
       if (includesAny(label, ['전화번호', '연락처'])) return 13;
       if (includesAny(label, ['주민등록번호'])) return 13;
       if (includesAny(label, ['이름', '성명'])) return 50;
       if (includesAny(label, ['주소'])) return 100;
       return 100;
-    };  
+    };
 
     const isResidentIdLabel = includesAny(field.label, ['주민등록번호']);
     const isPhoneLabel = includesAny(field.label, ['전화번호', '연락처']);
@@ -156,7 +131,6 @@ const WriteEditPage: React.FC = () => {
       onBlur: (e: React.FocusEvent<HTMLInputElement>) =>
         handleFieldBlur(field.id, sectionId, e.target.value),
     };
-
     // 특수 필드 분기 처리
     if (isResidentIdLabel) {
       return (
@@ -205,8 +179,7 @@ const WriteEditPage: React.FC = () => {
         />
       );
     }
-
-    if (['monthly_rent', 'deposit', 'earnest_money', 'balance', 'total_amount_paid', 'meal_amount', 'bonus_amount', 'transportation_fee_amount', 'other_allowances_1', 'other_allowances_2', 'incentive_amount', 'continuous_incentive_amount', 'provisional_deposit'].includes(fieldKey)) {
+    if (['monthly_rent', 'deposit', 'earnest_money', 'balance', 'total_amount_paid', 'basic_amount', 'meal_amount', 'bonus_amount', 'transportation_fee_amount', 'other_allowances_1', 'other_allowances_2', 'incentive_amount', 'continuous_incentive_amount', 'provisional_deposit', 'maintenance_cost_total', 'maintenance_common_fee', 'maintenance_electric_fee', 'maintenance_water_fee', 'maintenance_gas_fee', 'maintenance_heating_fee', 'maintenance_internet_fee', 'maintenance_tv_fee', 'maintenance_other_fee'].includes(fieldKey)) {
       return (
         <MoneyInput
           value={value}
@@ -217,7 +190,6 @@ const WriteEditPage: React.FC = () => {
         />
       );
     }
-
     switch (field.inputType) {
       case 'TEXT': {
         return (
@@ -248,15 +220,41 @@ const WriteEditPage: React.FC = () => {
           />
         );
       }
-      case 'DATE':
+      case 'DATE': {
+        if (!templateData) return null;
+        const fieldKey = field.fieldKey;
+        const value = dependsOnStates[fieldKey] ?? '';
+        // 이 섹션의 필드 리스트
+        const section = templateData.sections.find(s => s.fields.some(f => f.fieldKey === fieldKey))!;
+        // 라벨 키워드
+        const isEnd = field.label.includes('종료');    // '종료일', '계약 종료일' 등
+        const isStart = field.label.includes('시작');  // '시작일', '계약 시작일' 등
+
+        // 매칭되는 상대 필드 찾기
+        let minDate: Date | undefined;
+        let maxDate: Date | undefined;
+
+        if (isEnd) {
+          const startField = section.fields.find(f => f.label.includes('시작'));
+          const startVal = startField && dependsOnStates[startField.fieldKey];
+          if (startVal) minDate = new Date(startVal);
+        }
+        if (isStart) {
+          const endField = section.fields.find(f => f.label.includes('종료'));
+          const endVal = endField && dependsOnStates[endField.fieldKey];
+          if (endVal) maxDate = new Date(endVal);
+        }
+
         return (
           <DateFieldInput
             value={value}
-            onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
-            onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+            onChange={(v) => setDependsOnStates(p => ({ ...p, [fieldKey]: v }))}
+            onBlur={() => handleFieldBlur(field.id, section.id, value)}
+            minDate={minDate}
+            maxDate={maxDate}
           />
         );
-
+      }
       case 'RADIO': {
         const opts = parseOptions(field.options);
         return (
@@ -280,28 +278,44 @@ const WriteEditPage: React.FC = () => {
           </div>
         );
       }
-
       case 'CHECKBOX': {
         const opts = parseOptions(field.options);
-
         if (opts.length) {
-          const selected: string[] = value ? JSON.parse(value) : [];
+          const raw = dependsOnStates[fieldKey] ?? '';
+          let selected: string[];
+          try {
+            if (typeof raw === 'string' && raw.trim().startsWith('[')) {
+              selected = JSON.parse(raw);
+            } else if (Array.isArray(raw)) {
+              selected = raw;
+            } else if (typeof raw === 'string' && raw !== '') {
+              selected = [raw];
+            } else {
+              selected = [];
+            }
+          } catch {
+            selected = [];
+          }
 
           const toggle = (item: string) => {
             const next = selected.includes(item)
-              ? selected.filter((v) => v !== item)
+              ? selected.filter(v => v !== item)
               : [...selected, item];
-
-            setDependsOnStates((p) => ({
-              ...p,
-              [fieldKey]: JSON.stringify(next),
-            }));
-            handleFieldBlur(field.id, sectionId, JSON.stringify(next));
+            setDependsOnStates(p => ({ ...p, [fieldKey]: JSON.stringify(next) }));
+            saveMultiCheckbox(field, sectionId, next);
           };
+
+          // dependentFields 정의
+          const dependentFields = (opt: string) =>
+            templateData
+              ? templateData.sections
+                  .flatMap(sec => sec.fields)
+                  .filter((f: TemplateField) => f.dependsOn === `${fieldKey}=${opt}`)
+              : [];
 
           return (
             <div className="space-y-2">
-              {opts.map((opt) => (
+              {opts.map(opt => (
                 <div key={opt} className="space-y-2">
                   <label className="flex items-center gap-2">
                     <input
@@ -311,12 +325,29 @@ const WriteEditPage: React.FC = () => {
                     />
                     {opt}
                   </label>
+
+                  {selected.includes(opt) && (
+                    <div className="pl-4 space-y-2">
+                      {dependentFields(opt).map((depField: TemplateField) => (
+                        <div key={depField.id}>
+                          {depField.label && (
+                            <label
+                              htmlFor={depField.fieldKey}
+                              className="block font-medium"
+                            >
+                              {depField.label}
+                            </label>
+                          )}
+                          {renderInputField(depField, sectionId)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           );
         }
-
         return (
           <input
             type="checkbox"
@@ -330,89 +361,101 @@ const WriteEditPage: React.FC = () => {
           />
         );
       }
-
       default:
         return <input type="text" {...commonProps} />;
     }
   };
-
   /* 입력값 초기화 */
   const handleReset = async () => {
     if (!numericContractId) return;
-    const ok = await Swal.fire({
-      icon: 'question',
-      title: '모든 입력값을 초기화할까요?',
-      text: '저장된 값이 모두 삭제됩니다.',
-      showCancelButton: true,
-      confirmButtonText: '초기화',
-      cancelButtonText: '취소',
-    }).then((r) => r.isConfirmed);
-
+    const ok = await Swal.fire({ icon:'question', title:'모든 입력값을 초기화할까요?', showCancelButton:true }).then(r => r.isConfirmed);
     if (!ok) return;
-
     try {
       const res = await resetMutation.mutateAsync(numericContractId);
       setDependsOnStates({});
       Swal.fire('완료', res.message, 'success');
     } catch {
-      Swal.fire('실패', '초기화에 실패했습니다. 다시 시도해 주세요.', 'error');
+      Swal.fire('실패', '초기화에 실패했습니다.', 'error');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!numericContractId || !templateData) return;
 
-    /* 2. 필수 누락 체크 보강 ★ */
+  // 1) 필수 항목 누락 체크 (기존 로직)
     const missing: string[] = [];
-
-    templateData?.sections.forEach((sec: TemplateSection) =>
-      sec.fields.forEach((f: TemplateField) => {
+    templateData.sections.forEach((sec) =>
+      sec.fields.forEach((f) => {
         if (!f.required || !shouldShowField(f)) return;
-
         const v = dependsOnStates[f.fieldKey];
         const isEmpty =
           v === undefined ||
           v === '' ||
           (f.inputType === 'CHECKBOX' &&
             parseOptions(f.options).length > 0 &&
-            JSON.parse(v ?? '[]').length === 0);
-
+            JSON.parse(v).length === 0);
         if (isEmpty) missing.push(f.label);
-      }),
+      })
     );
-
     if (missing.length) {
       Swal.fire({
         icon: 'warning',
         title: '필수 항목 누락',
-        html:
-          '<ul style="text-align:left;padding-left:1em;">' +
-          missing.map((m) => `<li>• ${m}</li>`).join('') +
-          '</ul>',
+        html: `<ul style="text-align:left;padding-left:1em;">${missing
+          .map((m) => `<li>• ${m}</li>`)
+          .join('')}</ul>`,
       });
       return;
     }
-
-    const inputPayload: ContractInputSection[] = templateData.sections.map((section: TemplateSection) => ({
-      sectionId: section.id,
-      fieldValues: section.fields
-        .filter((field) => field.fieldKey in dependsOnStates)
-        .map((field) => ({ fieldId: field.id, value: String(dependsOnStates[field.fieldKey] ?? '') })),
+  
+    // 2) payload 생성
+    const payload: ContractInputSection[] = templateData.sections.map((sec) => ({
+      sectionId: sec.id,
+      fieldValues: sec.fields
+        // 멀티 체크박스(f.inputType==='CHECKBOX' && opts.length>0) 제외
+        .filter((f) =>
+          !(
+            f.inputType === 'CHECKBOX' &&
+            parseOptions(f.options).length > 0
+          )
+        )
+        // undefined/'' 값 제외
+        .filter((f) => {
+          const v = dependsOnStates[f.fieldKey];
+          return v !== undefined && v !== '';
+        })
+        .map((f) => ({
+          fieldId: f.id,
+          value: String(dependsOnStates[f.fieldKey]),
+        })),
     }));
-
+  
+    console.log('Submit payload (no multi):', payload);
+  
+    // 3) 저장 요청
     try {
-      const response = await saveContractInputs({ contractId: numericContractId, inputs: inputPayload });
-      navigate(`/contract/${numericContractId}/preview`, {
-        state: { contractId: numericContractId, templateName: templateData?.template.name, legalClausesBySection: response },
+      const res = await saveContractInputs({ contractId: numericContractId, inputs: payload });
+      navigate(`/contract/${contractId}/preview`, {
+        state: { contractId, templateName: templateData.template.name, legalClausesBySection: res },
       });
-    } catch (err) {
-      Swal.fire({ icon: 'error', title: '저장 실패', text: '계약서를 저장하는 중 오류가 발생했습니다. 다시 시도해주세요.' });
+    } catch (err: any) {
+      console.error('Status:', err.response?.status);
+      console.error('Body:', err.response?.data);
+      Swal.fire({
+        icon: 'error',
+        title: '저장 실패',
+        text: `${err.response?.data?.error?.code}: ${err.response?.data?.error?.message}`,
+      });
     }
   };
-
-  if (!templateData) {
-    return <div className="flex items-center justify-center min-h-[300px] text-gray-600">계약서를 불러오는 중입니다...</div>;
-  }
+  
+  if (!templateData)
+    return (
+      <div className="flex items-center justify-center min-h-[300px] text-gray-600">
+        템플릿을 불러오는 중입니다…
+      </div>
+    );
 
   return (
     <div className="container py-12 mx-auto">
@@ -427,14 +470,17 @@ const WriteEditPage: React.FC = () => {
         isResetting={resetMutation.isPending}
         submitTargetId="writeForm"
       />
-      
       {/* 툴바와 첫 섹션 간의 간격 */}
       <div className="h-7" />
 
       <form id="writeForm" className="space-y-10 max-w-3xl mx-auto px-4 sm:px-6" onSubmit={handleSubmit}>
-        {templateData.sections.map((section: TemplateSection) => (
-          <section key={section.id} className="p-5 bg-[#F6F6F6] rounded-2xl relative">
-            <div className="flex items-center gap-2 mb-4 relative">
+        {templateData.sections.map((section) => (
+          <section
+            key={section.id}
+            className="p-5 bg-[#F6F6F6] rounded-2xl border border-gray-300"
+          >
+            {/* 섹션 헤더 */}
+            <div className="flex items-center gap-2 mb-4">
               <h2 className="text-2xl font-bold">{section.name}</h2>
               {section.description && (
                 <div className="relative">
@@ -449,47 +495,131 @@ const WriteEditPage: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="grid gap-4">
-              {section.fields.filter(shouldShowField).map((field) => {
-                const isCheckbox = field.inputType === 'CHECKBOX';
-                const options = parseOptions(field.options);
-                const isMultiCheckbox = isCheckbox && options.length > 0;
 
-                return (
-                  <div
-                    key={field.fieldKey}
-                    className={
-                      isCheckbox
-                        ? isMultiCheckbox
-                          ? 'space-y-1' // 여러 옵션: 위아래 구조
-                          : 'flex items-center' // 단일 옵션: 옆으로
-                        : 'space-y-1' // TEXT, NUMBER 등은 기존대로
+            {/* 필드 목록 */}
+            <div className="grid gap-4">
+              {section.fields
+                .filter((f) => {
+                  // 1) 표시 조건
+                  if (!shouldShowField(f)) return false;
+                  // 2) multi-checkbox 부모에 종속된 필드는 하단에서 제외
+                  if (f.dependsOn) {
+                    const [parentKey] = f.dependsOn.split(/!=|=/);
+                    const pf = section.fields.find((x) => x.fieldKey === parentKey);
+                    if (pf && isMultiCheckboxField(pf)) {
+                      return false;
                     }
-                  >
-                    {/* ====== CHECKBOX ====== */}
-                    {isCheckbox ? (
-                      isMultiCheckbox ? (
-                        <>
-                          <label htmlFor={field.fieldKey} className="font-medium block">
+                  }
+                  return true;
+                })
+                .map((field) => {
+                  const opts = parseOptions(field.options);
+                  return (
+                  <div key={field.fieldKey} className={field.inputType==='CHECKBOX'&&opts.length>0?'space-y-2':'space-y-1'}>
+                    {field.inputType === 'CHECKBOX' && (() => {
+                      if (opts.length > 0) {
+                        return (
+                          <>
+                            {/* 그룹 레이블 */}
+                            <label className="font-medium block mb-2" htmlFor={field.fieldKey}>
+                              {field.label}
+                            </label>
+                            {opts.map((opt) => {
+                              const raw = dependsOnStates[field.fieldKey] ?? '';
+                              const inputId = `chk-${field.fieldKey}-${opt}`;
+                              // 안전하게 다중값 파싱
+                              let selected: string[];
+                                try {
+                                  if (Array.isArray(raw)) {
+                                    selected = raw;
+                                  } else if (typeof raw === 'string' && raw.trim().startsWith('[')) {
+                                    selected = JSON.parse(raw);
+                                  } else if (typeof raw === 'string' && raw !== '') {
+                                    selected = [raw];
+                                  } else {
+                                    selected = [];
+                                  }
+                                } catch {
+                                  selected = [];
+                                }
+                              return (
+                                <div key={opt} className="space-y-2">
+                                  <input
+                                    type="checkbox"
+                                    id={inputId}
+                                    className="w-4 h-4"
+                                    checked={selected.includes(opt)}
+                                    onChange={() => {
+                                      const next = selected.includes(opt)
+                                        ? selected.filter(v => v !== opt)
+                                        : [...selected, opt];
+                                      setDependsOnStates(p => ({
+                                        ...p,
+                                        [field.fieldKey]: JSON.stringify(next),
+                                      }));
+                                      saveMultiCheckbox(field, section.id, next);
+                                    }}
+                                  />
+                                  <label
+                                    htmlFor={inputId}
+                                    className="ml-2 cursor-pointer select-none"
+                                  >
+                                    {opt}
+                                  </label>
+
+                                  {selected.includes(opt) && (
+                                    <div className="pl-6 space-y-2">
+                                      {templateData!.sections
+                                        .flatMap(sec => sec.fields)
+                                        .filter(f => f.dependsOn === `${field.fieldKey}=${opt}`)
+                                        .map(dep => (
+                                          <div key={dep.id}>
+                                            {dep.label && (
+                                              <label
+                                                htmlFor={`inp-${dep.fieldKey}`}
+                                                className="block font-medium text-sm"
+                                              >
+                                                {dep.label}
+                                              </label>
+                                            )}
+                                            {renderInputField(dep, section.id)}
+                                          </div>
+                                        ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </>
+                        );
+                      }
+
+                      // 단일 체크박스
+                      const inputId = `chk-${field.fieldKey}`;
+                      const checked = dependsOnStates[field.fieldKey] === '1';
+                      return (
+                        <div key={field.fieldKey} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id={inputId}
+                            className="w-4 h-4"
+                            checked={checked}
+                            onChange={() => {
+                              const v = checked ? '0' : '1';
+                              setDependsOnStates(p => ({ ...p, [field.fieldKey]: v }));
+                              handleFieldBlur(field.id, section.id, v);
+                            }}
+                          />
+                          <label htmlFor={inputId} className="cursor-pointer select-none font-medium">
                             {field.label}
                           </label>
-                          <div>{renderInputField(field, section.id)}</div>
-                        </>
-                      ) : (
-                        <>
-                          {renderInputField(field, section.id)}
-                          <label htmlFor={field.fieldKey} className="font-medium">
-                            {field.label}
-                          </label>
-                        </>
-                      )
-                    ) : (
-                      /* ====== 일반 필드 (TEXT, NUMBER 등) ====== */
-                      <>
-                        <label htmlFor={field.fieldKey} className="font-medium block">
-                          {field.label}
-                        </label>
-                        {renderInputField(field, section.id)}
+                        </div>
+                      );
+                    })()}
+                    {field.inputType!=='CHECKBOX'&&(
+                      <> 
+                        <label htmlFor={field.fieldKey} className="font-medium block">{field.label}</label>
+                        {renderInputField(field,section.id)}
                       </>
                     )}
                   </div>

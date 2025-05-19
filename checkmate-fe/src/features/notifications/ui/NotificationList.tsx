@@ -73,7 +73,9 @@ const NotificationList: React.FC<Props> = ({
   const outerCls = isPopup
     ? `w-[90vw] max-w-xs md:w-[400px] bg-white rounded-lg shadow-lg p-4
        max-h-[75vh] overflow-y-auto`
-    : `w-full bg-white rounded-lg p-6`;
+    : `bg-white rounded-lg p-6          /* 내부 패딩 24px */
+       +      mx-5 md:mx-8 lg:mx-10          /* 양옆 여백 20 / 32 / 40px */
+       +      lg:mt-6 lg:mb-8`;
 
   const listMaxH = isPopup ? 'max-h-64' : 'max-h-[70vh]';
 
@@ -98,7 +100,8 @@ const NotificationList: React.FC<Props> = ({
 
       {/* ── 알림 목록 ─────────────────────────── */}
       <div
-        className={`${listMaxH} overflow-y-auto divide-y divide-gray-200 space-y-0`}
+        className={`${listMaxH} overflow-y-auto no-scrollbar
+                     divide-y divide-gray-200 space-y-0`}
       >
         {list.map((n) => (
           <div

@@ -48,8 +48,8 @@ export default function KoreaMap({
   const location = useSelector((state: RootState) => state.auth.location);
 
   
-  const width = isMobile ? 350 : 1000;
-  const height = isMobile ? 400 : 900;
+  const width = isMobile ? 350 : 760;
+  const height = isMobile ? 400 : 660;
 
   // 드롭다운 옵션
   const options = useMemo(() =>

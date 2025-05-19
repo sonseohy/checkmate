@@ -85,18 +85,18 @@ export default function CourtLocation() {
                 </div> 
 
             : <div className="w-full flex flex-row">
-                <div className="rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] m-8 ">
+                <div className="rounded-2xl bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] m-8">
                     <KoreaMap 
                         onRegionSelect={setSelectedRegion}  
                         selectedRegion={selectedRegion}  
                     /> 
                 </div>
-                <div className="flex-1 rounded-2xl p-2 bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] max-h-[1018px] m-8 overflow-y-auto">
+                <div className="flex-1 rounded-2xl p-2 bg-white shadow-[0_0px_10px_rgba(0,0,0,0.1)] max-h-[1018px] max-w-[450px] my-8 mx-2 overflow-y-auto">
                     <div className="font-semibold m-3 text-2xl">
                         주변 법원 목록
                     </div>
                     <div className="h-px bg-gray-200" />
-                    <div className="mt-5 divide-y divide-gray-200">
+                    <div className="mt-2 divide-y divide-gray-200">
                         {filteredCourts.length === 0 && (
                         <div className="p-5 text-gray-400">해당 지역의 법원이 없습니다.</div>
                         )}
@@ -106,8 +106,8 @@ export default function CourtLocation() {
                                 <span className="text-xl font-semibold">{idx+1}</span>
                             </div>
                             <div className="flex flex-col gap-1 my-2">
-                                <span className="font-medium text-2xl">{court.courthouseName}</span>
-                                <span className="text-lg">{court.courthouseAddress}</span>
+                                <span className="font-medium text-xl">{court.courthouseName}</span>
+                                <span className="text-md">{court.courthouseAddress}</span>
                                 <span className="text-md">{court.courthousePhoneNumber}</span>
                             </div>
                         </div>

@@ -1,3 +1,4 @@
+
 export { Header } from './ui/Header';
 export { default as Footer } from './ui/Footer';
 export { AppLayout } from '@/shared/ui/layout/AppLayout';
@@ -18,3 +19,5 @@ export { default as DayInput } from './ui/input/DayInput'
 export { default as AreaInput } from './ui/input/AreaInput'
 export { default as AddressInput } from './ui/input/AddressInput'
 export { default as DateFieldInput } from './ui/input/DateFieldInput'
+
+export  {default as getCategorName } from './utils/getCategoryName';

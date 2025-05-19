@@ -15,7 +15,10 @@ export const getContractDetail = async (contractId: number): Promise<Blob> => {
 };
 
 // 계약서 다운로드
-export const getContractownload = async (contractId: number) => {
+export const getContractownload = async (
+  contractId: number,
+  fileName: string,
+) => {
   try {
     const response = await customAxios.get(
       `/api/files/${contractId}/download`,
@@ -27,7 +30,7 @@ export const getContractownload = async (contractId: number) => {
 
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.setAttribute('download', '제목을 입력하세요.pdf');
+    link.setAttribute('download', fileName);
     document.body.appendChild(link);
     link.click();
   } catch (error) {

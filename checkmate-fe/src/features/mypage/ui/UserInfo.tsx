@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import { logout } from '@/features/auth/slices/authSlice';
 import { useMobile } from "@/shared";
+import { formatPhone } from "@/features/write";
 
 //회원 정보
 export default function UserInfo() {
@@ -84,7 +85,7 @@ export default function UserInfo() {
                             </span>
                             <div className="border-[#9F9F9F] border-1 rounded-md w-60 pl-2 ">
                                 <span className="my-2 text-lg">
-                                    {user?.phone}
+                                    {user?.phone ? formatPhone(user.phone) : ''}
                                 </span>
                             </div>
                         </div>

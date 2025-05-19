@@ -1,3 +1,4 @@
+/* src/features/mypage/ui/SideBar.tsx */
 import { postLogout } from '@/features/auth';
 import { useMobile } from '@/shared';
 import {
@@ -10,7 +11,6 @@ import {
 } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Dropdown } from '@/features/mypage';
 
 interface SideBarProps {
   selectedMenu: string;
@@ -22,7 +22,7 @@ export default function SideBar({ selectedMenu, onMenuClick }: SideBarProps) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  /* 메뉴 정의 ──────────────────────────────── */
+  /* 메뉴 정의 */
   const menu = [
     { icon: LuLayoutGrid, label: '대시보드' },
     { icon: LuFolder, label: '내 계약서' },
@@ -32,7 +32,6 @@ export default function SideBar({ selectedMenu, onMenuClick }: SideBarProps) {
     { icon: LuLogOut, label: '로그아웃' },
   ];
 
-  /* 공통 클릭 핸들러 ───────────────────────── */
   const handleClick = async (label: string) => {
     if (label === '로그아웃') {
       await postLogout(navigate, dispatch);
@@ -41,51 +40,74 @@ export default function SideBar({ selectedMenu, onMenuClick }: SideBarProps) {
     onMenuClick(label);
   };
 
-  /* 모바일용 드롭다운 옵션 ─────────────────── */
-  const dropdownOptions = menu.map((m) => ({
-    value: m.label,
-    label: m.label,
-  }));
+  /* ───────── 📱 모바일: 하단 아이콘 바 ───────── */
+  if (isMobile) {
+    return (
+      <nav
+        className="
+          fixed bottom-0 left-0 right-0
+          bg-white shadow
+          flex justify-around
+          py-4 z-50
+        "
+      >
+        {menu.map(({ icon: Icon, label }) => {
+          const active = selectedMenu === label;
+          return (
+            <button key={label} onClick={() => handleClick(label)}>
+              <Icon
+                size={26}
+                style={{ strokeWidth: 1.6 }}
+                className={active ? 'text-blue-500' : 'text-gray-700'}
+              />
+            </button>
+          );
+        })}
+      </nav>
+    );
+  }
 
-  /* ────────────────────────────────────────── */
+  /* ───────── 🖥 데스크톱: 호버 확장 사이드바 ───────── */
   return (
-    <div>
-      {/* ────────── ✅ 모바일 ────────── */}
-      {isMobile ? (
-        <div className="flex w-full">
-          <Dropdown
-            options={dropdownOptions}
-            value={{ value: selectedMenu, label: selectedMenu }}
-            onChange={(opt) => handleClick(opt.value)}
-          />
-        </div>
-      ) : (
-        /* ────────── ✅ 데스크탑 ────────── */
-        <div className="relative flex flex-col h-screen bg-white mr-5 ml-10">
-          <div className="mt-5">
-            {menu.map(({ icon: Icon, label }) => (
-              <button
-                key={label}
-                onClick={() => handleClick(label)}
-                className="flex items-center gap-5 mb-6 group"
+    <div
+      className="
+        group/sidebar relative flex flex-col
+        h-full bg-white shadow-md
+        overflow-hidden transition-all duration-300
+        w-16 hover:w-64
+      "
+    >
+      <div className="mt-10 space-y-6">
+        {menu.map(({ icon: Icon, label }) => {
+          const active = selectedMenu === label;
+          return (
+            <button
+              key={label}
+              onClick={() => handleClick(label)}
+              className="flex items-center gap-4 w-full px-4"
+            >
+              <Icon
+                size={26}
+                style={{ strokeWidth: 1.5 }}
+                className={active ? 'text-blue-500' : 'text-gray-800'}
+              />
+
+              {/* 라벨: 사이드바 호버 시에만 노출 */}
+              <span
+                className={`
+                  hidden group-hover/sidebar:inline-block
+                  whitespace-nowrap text-lg font-medium
+                  ${active ? 'text-blue-500' : 'text-gray-800'}
+                  transition-opacity duration-300
+                  opacity-0 group-hover/sidebar:opacity-100
+                `}
               >
-                <Icon
-                  size={36}
-                  style={{ strokeWidth: 1.5 }}
-                  color={selectedMenu === label ? '#60A5FA' : '#202020'}
-                />
-                <span
-                  className={`text-2xl font-medium transition-colors ${
-                    selectedMenu === label ? 'text-[#60A5FA]' : 'text-black'
-                  }`}
-                >
-                  {label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+                {label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

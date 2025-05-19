@@ -139,9 +139,7 @@ public class ContractService {
             throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
         }
 
-        contract.getFiles().forEach(file -> {
-            contractFileService.deleteFileByAddress(file.getFileAddress());
-        });
+        contract.getFiles().forEach(file -> contractFileService.deleteFileByAddress(file.getFileAddress()));
 
         contractRepository.deleteById(contractId);
     }

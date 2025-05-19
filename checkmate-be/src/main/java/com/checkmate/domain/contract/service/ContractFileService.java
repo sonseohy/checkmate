@@ -8,7 +8,6 @@ import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.entity.FileCategory;
 import com.checkmate.domain.contract.repository.ContractFileRepository;
 import com.checkmate.domain.contract.repository.ContractRepository;
-import com.checkmate.domain.user.entity.User;
 import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
@@ -47,7 +46,6 @@ public class ContractFileService {
     private final FileConversionService fileConversion;
     private final PdfProcessingService pdfProcessing;
     private final MeterRegistry meterRegistry;
-    private final UserService userService;
     private final ContractRepository contractRepository;
 
     /**

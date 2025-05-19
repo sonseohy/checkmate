@@ -6,7 +6,6 @@ import com.checkmate.domain.contract.entity.Contract;
 import com.checkmate.domain.contract.repository.ContractRepository;
 import com.checkmate.domain.summaryreport.entity.SummaryReport;
 import com.checkmate.domain.summaryreport.repository.SummaryReportRepository;
-import com.checkmate.domain.user.entity.User;
 import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class SummaryReportService {
 
-     private final UserService userService;
      private final ContractRepository contractRepository;
      private final AiAnalysisReportRepository aiAnalysisReportRepository;
      private final SummaryReportRepository summaryReportRepository;

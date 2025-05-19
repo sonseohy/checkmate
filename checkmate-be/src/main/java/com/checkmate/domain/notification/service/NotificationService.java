@@ -3,7 +3,6 @@ package com.checkmate.domain.notification.service;
 import com.checkmate.domain.notification.dto.response.NotificationResponse;
 import com.checkmate.domain.notification.entity.Notification;
 import com.checkmate.domain.notification.repository.NotificationRepository;
-import com.checkmate.domain.user.entity.User;
 import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
@@ -21,7 +20,6 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
     /**

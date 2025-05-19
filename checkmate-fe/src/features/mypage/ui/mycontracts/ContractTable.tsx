@@ -31,7 +31,6 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
   };
 
   // 다운로드
-    // 다운로드
   const handlePdfDownload = (row: Contract) => { 
     const categoryName = row.category_id ? getCategorName(Number(row.category_id)) : '제목을 입력하세요';
     const fileName = `${categoryName}_${row.title}.pdf`;

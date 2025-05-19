@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Document, Page } from 'react-pdf';
 import { LuDownload, LuTrash2, LuPlus, LuMinus } from 'react-icons/lu';
 import { FaSignature } from 'react-icons/fa';
@@ -14,6 +14,7 @@ import {
 } from '@/features/detail';
 import { useMobile } from '@/shared';
 import { SignatureRequestForm } from '@/features/e-sign';
+import { getCategorName } from '@/shared';
 
 interface Params {
   contractId: string;
@@ -28,7 +29,8 @@ const ContractPdfViewer: React.FC = () => {
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(isMobile ? 0.6 : 1);
-  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);  
+  const { state: contract } = useLocation();
 
   const documentKey = useMemo(() => {
     return pdfBlob ? URL.createObjectURL(pdfBlob) : 'empty';
@@ -60,7 +62,8 @@ const ContractPdfViewer: React.FC = () => {
   };
 
   const handlePdfDownload = () => {
-    getContractownload(Number(contractId));
+    const categoryName = contract.contract.category_id ? getCategorName(Number(contract.contract.category_id)) : '제목을 입력하세요';
+    getContractownload(Number(contractId), `${categoryName}.pdf`);
   };
 
   const handleDeleteContract = async () => {

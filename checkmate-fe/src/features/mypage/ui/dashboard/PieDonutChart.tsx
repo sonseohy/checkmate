@@ -105,7 +105,12 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({ contractList }) =>
     return (
         <div>
 
-            <ReactApexChart options={options} series={series} type="donut" height={isMobile ? 300 : 400}/>
+            <ReactApexChart 
+                key={series.join('-')}
+                options={options} 
+                series={series} 
+                type="donut" 
+                height={isMobile ? 300 : 400}/>
         </div>
     )
 };

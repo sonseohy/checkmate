@@ -5,7 +5,7 @@ import ReactPaginate from 'react-paginate';
 import { useNavigate } from 'react-router-dom';
 import { LuDownload } from "react-icons/lu";
 import { getContractownload } from '@/features/detail';
-import { useMobile } from '@/shared';
+import { getCategorName, useMobile } from '@/shared';
 
 interface ContractTableProps {
   rowData: Contract[];
@@ -31,8 +31,10 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
   };
 
   // 다운로드
-  const handlePdfDownload = (id: number) => { 
-    getContractownload(id);
+  const handlePdfDownload = (row: Contract) => { 
+    const categoryName = row.category_id ? getCategorName(Number(row.category_id)) : '제목을 입력하세요';
+    const fileName = `${categoryName}.pdf`;
+    getContractownload(row.contract_id, fileName);
   };
 
   return (
@@ -71,10 +73,12 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                   }
 
                   // isCompleted에 따라 navigate 경로 변경
-                  if (isCompleted) {
+                  if (row.source_type === 'SERVICE_GENERATED' && row.edit_status === 'COMPLETED') {
                     navigate(`/detail/${row.contract_id}`, { state: { contract: row } });
-                  } else {
+                  } else if (row.source_type === 'SERVICE_GENERATED' && row.edit_status === 'EDITING') {
                     navigate(`/write/edit/${row.contract_id}`, { state: { contract: row } });
+                  } else if (row.source_type === 'USER_UPLOAD' && row.edit_status === 'COMPLETED') {
+                    navigate(`/analyze/result/${row.contract_id}`, { state: row });
                   }
                 }}
               >
@@ -101,7 +105,11 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                     {isWritten ? '작성' : '분석'}
                   </span>
                 </td>
-                <td className='table-ceil text-center text-[#202020]'>{row.title}</td>
+                <td className='table-ceil text-center text-[#202020]'>
+                  {isWritten 
+                  ? `${row.title}`  
+                  : '분석 계약서'}
+                </td>
                 <td className='table-ceil text-center'>
                   <span
                     className={`inline-block px-3 py-1 font-bold uppercase rounded
@@ -129,7 +137,7 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                         size={isMobile ? 20 : 30} 
                         onClick={(e) => {
                           e.stopPropagation();
-                          handlePdfDownload(row.contract_id);
+                          handlePdfDownload(row);
                         }}
                       />
                   : <LuDownload
@@ -137,7 +145,7 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                         color="white"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handlePdfDownload(row.contract_id);
+                          handlePdfDownload(row);
                         }}
                       />}
                 </td>

@@ -43,9 +43,9 @@ export default function MyContracts() {
   const filteredContracts = useMemo<Contract[]>(() => {
     switch (filter.value) {
       case 'created':
-        return contracts.filter(c => c.source_type === 'USER_UPLOAD');
-      case 'analyzed':
         return contracts.filter(c => c.source_type === 'SERVICE_GENERATED');
+      case 'analyzed':
+        return contracts.filter(c => c.source_type === 'USER_UPLOAD');
       default:
         return contracts;
     }

@@ -25,7 +25,7 @@ export default function Dashboard() {
 
     return (
         <div> 
-            <div className={`flex flex-col  ${isMobile ? ' justify-center items-center': 'ml-10 h-120 mt-10 '}`}>
+            <div className={`flex flex-col  h-screen ${isMobile ? ' justify-center items-center': 'ml-10 h-120 mt-10 '}`}>
                 <div className={` ${isMobile ? 'w-full': 'w-full rounded-2xl'}`}>
                     <div className={` text-[#202020] font-semibold ${isMobile ? 'my-3 text-xl': 'mt-5 text-2xl ml-5'}`}>
                         최근 활동

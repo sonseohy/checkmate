@@ -35,7 +35,6 @@ public class AiAnalysisReportController {
 	@Operation(summary = "AI 분석 리포트 조회", description = "AI 분석 리포트를 조회합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "AI 분석 리포트 조회 성공"),
-		@ApiResponse(responseCode = "401", description = "인증 실패"),
 	})
 	@GetMapping("/{contractId}")
 	@PreAuthorize("isAuthenticated()")

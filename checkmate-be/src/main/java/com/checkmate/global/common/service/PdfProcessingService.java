@@ -28,6 +28,14 @@ public class PdfProcessingService {
 
     private final MeterRegistry meterRegistry;
 
+    /**
+     * PDF가 이미지 기반인지 텍스트 기반인지 판별
+     * 페이지당 텍스트 문자 수로 판단
+     *
+     * @param pdfStream PDF 파일 스트림
+     * @return 이미지 기반이면 true, 텍스트 기반이면 false
+     * @throws RuntimeException PDF 분석 실패 시
+     */
     public boolean isImageBasedPdf(InputStream pdfStream) {
         log.info("PDF 기반 판별 시작");
         StopWatch sw = new StopWatch();
@@ -53,6 +61,14 @@ public class PdfProcessingService {
         }
     }
 
+    /**
+     * 이미지 기반 PDF 전처리
+     * PDF 내 이미지를 추출하여 새로운 PDF 문서로 재구성
+     *
+     * @param pdfBytes PDF 파일 바이트 배열
+     * @return 처리된 PDF 파일 바이트 배열
+     * @throws RuntimeException 처리 실패 시
+     */
     public byte[] preprocessImageBasedPdf(byte[] pdfBytes) {
         log.info("이미지 기반 PDF 전처리 시작 ({} bytes)", pdfBytes.length);
         StopWatch sw = new StopWatch();
@@ -97,6 +113,13 @@ public class PdfProcessingService {
         }
     }
 
+    /**
+     * PDF 파일의 총 페이지 수 계산
+     *
+     * @param pdfStream PDF 파일 스트림
+     * @return 페이지 수
+     * @throws RuntimeException 계산 실패 시
+     */
     public int countPages(InputStream pdfStream) {
         log.info("PDF 페이지 수 계산 시작");
         StopWatch sw = new StopWatch();
@@ -119,6 +142,13 @@ public class PdfProcessingService {
         }
     }
 
+    /**
+     * 이미지를 PNG 바이트 배열로 변환
+     *
+     * @param image 변환할 BufferedImage
+     * @return PNG 형식의 바이트 배열
+     * @throws Exception 변환 실패 시
+     */
     private byte[] toPngBytes(BufferedImage image) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ImageIO.write(image, "png", bos);

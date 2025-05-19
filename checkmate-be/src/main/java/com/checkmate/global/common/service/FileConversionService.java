@@ -47,7 +47,6 @@ public class FileConversionService {
      *
      * @param hwpBytes HWP 파일의 바이트 배열
      * @return 변환된 PDF 파일의 바이트 배열
-     * @throws RuntimeException 변환 실패 시
      */
     public byte[] hwpToPdf(byte[] hwpBytes) throws IOException {
         if (hwpBytes == null || hwpBytes.length == 0) {
@@ -204,6 +203,12 @@ public class FileConversionService {
         }
     }
 
+    /**
+     * 임시 디렉터리와 내부 파일들을 재귀적으로 삭제
+     * 변환 작업 후 생성된 임시 파일들을 정리
+     *
+     * @param tmpDir 삭제할 임시 디렉터리 경로
+     */
     private void cleanupTempDirectory(Path tmpDir) {
         try (Stream<Path> paths = Files.walk(tmpDir)) {
             paths.sorted(Comparator.reverseOrder())
@@ -219,6 +224,13 @@ public class FileConversionService {
         }
     }
 
+    /**
+     * 이미지 파일을 PDF로 변환
+     * 단일 이미지를 A4 크기의 PDF 문서로 변환
+     *
+     * @param imageBytes 이미지 파일의 바이트 배열
+     * @return 변환된 PDF 파일의 바이트 배열
+     */
     public byte[] imageToPdf(byte[] imageBytes) {
         log.info("Image→PDF 변환 시작 ({} bytes)", imageBytes.length);
         StopWatch sw = new StopWatch();

@@ -31,6 +31,13 @@ public class CloudFrontService {
     @Value("${aws.cloudfront.private-key-path}")
     private String privateKeyPath;
 
+    /**
+     * CloudFront 리소스에 대한 서명된 URL 생성
+     * 지정된 리소스 경로에 대해 10분 동안 유효한 서명된 URL을 생성
+     *
+     * @param resourcePath 접근할 리소스 경로 (예: /images/example.jpg)
+     * @return 서명된 CloudFront URL
+     */
     public String generateSignedUrl(String resourcePath) {
         try {
             String resourceUrl = "https://" + cfDomain + resourcePath;

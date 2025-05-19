@@ -68,38 +68,6 @@ public interface TemplateFieldCategoryRepository extends JpaRepository<TemplateF
             @Param("categoryId") Integer categoryId);
 
     /**
-     * 필드 ID와 카테고리 ID로 MongoDB ID 목록 조회
-     * 특정 필드와 카테고리 조합에 연결된 MongoDB 문서 ID 목록 조회
-     *
-     * @param fieldId 필드 ID
-     * @param categoryId 카테고리 ID
-     * @return 해당 필드와 카테고리에 연결된 MongoDB 문서 ID 목록
-     */
-    @Query("SELECT tfc.mongoClauseId FROM TemplateFieldCategory tfc " +
-            "WHERE tfc.templateField.id = :fieldId " +
-            "AND tfc.contractCategory.id = :categoryId " +
-            "AND tfc.mongoClauseId IS NOT NULL")
-    List<String> findMongoClauseIdsByFieldIdAndCategoryId(
-            @Param("fieldId") Integer fieldId,
-            @Param("categoryId") Integer categoryId);
-
-    /**
-     * 여러 필드 ID와 카테고리 ID로 MongoDB ID 목록 조회
-     * 여러 필드와 특정 카테고리 조합에 연결된 MongoDB 문서 ID 목록 조회
-     *
-     * @param fieldIds 필드 ID 목록
-     * @param categoryId 카테고리 ID
-     * @return 해당 필드들과 카테고리에 연결된 MongoDB 문서 ID 목록
-     */
-    @Query("SELECT DISTINCT tfc.mongoClauseId FROM TemplateFieldCategory tfc " +
-            "WHERE tfc.templateField.id IN :fieldIds " +
-            "AND tfc.contractCategory.id = :categoryId " +
-            "AND tfc.mongoClauseId IS NOT NULL")
-    List<String> findMongoClauseIdsByFieldIdsAndCategoryId(
-            @Param("fieldIds") List<Integer> fieldIds,
-            @Param("categoryId") Integer categoryId);
-
-    /**
      * 필드 ID와 카테고리 ID로 라벨 오버라이드 조회
      * 특정 필드와 카테고리 조합에 설정된 라벨 오버라이드 값 조회
      *

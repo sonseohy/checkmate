@@ -17,6 +17,12 @@ public class S3Config {
     @Value("${aws.s3.region}")
     private String region;
 
+    /**
+     * AWS S3 클라이언트 생성
+     * 설정된 자격 증명과 리전으로 S3 클라이언트 생성
+     *
+     * @return 설정된 S3Client 인스턴스
+     */
     @Bean
     public S3Client s3Client() {
         return S3Client.builder().region(Region.of(region))

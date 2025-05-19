@@ -1,7 +1,6 @@
 package com.checkmate.global.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -20,13 +19,18 @@ import reactor.core.publisher.Mono;
 public class WebClientConfig {
 
 	private final WebClient.Builder webClient;
+	private final NaverApiConfig naverApiConfig;
 
 	@Value("${fastapi.baseUrl}")
 	private String analysisApiUrl;
 
-    @Autowired
-    NaverApiConfig naverApiConfig;
 
+	/**
+	 * 네이버 API 호출을 위한 WebClient 생성
+	 * 네이버 API 인증 헤더가 설정된 WebClient 빈 등록
+	 *
+	 * @return 네이버 API용 WebClient
+	 */
     @Bean
     public WebClient naverWebClient() {
         return WebClient.builder()
@@ -36,6 +40,14 @@ public class WebClientConfig {
                 .build();
     }
 
+	/**
+	 * 계약서 분석 API 호출
+	 * AI 서비스에 계약서 분석 요청을 전송
+	 *
+	 * @param contractId 계약서 ID
+	 * @param categoryId 카테고리 ID
+	 * @return 요청 처리 결과를 담은 Mono 객체
+	 */
 	public Mono<Void> analyzeContract(int contractId, int categoryId) {
 		AiContractAnalysisRequestDto request = AiContractAnalysisRequestDto.builder()
 			.contractId(contractId)
@@ -53,7 +65,14 @@ public class WebClientConfig {
 			.doOnError(e -> log.error("계약서 분석 요청 실패: contractId={}, error={}", contractId, e.getMessage()));
 	}
 
-	// WebClientConfig.java에 메서드 추가
+	/**
+	 * 계약서 질문 생성 API 호출
+	 * AI 서비스에 계약서 관련 질문 생성 요청을 전송
+	 *
+	 * @param contractId 계약서 ID
+	 * @param categoryId 카테고리 ID
+	 * @return 요청 처리 결과를 담은 Mono 객체
+	 */
 	public Mono<Void> generateQuestions(int contractId, int categoryId) {
 		QuestionGenerationRequestDtp request = QuestionGenerationRequestDtp.builder()
 			.contractId(contractId)

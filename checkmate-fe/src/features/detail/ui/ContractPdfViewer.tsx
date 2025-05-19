@@ -32,7 +32,6 @@ const ContractPdfViewer: React.FC = () => {
   const [showSignatureModal, setShowSignatureModal] = useState(false);  
   const { state: contract } = useLocation();
 
-
   const documentKey = useMemo(() => {
     return pdfBlob ? URL.createObjectURL(pdfBlob) : 'empty';
   }, [pdfBlob]);
@@ -63,7 +62,7 @@ const ContractPdfViewer: React.FC = () => {
   };
 
   const handlePdfDownload = () => {
-    const categoryName = contract.category_id ? getCategorName(Number(contract.category_id)) : '제목을 입력하세요';
+    const categoryName = contract.contract.category_id ? getCategorName(Number(contract.contract.category_id)) : '제목을 입력하세요';
     getContractownload(Number(contractId), `${categoryName}.pdf`);
   };
 

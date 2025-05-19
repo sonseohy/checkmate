@@ -7,9 +7,13 @@ interface DateFieldInputProps {
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
+  minDate?: Date;
+  maxDate?: Date;
 }
 
-const DateFieldInput: React.FC<DateFieldInputProps> = ({ value, onChange, onBlur }) => {
+const DateFieldInput: React.FC<DateFieldInputProps> = ({
+  value, onChange, onBlur, minDate, maxDate
+}) => {
   const dateValue = value ? new Date(value) : null;
 
   const handleChange = (date: Date | null) => {
@@ -32,6 +36,8 @@ const DateFieldInput: React.FC<DateFieldInputProps> = ({ value, onChange, onBlur
         dropdownMode="select"
         placeholderText="연도-월-일"
         className="w-full p-2 rounded-md border bg-white border-gray-400 text-left"
+        minDate={minDate}
+        maxDate={maxDate}
       />
     </div>
   );

@@ -9,6 +9,7 @@ import {
 } from '@/features/write';
 import Swal from 'sweetalert2';
 import html2pdf from 'html2pdf.js';
+import '@/features/write/style/pdf-fix.css'
 
 const WritePreviewPage: React.FC = () => {
   const { state } = useLocation() as {
@@ -82,10 +83,37 @@ const WritePreviewPage: React.FC = () => {
 
   /* 섹션 정렬 */
   const sortedSections = [...legalClauses].sort(
-    (a, b) =>
-      (a.legalClauses[0]?.order ?? Infinity) -
-      (b.legalClauses[0]?.order ?? Infinity),
+    (a, b) => (a.legalClauses[0]?.order ?? Infinity) - (b.legalClauses[0]?.order ?? Infinity)
   );
+
+  const allOrders = legalClauses
+  .flatMap((group) => group.legalClauses.map((c) => c.order ?? Infinity))
+  .filter((o) => o !== Infinity)
+  .sort((a, b) => a - b);
+
+  const lastTwoOrders = allOrders.slice(-2);
+  let currentOrder = 1;
+
+  // SSN 마스킹 함수
+  function maskResidentId(raw: string) {
+    const m = raw.match(/^(\d{6})(\d)(\d*)$/);
+    if (!m) return raw;
+    const [, front, one, rest] = m;
+    return `${front}-${one}${'*'.repeat(rest.length)}`;
+  }
+
+  // 각 라인 렌더링 헬퍼
+  function renderLine(line: string) {
+    // '주민등록번호:' 로 시작하면
+    if (/^\s*주민등록번호\s*[:：]/.test(line)) {
+      const parts = line.split(/[:：]\s*/);
+      const label = parts[0];
+      const raw = parts[1] ?? '';
+      return `${label}: ${maskResidentId(raw.trim())}`;
+    }
+    // 그 외는 일반 prettify
+    return prettifyLine(line);
+  }
 
   return (
     <div className="container py-16 space-y-10 max-w-3xl mx-auto px-4">
@@ -96,7 +124,6 @@ const WritePreviewPage: React.FC = () => {
         {/* ===== 타이틀 ===== */}
         <h1 className="text-3xl font-bold text-center mb-10">{templateName}</h1>
 
-        {/* ===== 프린트·PDF 대상 영역 ===== */}
         {sortedSections.map((section, idx) => {
           const clauses: Clause[] = [...section.legalClauses].sort(
             (a, b) => (a.order ?? Infinity) - (b.order ?? Infinity),
@@ -104,12 +131,12 @@ const WritePreviewPage: React.FC = () => {
           const [header, ...others] = clauses;
           const orderNo = header?.order;
 
-          /* ── 15+16조 합치기 ── */
-          if (orderNo === 15) {
+          /* 마지막 두 조항은 계약하는 사람들 상세 정보 */
+          if (orderNo === lastTwoOrders[0]) {
             const nextClauses = sortedSections[idx + 1]?.legalClauses ?? [];
-
             return (
-              <React.Fragment key={`combined-${section.groupId}`}>
+              // 묶음 전체를 새 페이지에서 시작하게
+              <div key={`combined-${section.groupId}`} className="section-start-new-page">
                 <p className="text-center font-semibold">{today}.</p>
                 {[...clauses, ...nextClauses].map((c, i) => (
                   <article key={`${section.groupId}-${c.order ?? i}`}>
@@ -124,24 +151,24 @@ const WritePreviewPage: React.FC = () => {
                               : 'list-disc list-inside'
                           }
                         >
-                          {prettifyLine(line)}
+                          {renderLine(line)}
                         </li>
                       ))}
                     </ul>
                   </article>
                 ))}
-              </React.Fragment>
+              </div>
             );
           }
-          if (orderNo === 16) return null;
+          if (orderNo === lastTwoOrders[1]) return null;
 
           /* ── 일반 조항 ── */
-          return (
+           return (
             <article key={section.groupId}>
-              {header && (
+              {header && header.titleText ? (
                 <>
                   <h2 className="font-bold mb-2">
-                    제{header.order}조 ({header.titleText})
+                    제{currentOrder++}조 ({header.titleText})
                   </h2>
                   <ul className="pl-5 space-y-1 mb-4">
                     {header.content.map((line, i) => (
@@ -153,11 +180,26 @@ const WritePreviewPage: React.FC = () => {
                             : 'list-disc list-inside'
                         }
                       >
-                        {prettifyLine(line)}
+                        {renderLine(line)}
                       </li>
                     ))}
                   </ul>
                 </>
+              ) : (
+                <ul className="pl-5 space-y-1 mb-4">
+                  {header?.content.map((line, i) => (
+                    <li
+                      key={i}
+                      className={
+                        /^[0-9]+[.)]/.test(line.trim())
+                          ? 'list-none pl-0'
+                          : 'list-disc list-inside'
+                      }
+                    >
+                      {renderLine(line)}
+                    </li>
+                  ))}
+                </ul>
               )}
 
               {others.map((c, i) => (
@@ -187,7 +229,6 @@ const WritePreviewPage: React.FC = () => {
         })}
       </div>
 
-      {/* ===== 버튼 영역 ===== */}
       <div className="flex justify-center gap-4 mt-12">
         <button
           onClick={handlePdfUpload}

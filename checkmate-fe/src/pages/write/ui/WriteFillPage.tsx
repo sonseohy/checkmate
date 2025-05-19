@@ -58,12 +58,41 @@ const WriteFillPage: React.FC = () => {
 }, [numericCategoryId, mutate, navigate]);
 
  /* 입력 blur → 자동 저장 */
-  const handleFieldBlur = async (fieldId: number, sectionId: number, value: string) => {
-    if (!contractId) return;
+  const handleFieldBlur = async (
+    fieldId: number,
+    sectionId: number,
+    value: string,
+  ) => {
+    if (!contractId || !templateData) return;
+
+    const allFields: TemplateField[] = templateData.sections.flatMap((s) => s.fields);
+    const matchedField = allFields.find((f) => f.id === fieldId);
+    const fieldKey = matchedField?.fieldKey;
+
+    if (!fieldKey || !matchedField) return;
+
+    const normalizedValue: string =
+      matchedField?.inputType === 'NUMBER' ? String(value).replace(/[^0-9]/g, '') : String(value ?? '');
+
+    setDependsOnStates((prev) => ({ ...prev, [fieldKey]: normalizedValue }));
+
     try {
-      await saveContractInputs({ contractId, inputs: [{ sectionId, fieldValues: [{ fieldId, value }] }] });
-    } catch (err) {
-      console.error('자동 저장 실패:', err);
+      await saveContractInputs({
+        contractId,
+        inputs: [
+          {
+            sectionId,
+            fieldValues: [
+              {
+                fieldId,
+                value: normalizedValue,
+              },
+            ],
+          },
+        ],
+      });
+    } catch (err: any) {
+      console.error('자동 저장 실패:', err.response?.data || err);
     }
   };
 
@@ -100,12 +129,29 @@ const WriteFillPage: React.FC = () => {
   /* 렌더링 보조 */
   const shouldShowField = (field: TemplateField) => {
     if (!field.dependsOn) return true;
-    if (field.dependsOn.includes('!=')) {
-      const [key, notExp] = field.dependsOn.split('!=');
-      return dependsOnStates[key] !== notExp;
+
+    const [key, expected] = field.dependsOn.includes('!=')
+      ? field.dependsOn.split('!=')
+      : field.dependsOn.split('=');
+
+    const fieldValue = dependsOnStates[key];
+
+    if (fieldValue?.startsWith?.('[')) {
+      try {
+        const values = JSON.parse(fieldValue);
+        return Array.isArray(values)
+          ? field.dependsOn.includes('!=')
+            ? !values.includes(expected)
+            : values.includes(expected)
+          : false;
+      } catch {
+        return false;
+      }
     }
-    const [key, exp] = field.dependsOn.split('=');
-    return dependsOnStates[key] === exp;
+
+    return field.dependsOn.includes('!=')
+      ? fieldValue !== expected
+      : fieldValue === expected;
   };
 
   const renderInputField = (field: TemplateField, sectionId: number) => {
@@ -185,10 +231,12 @@ const WriteFillPage: React.FC = () => {
   if (isAddressLabel) {
     return (
       <AddressInput
-        value={value}
-        onChange={(v) => setDependsOnStates((prev) => ({ ...prev, [fieldKey]: v }))}
-        onBlur={() => handleFieldBlur(field.id, sectionId, value)}
-      />
+          value={value}
+          onChange={(v) => {
+            setDependsOnStates((p) => ({ ...p, [fieldKey]: v }));
+            handleFieldBlur(field.id, sectionId, v); // 최신 v로 바로 호출
+          }}
+        />
     );
   }
 
@@ -282,23 +330,43 @@ const WriteFillPage: React.FC = () => {
             handleFieldBlur(field.id, sectionId, JSON.stringify(next));
           };
 
+          const dependentFields = (opt: string) =>
+            templateData?.sections
+              .flatMap((sec) => sec.fields)
+              .filter((f) => f.dependsOn === `${fieldKey}=${opt}`) || [];
+
           return (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {opts.map((opt) => (
-                <label key={opt} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(opt)}
-                    onChange={() => toggle(opt)}
-                  />
-                  {opt}
-                </label>
+                <div key={opt} className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(opt)}
+                      onChange={() => toggle(opt)}
+                    />
+                    {opt}
+                  </label>
+                  {selected.includes(opt) && (
+                    <div className="pl-4 space-y-2">
+                      {dependentFields(opt).map((depField) => (
+                        <div key={depField.id}>
+                          {depField.label && (
+                            <label htmlFor={depField.fieldKey} className="block font-medium">
+                              {depField.label}
+                            </label>
+                          )}
+                          {renderInputField(depField, sectionId)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           );
         }
 
-        // 단일 Boolean 체크박스
         return (
           <input
             type="checkbox"
@@ -321,23 +389,17 @@ const WriteFillPage: React.FC = () => {
   /* 최종 저장 & 미리보기 */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const missing: string[] = [];
 
     templateData?.sections.forEach((sec) =>
       sec.fields.forEach((f) => {
-        // 1) 화면에 보이는 + required 필드만 검사
         if (!f.required || !shouldShowField(f)) return;
-
         const v = dependsOnStates[f.fieldKey];
-
-        /* 2) 타입별 누락 판정 - 여기서 보완 */
         const isEmpty =
-          v === undefined ||                          // 입력 안함
-          v === '' ||                                // 텍스트/넘버 등이 빈값
-          (f.inputType === 'CHECKBOX' &&
-            parseOptions(f.options).length &&        // 다중 체크박스
-            JSON.parse(v ?? '[]').length === 0);     // 선택 항목이 0개
-
+          v === undefined ||
+          v === '' ||
+          (f.inputType === 'CHECKBOX' && parseOptions(f.options).length > 0 && JSON.parse(v ?? '[]').length === 0);
         if (isEmpty) missing.push(f.label);
       }),
     );
@@ -346,25 +408,32 @@ const WriteFillPage: React.FC = () => {
       Swal.fire({
         icon: 'warning',
         title: '필수 항목 누락',
-        html: `<ul style="text-align:left;padding-left:1em;">${missing
-          .map((m) => `<li>• ${m}</li>`)
-          .join('')}</ul>`,
+        html: `<ul style="text-align:left;padding-left:1em;">${missing.map((m) => `<li>• ${m}</li>`).join('')}</ul>`,
       });
       return;
     }
 
     if (!contractId || !templateData) return;
+
     const payload: ContractInputSection[] = templateData.sections.map((sec) => ({
       sectionId: sec.id,
       fieldValues: sec.fields
         .filter((f) => f.fieldKey in dependsOnStates)
-        .map((f) => ({ fieldId: f.id, value: String(dependsOnStates[f.fieldKey]) })),
+        .map((f) => {
+          const rawValue = dependsOnStates[f.fieldKey];
+          const cleanedValue = f.inputType === 'NUMBER' ? String(rawValue).replace(/[^0-9]/g, '') : String(rawValue);
+          return { fieldId: f.id, value: cleanedValue };
+        }),
     }));
 
     try {
       const res = await saveContractInputs({ contractId, inputs: payload });
       navigate(`/contract/${contractId}/preview`, {
-        state: { contractId, templateName: templateData.template.name, legalClausesBySection: res },
+        state: {
+          contractId,
+          templateName: templateData.template.name,
+          legalClausesBySection: res,
+        },
       });
     } catch {
       Swal.fire({ icon: 'error', title: '저장 실패', text: '다시 시도해 주세요.' });

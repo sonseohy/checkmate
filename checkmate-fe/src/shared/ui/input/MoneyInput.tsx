@@ -20,15 +20,15 @@ const formatMoney = (value: string) => {
  * - 자동 쉼표 삽입
  * - inputMode="numeric"으로 모바일 숫자 키패드 유도
  */
-const MoneyInput: React.FC<MoneyInputProps> = ({
-  value,
-  onChange,
-  onBlur,
-}) => {
+const MoneyInput: React.FC<MoneyInputProps> = ({ value, onChange, onBlur }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     const onlyDigits = raw.replace(/\D/g, '');
-    onChange(onlyDigits);
+    onChange(onlyDigits); // onChange에 콤마 없는 값 전달
+  };
+
+  const handleBlur = () => {
+    onBlur?.(); // 필요 시 추가 로직 삽입 가능
   };
 
   return (
@@ -36,11 +36,11 @@ const MoneyInput: React.FC<MoneyInputProps> = ({
       <input
         type="text"
         inputMode="numeric"
-        pattern="[0-9]*"
+        pattern="[0-9,]*"
         maxLength={15}
-        value={formatMoney(value)}
+        value={formatMoney(value)} // UI에만 포맷
         onChange={handleChange}
-        onBlur={onBlur}
+        onBlur={handleBlur}
         className="w-full p-2 pr-8 rounded-md border bg-white border-gray-400 text-right"
       />
       <span className="absolute right-2 top-1/2 -translate-y-1/2 text-md text-gray-500 pointer-events-none">원</span>

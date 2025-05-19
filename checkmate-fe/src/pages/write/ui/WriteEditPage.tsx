@@ -30,58 +30,98 @@ const WriteEditPage: React.FC = () => {
 
   /* blur 자동 저장 */
   const handleFieldBlur = async (
-    fieldId: number,
-    sectionId: number,
-    value: string
-  ) => {
-    if (!numericContractId || !templateData) return;
+  fieldId: number,
+  sectionId: number,
+  value: string | number
+) => {
+  if (!contractId || !templateData) return;
 
-    const normalizedValue = value ?? '';
+  const allFields: TemplateField[] = templateData.sections.flatMap(
+    (s: TemplateSection) => s.fields
+  );
+  const matchedField = allFields.find((f) => f.id === fieldId);
+  const fieldKey = matchedField?.fieldKey;
 
-    const allFields: TemplateField[] = templateData.sections.flatMap(
-      (s: TemplateSection) => s.fields
-    );
-    const matchedField = allFields.find((f: TemplateField) => f.id === fieldId);
-    const fieldKey = matchedField?.fieldKey;
+  if (!fieldKey) {
+    console.warn('fieldKey를 찾을 수 없음 (fieldId:', fieldId, ')');
+    return;
+  }
 
-    if (!fieldKey) {
-      console.warn('fieldKey를 찾을 수 없음 (fieldId:', fieldId, ')');
-      return;
-    }
+  // 숫자 입력 필드일 경우, 숫자만 추출해서 문자열로 변환
+  const normalizedValue =
+    matchedField?.inputType === 'NUMBER'
+      ? String(value).replace(/[^0-9]/g, '') || '0'
+      : String(value ?? '');
 
-    setDependsOnStates((prev) => ({
-      ...prev,
-      [fieldKey]: normalizedValue,
-    }));
+  setDependsOnStates((prev) => ({
+    ...prev,
+    [fieldKey]: normalizedValue,
+  }));
 
-    try {
-      await saveContractInputs({
-        contractId: numericContractId,
-        inputs: [
+  // 로그 추가: 서버에 보낼 실제 데이터 확인
+  console.log('자동 저장 요청 payload', {
+    contractId,
+    inputs: [
+      {
+        sectionId,
+        fieldValues: [
           {
-            sectionId,
-            fieldValues: [
-              {
-                fieldId,
-                value: normalizedValue,
-              },
-            ],
+            fieldId,
+            value: normalizedValue,
           },
         ],
-      });
-    } catch (err: any) {
-      console.error('자동 저장 실패:', err.response?.data || err);
-    }
-  };
+      },
+    ],
+  });
 
-  const shouldShowField = (field: TemplateField): boolean => {
+  try {
+    await saveContractInputs({
+      contractId: numericContractId,
+      inputs: [
+        {
+          sectionId,
+          fieldValues: [
+            {
+              fieldId,
+              value: normalizedValue,
+            },
+          ],
+        },
+      ],
+    });
+  } catch (err: any) {
+    console.error('자동 저장 실패:', err.response?.data || err);
+  }
+};
+
+  const shouldShowField = (field: TemplateField) => {
     if (!field.dependsOn) return true;
-    if (field.dependsOn.includes('!=')) {
-      const [key, notExpected] = field.dependsOn.split('!=');
-      return dependsOnStates[key] !== notExpected;
+
+    // checkbox의 다중 선택에 대응하기 위한 로직
+    const [key, expected] = field.dependsOn.includes('!=')
+      ? field.dependsOn.split('!=')
+      : field.dependsOn.split('=');
+
+    const fieldValue = dependsOnStates[key];
+
+    // JSON 배열이면 checkbox 멀티 선택값으로 가정
+    if (fieldValue?.startsWith?.('[')) {
+      try {
+        const values = JSON.parse(fieldValue);
+        return Array.isArray(values)
+          ? field.dependsOn.includes('!=')
+            ? !values.includes(expected)
+            : values.includes(expected)
+          : false;
+      } catch {
+        return false;
+      }
     }
-    const [key, expected] = field.dependsOn.split('=');
-    return dependsOnStates[key] === expected;
+
+    // 일반 문자열 비교 (RADIO 등)
+    return field.dependsOn.includes('!=')
+      ? fieldValue !== expected
+      : fieldValue === expected;
   };
 
   const renderInputField = (field: TemplateField, sectionId: number) => {
@@ -158,8 +198,10 @@ const WriteEditPage: React.FC = () => {
       return (
         <AddressInput
           value={value}
-          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
-          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+          onChange={(v) => {
+            setDependsOnStates((p) => ({ ...p, [fieldKey]: v }));
+            handleFieldBlur(field.id, sectionId, v); // 최신 v로 바로 호출
+          }}
         />
       );
     }
@@ -168,8 +210,10 @@ const WriteEditPage: React.FC = () => {
       return (
         <MoneyInput
           value={value}
-          onChange={(v) => setDependsOnStates((p) => ({ ...p, [fieldKey]: v }))}
-          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+          onChange={(v) => {
+            setDependsOnStates((prev) => ({ ...prev, [fieldKey]: v }));
+            handleFieldBlur(field.id, sectionId, v); // 여기서 콤마 없는 v로 저장
+          }}
         />
       );
     }
@@ -258,20 +302,21 @@ const WriteEditPage: React.FC = () => {
           return (
             <div className="space-y-2">
               {opts.map((opt) => (
-                <label key={opt} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(opt)}
-                    onChange={() => toggle(opt)}
-                  />
-                  {opt}
-                </label>
+                <div key={opt} className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(opt)}
+                      onChange={() => toggle(opt)}
+                    />
+                    {opt}
+                  </label>
+                </div>
               ))}
             </div>
           );
         }
 
-        // 단일 Boolean 체크박스
         return (
           <input
             type="checkbox"

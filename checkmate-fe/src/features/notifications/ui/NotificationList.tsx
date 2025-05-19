@@ -1,8 +1,7 @@
-/* src/features/notifications/ui/NotificationList.tsx */
 import { useState } from 'react';
 import { format, formatDistanceToNowStrict, isBefore, subDays } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Notification } from '@/features/notifications';
 import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 
@@ -109,12 +108,12 @@ const NotificationList: React.FC<Props> = ({ notifications }) => {
 
       {/* 전체 보기 */}
       <div className="mt-4 text-right">
-        <a
-          href="/mypage?tab=notifications"
+        <Link
+          to="/mypage?tab=notifications"
           className="text-sm text-blue-600 font-semibold"
         >
           알림 전체 보기
-        </a>
+        </Link>
       </div>
     </div>
   );

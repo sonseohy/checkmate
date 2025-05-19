@@ -7,7 +7,7 @@ import {
   AnalysisResult,
 } from '@/features/analyze';
 import { useUserInfo } from '@/features/auth';
-import Spinner from '@/shared/ui/Spinner';
+import { Spinner } from '@/shared/ui/Spinner';
 import uploadImage from '@/assets/images/loading/upload.png';
 import {
   getOverallLevel,
@@ -87,7 +87,10 @@ const AnalyzeResultPage: React.FC = () => {
   const stageSize = 'text-3xl md:text-4xl';
   return (
     <section className="container px-4 py-16 mx-auto space-y-12">
-      <h1 className="text-3xl font-bold text-center">근로계약서 분석결과</h1>
+      <h1 className="text-3xl font-bold text-center">
+        {' '}
+        {result?.categoryName ?? contractTitle} 분석결과
+      </h1>
 
       {/* 배너 */}
       {!loading && (

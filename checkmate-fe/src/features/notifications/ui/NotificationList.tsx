@@ -51,15 +51,21 @@ const NotificationList: React.FC<Props> = ({
 
   /* ▼ 클릭 내비게이션 */
   const handleClick = (n: Notification) => {
+    /* 1) 아직 안 읽었다면 읽음 표시 */
     if (!n.read) markAsRead(n.id);
 
-    if (n.type === 'CONTRACT_ANALYSIS')
+    /* 2) 메시지에 ‘실패’가 포함되면 이동하지 않음 */
+    if (n.message.includes('실패')) return;
+
+    /* 3) 정상 알림이면 타입별 라우팅 */
+    if (n.type === 'CONTRACT_ANALYSIS') {
       navigate(`/analyze/result/${n.contract_id}`);
-    else if (
+    } else if (
       n.type === 'SIGNATURE_COMPLETED' ||
       n.type === 'QUESTION_GENERATION'
-    )
+    ) {
       navigate(`/detail/${n.contract_id}`);
+    }
   };
 
   /* ▼ variant 에 따른 스타일 */
@@ -129,14 +135,7 @@ const NotificationList: React.FC<Props> = ({
           </a>
         </div>
       ) : (
-        <div className="mt-6 text-right">
-          <button
-            onClick={() => markAllAsRead()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm"
-          >
-            모두 읽음
-          </button>
-        </div>
+        <></>
       )}
     </div>
   );

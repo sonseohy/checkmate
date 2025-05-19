@@ -7,8 +7,10 @@ import Footer from '@/shared/ui/Footer';
 import { ChatbotButton } from '@/shared/ui/ChatbotButton';
 import { TopButton } from '@/shared/ui/TopButton';
 import { useAutoLogout } from '@/shared/hooks/useAutoLogout';
+import { Spinner } from '@/shared/ui/Spinner';
 
 import { ChatModal, chatService } from '@/features/chat';
+import { useNavigation } from 'react-router-dom';
 
 export interface AppLayoutProps {
   children: React.ReactNode;
@@ -32,7 +34,7 @@ export const AppLayout = ({
   const [showChat, setShowChat] = useState(false);
   const [showTopButton, setShowTopButton] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
-
+  const { state } = useNavigation();
   // 자동 로그아웃 - 사용자 활동 감지용 main 영역
   useAutoLogout(mainRef);
 
@@ -75,6 +77,12 @@ export const AppLayout = ({
       <ChatbotButton onClick={() => setShowChat(true)} isVisible={!showChat} />
       {showChat && <ChatModal onClose={() => setShowChat(false)} />}
       {showTopButton && <TopButton onClick={scrollToTop} />}
+      {/* ---------- 페이지 전환 오버레이 ---------- */}
+      {state === 'loading' && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
+          <Spinner size="lg" />
+        </div>
+      )}
     </div>
   );
 };

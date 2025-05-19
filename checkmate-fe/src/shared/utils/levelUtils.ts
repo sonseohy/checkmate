@@ -31,3 +31,9 @@ export const getOverallLevel = (r: AnalysisResult) => {
   const avg = scores.reduce((a, b) => a + b, 0) / scores.length; // 평균
   return Math.round(avg) as 1 | 2 | 3; // 1.4→1, 1.5→2 …
 };
+
+export const korRiskLabel: Record<'HIGH' | 'MEDIUM' | 'LOW', string> = {
+  HIGH: '위험해요!',
+  MEDIUM: '주의해요!',
+  LOW: '안심해요!',
+};

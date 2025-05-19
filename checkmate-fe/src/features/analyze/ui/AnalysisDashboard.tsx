@@ -1,9 +1,22 @@
+/* src/features/analyze/ui/AnalysisDashboard.tsx */
 import { useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { AnalysisResult } from '@/features/analyze';
 import { parseSummary } from '@/shared/utils/parseSummary';
 
-/* ─────────────────── Modal ─────────────────── */
+/* 위험·중요도 한국어 라벨 & 색상 */
+export const korRiskLabel: Record<'HIGH' | 'MEDIUM' | 'LOW', string> = {
+  HIGH: '🚨위험해요!',
+  MEDIUM: '⚠️주의해요!',
+  LOW: '✅안심해요!',
+};
+const importanceColor = {
+  HIGH: 'text-red-600',
+  MEDIUM: 'text-yellow-500',
+  LOW: 'text-green-600',
+} as const;
+
+/* ────────── Modal ────────── */
 const Modal: React.FC<{
   open: boolean;
   onClose: () => void;
@@ -25,7 +38,7 @@ const Modal: React.FC<{
     </div>
   );
 
-/* ───────────────── Expandable ───────────────── */
+/* ────────── Expandable ────────── */
 const Expandable: React.FC<{
   preview: React.ReactNode;
   full: React.ReactNode;
@@ -40,7 +53,7 @@ const Expandable: React.FC<{
           className="mt-2 text-sm text-blue-600 hover:underline"
           onClick={() => setOpen(true)}
         >
-          …더보기
+          더보기
         </button>
       )}
       <Modal open={open} onClose={() => setOpen(false)}>
@@ -50,26 +63,22 @@ const Expandable: React.FC<{
   );
 };
 
-/* ───────────────── Dashboard ───────────────── */
+/* ────────── Dashboard ────────── */
 interface Props {
   result: AnalysisResult;
   userName: string;
   contractTitle: string;
-  cardVar?: Variants; // ← 부모가 넘겨주는 카드 애니메이션
+  cardVar?: Variants; // 부모가 넘겨주는 애니메이션 variants
 }
 
-const AnalysisDashboard: React.FC<Props> = ({
-  result,
-  // userName,
-  // contractTitle,
-  cardVar,
-}) => {
+const AnalysisDashboard: React.FC<Props> = ({ result, cardVar }) => {
   /* 요약 파싱 */
   const summarySecs = parseSummary(result.summaries[0]?.description ?? '');
 
+  /* util – 리스트를 미리보기·전체보기 세트로 변환 */
   const makeListPreviewFull = <T,>(
     arr: T[],
-    render: (v: T, i?: number) => React.ReactNode,
+    render: (v: T) => React.ReactNode,
     slice = 5,
   ) => ({
     preview: <ul className="space-y-1">{arr.slice(0, slice).map(render)}</ul>,
@@ -77,36 +86,59 @@ const AnalysisDashboard: React.FC<Props> = ({
     isLong: arr.length > slice,
   });
 
+  /* ───── 누락된 조항 ───── */
   const missing = makeListPreviewFull(result.missingClauses, (m) => (
-    <li key={m.missingClauseReportId}>
-      <strong className="text-red-600">[{m.importance}]</strong> {m.description}
+    <li key={m.missingClauseReportId} className="leading-relaxed">
+      <span
+        className={`${
+          importanceColor[m.importance as keyof typeof importanceColor]
+        } font-semibold mr-2`}
+      >
+        {korRiskLabel[m.importance as keyof typeof korRiskLabel]}
+      </span>
+      {m.description}
     </li>
   ));
 
+  /* ───── 위험 요소 ───── */
   const risk = makeListPreviewFull(
     result.riskClauses,
     (r) => (
-      <li key={r.riskClauseReportId} className="text-sm">
-        <p className="text-red-600 font-medium mb-0.5">
-          [위험도: {r.riskLevel}]
-        </p>
-        <p className="mb-0.5">
+      <li key={r.riskClauseReportId} className="mb-4 last:mb-0 leading-relaxed">
+        <span
+          className={`${
+            importanceColor[
+              r.riskLevel as keyof typeof importanceColor // ← 캐스팅
+            ]
+          } font-semibold mr-2`}
+        >
+          {
+            korRiskLabel[
+              r.riskLevel as keyof typeof korRiskLabel // ← 캐스팅
+            ]
+          }
+        </span>
+
+        <span className="block">
           <strong>원문:</strong> {r.originalText}
-        </p>
-        <p>{r.description}</p>
+        </span>
+        <span className="block mt-1">{r.description}</span>
       </li>
     ),
     3,
   );
 
+  /* ───── 개선 제안 ───── */
   const improve = makeListPreviewFull(result.improvements, (i) => (
-    <li key={i.improvementReportId}>{i.description}</li>
+    <li key={i.improvementReportId} className="mb-4 last:mb-0">
+      {i.description}
+    </li>
   ));
 
-  /* ---------- UI ---------- */
+  /* ────────── UI ────────── */
   return (
     <>
-      {/* 계약 요약 */}
+      {/* 요약 카드 */}
       <motion.div
         variants={cardVar}
         layout
@@ -153,7 +185,7 @@ const AnalysisDashboard: React.FC<Props> = ({
         )}
       </motion.div>
 
-      {/* 누락 */}
+      {/* 누락된 조항 카드 */}
       <motion.div
         variants={cardVar}
         layout
@@ -163,7 +195,7 @@ const AnalysisDashboard: React.FC<Props> = ({
         <Expandable {...missing} />
       </motion.div>
 
-      {/* 위험 */}
+      {/* 위험 요소 카드 */}
       <motion.div
         variants={cardVar}
         layout
@@ -173,7 +205,7 @@ const AnalysisDashboard: React.FC<Props> = ({
         <Expandable {...risk} />
       </motion.div>
 
-      {/* 개선 */}
+      {/* 개선 제안 카드 */}
       <motion.div
         variants={cardVar}
         layout

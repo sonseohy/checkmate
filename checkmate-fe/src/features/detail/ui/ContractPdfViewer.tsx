@@ -63,7 +63,6 @@ const ContractPdfViewer: React.FC = () => {
   };
 
   const handlePdfDownload = () => {
-    console.log('category_id:', contract.category_id)
     const categoryName = contract.category_id ? getCategorName(Number(contract.category_id)) : '제목을 입력하세요';
     getContractownload(Number(contractId), `${categoryName}.pdf`);
   };

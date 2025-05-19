@@ -13,8 +13,6 @@ const ContractDetail: React.FC = () => {
   const { contractId: paramId } = useParams<{ contractId: string }>();
   const { state } = useLocation();
   const contract = state?.contract;
-  console.log(contract)
-
   const id = Number(paramId); // 질문 리스트 조회용
 
   const [questions, setQuestions] = useState<questionList>({ question: [] });

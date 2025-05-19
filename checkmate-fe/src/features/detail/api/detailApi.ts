@@ -52,7 +52,6 @@ export const getContractQuestions = async (
 ): Promise<questionList> => {
   try {
     const response = await customAxios.get(`/api/questions/${contractId}`);
-    console.log('API Response:', response.data);
     const data: questions[] = response.data.data;
     // questionDetail에서 따옴표를 제거한 후 반환
     const cleanedQuestions = data.map((question) => ({

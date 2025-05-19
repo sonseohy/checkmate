@@ -105,7 +105,11 @@ const ContractTable: React.FC<ContractTableProps> = ({ rowData, selectedIds, tog
                     {isWritten ? '작성' : '분석'}
                   </span>
                 </td>
-                <td className='table-ceil text-center text-[#202020]'>{row.title}</td>
+                <td className='table-ceil text-center text-[#202020]'>
+                  {isWritten 
+                  ? `${row.title}`  
+                  : '분석 계약서'}
+                </td>
                 <td className='table-ceil text-center'>
                   <span
                     className={`inline-block px-3 py-1 font-bold uppercase rounded

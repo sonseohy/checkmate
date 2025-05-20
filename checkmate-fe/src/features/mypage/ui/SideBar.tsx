@@ -73,11 +73,14 @@ export default function SideBar({ selectedMenu, onMenuClick }: SideBarProps) {
   return (
     <div
       className="
-        group/sidebar relative flex flex-col
-        h-full bg-white shadow-md overflow-hidden
-        transition-all duration-300
-        w-16 hover:w-48            /* 폭 조금만 넓힘 */
-      "
+      group/sidebar
+      sticky top-16           /* ← 헤더 바로 아래에 고정 */
+      flex flex-col
+      h-[calc(100vh-4rem)]    /* 뷰포트 높이 - 헤더 높이(4rem=64px) */
+      bg-white shadow-md overflow-hidden
+      transition-all duration-300
+      w-16 hover:w-48         /* 폭 조금만 넓힘 */
+    "
     >
       <div className="mt-10 space-y-7 px-2">
         {menu.map(({ icon: Icon, label }) => {

@@ -1,4 +1,4 @@
-// 대시 보드
+// src/features/mypage/ui/Dashboard.tsx
 import {
   PieDonutChart,
   ContractListData,
@@ -7,62 +7,74 @@ import {
 } from '@/features/mypage';
 import useMobile from '@/shared/hooks/useMobile';
 import { useQuery } from '@tanstack/react-query';
+import UnreadCard from './UnreadCard';
+import { useUserInfo } from '@/features/auth'; // ✨ 추가
 
 export default function Dashboard() {
   const isMobile = useMobile();
+  const user = useUserInfo(); // ✨ 사용자 정보
+  const userName = user?.name ?? '회원';
 
   const { data, isLoading, isError, error } = useQuery<ContractListData, Error>(
-    {
-      queryKey: ['contractList'],
-      queryFn: contractList,
-    },
+    { queryKey: ['contractList'], queryFn: contractList },
   );
 
-  if (isLoading) {
-    return <div>Loading..</div>;
-  }
+  if (isLoading) return <div>Loading…</div>;
+  if (isError)
+    return <div>Error: {error instanceof Error ? error.message : 'Error'}</div>;
 
-  if (isError) {
-    return (
-      <div>
-        Error: {error instanceof Error ? error.message : 'An error occurred'}
-      </div>
-    );
-  }
-  /* ── 레이아웃 클래스 분기 ── */
+  /* 카드 높이(제목 제외) */
+  const chartAreaH = isMobile ? 300 : 400;
+
+  /* wrapper */
   const wrapperCls = isMobile
-    ? 'flex flex-col px-4 pt-4 pb-20 gap-6' // ↙️ 모바일: 상단 16px, 하단 80px(바 여유), 가운데 정렬 제거
-    : 'flex flex-col ml-10 mt-10 gap-8'; // 데스크톱(기존)
-
-  const cardOuterCls = isMobile ? 'w-full' : 'w-full rounded-2xl';
+    ? 'flex flex-col px-4 pt-4 pb-20 gap-6'
+    : 'flex flex-col px-10 pt-10 gap-10';
 
   return (
     <div className={wrapperCls}>
-      {/* ── 최근 활동 ── */}
-      <div className={cardOuterCls}>
+      {/* 🌟 사용자 타이틀 */}
+      <h1
+        className={`font-bold text-[#202020] ${
+          isMobile ? 'text-2xl mb-2' : 'text-3xl mb-4'
+        }`}
+      >
+        {userName}님의 대시보드
+      </h1>
+
+      {/* ── 1행: 계약 활동 + 읽지 않은 알림 ── */}
+      <div className={isMobile ? 'flex flex-col gap-6' : 'flex gap-8'}>
+        {/* 계약 활동 카드 */}
+        <div
+          className={`flex-1 flex flex-col rounded-2xl bg-white ${
+            isMobile ? '' : 'shadow-[0_0px_15px_rgba(0,0,0,0.1)]'
+          }`}
+        >
+          <h2 className="mt-5 ml-5 text-black text-2xl font-semibold shrink-0">
+            계약 활동
+          </h2>
+          <div className="flex-1" style={{ minHeight: chartAreaH }}>
+            <PieDonutChart contractList={data?.contracts ?? []} />
+          </div>
+        </div>
+
+        {/* 읽지 않은 알림 카드 */}
+        <div className="flex-1">
+          <UnreadCard minHeight={chartAreaH} />
+        </div>
+      </div>
+
+      {/* ── 2행: 최근 활동 캐러셀 ── */}
+      <div className="w-full">
         <h2
           className={`text-[#202020] font-semibold ${
-            isMobile ? 'text-xl mb-3' : 'text-2xl mb-5 ml-5'
+            isMobile ? 'text-xl mb-3' : 'text-2xl mb-5'
           }`}
         >
           최근 활동
         </h2>
         <ContractCarousel contractList={data?.contracts ?? []} />
       </div>
-
-      {/* ── 계약 활동 차트 ── */}
-      {isMobile ? (
-        <div className="rounded-2xl bg-white w-full">
-          <PieDonutChart contractList={data?.contracts ?? []} />
-        </div>
-      ) : (
-        <div className="rounded-2xl bg-white shadow-[0_0px_15px_rgba(0,0,0,0.2)] w-1/4">
-          <h2 className="mt-5 ml-5 text-black text-2xl font-semibold">
-            계약 활동
-          </h2>
-          <PieDonutChart contractList={data?.contracts ?? []} />
-        </div>
-      )}
     </div>
   );
 }

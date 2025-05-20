@@ -81,3 +81,6 @@ export const getContractQuestions = async (
     return { question: [] };
   }
 };
+
+export const fetchQuestions = (contractId: number) =>
+  getContractQuestions(contractId);

@@ -45,10 +45,10 @@ export default function SideBar({ selectedMenu, onMenuClick }: SideBarProps) {
     return (
       <nav
         className="
-          fixed bottom-0 left-0 right-0
-          bg-white shadow
-          flex justify-around
-          py-4 z-50
+          sticky top-14 left-0 right-0      /* ↑ 헤더 높이(예: 56px=14)만큼 내려서 겹치지 않도록 */
+        bg-white 
+        flex justify-around
+        py-4 z-50
         "
       >
         {menu.map(({ icon: Icon, label }) => {

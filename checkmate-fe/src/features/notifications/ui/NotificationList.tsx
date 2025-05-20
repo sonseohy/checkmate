@@ -23,13 +23,15 @@ const TABS: { type: Tab; label: string }[] = [
 
 interface Props {
   notifications: Notification[];
-  variant?: Variant; // ▸ 기본값 'popup'
+  variant?: Variant;
+  onItemClick?: () => void;
 }
 
 /* ────────────────────────── 컴포넌트 ────────────────────────── */
 const NotificationList: React.FC<Props> = ({
   notifications,
   variant = 'popup',
+  onItemClick,
 }) => {
   const navigate = useNavigate();
   const { markAsRead, markAllAsRead } = useNotifications(); // 공통 훅
@@ -55,7 +57,10 @@ const NotificationList: React.FC<Props> = ({
     if (!n.read) markAsRead(n.id);
 
     /* 2) 메시지에 ‘실패’가 포함되면 이동하지 않음 */
-    if (n.message.includes('실패')) return;
+    if (n.message.includes('실패')) {
+      onItemClick?.();
+      return;
+    }
 
     /* 3) 정상 알림이면 타입별 라우팅 */
     if (n.type === 'CONTRACT_ANALYSIS') {
@@ -66,6 +71,8 @@ const NotificationList: React.FC<Props> = ({
     ) {
       navigate(`/detail/${n.contract_id}`);
     }
+
+    onItemClick?.(); // 페이지 이동 후에도 팝업 닫기
   };
 
   /* ▼ variant 에 따른 스타일 */

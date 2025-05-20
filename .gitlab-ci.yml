@@ -21,8 +21,9 @@ build_checkmate_fe:
     - echo "$FRONTEND_ENV" > .env
     - cat .env
     - npm ci
+    - mkdir -p public
+    - cp node_modules/pdfjs-dist/build/pdf.worker.mjs public/
     - npm run build
-    - cp node_modules/pdfjs-dist/build/pdf.worker.mjs dist/
   artifacts:
     paths:
       - checkmate-fe/dist

@@ -3,8 +3,6 @@ package com.checkmate.domain.notification.service;
 import com.checkmate.domain.notification.dto.response.NotificationResponse;
 import com.checkmate.domain.notification.entity.Notification;
 import com.checkmate.domain.notification.repository.NotificationRepository;
-import com.checkmate.domain.user.entity.User;
-import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +19,17 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
+    /**
+     * 알림 목록 조회
+     * 사용자의 모든 알림을 조회
+     *
+     * @param userId 사용자 ID
+     * @return 사용자의 알림 목록
+     */
     @Transactional(readOnly = true)
     public List<NotificationResponse> getNotifications(int userId) {
-        User user = userService.findUserById(userId);
         List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreatedAtDesc(userId);
 
         return notifications.stream()
@@ -42,9 +45,15 @@ public class NotificationService {
                 .toList();
     }
 
+    /**
+     * 읽지 않은 알림 목록 조회
+     * 사용자의 읽지 않은 알림만 조회
+     *
+     * @param userId 사용자 ID
+     * @return 사용자의 읽지 않은 알림 목록
+     */
     @Transactional(readOnly = true)
     public List<NotificationResponse> getUnreadNotifications(int userId) {
-        User user = userService.findUserById(userId);
         List<Notification> notifications = notificationRepository.findByUserUserIdAndIsReadFalseOrderByCreatedAtDesc(userId);
 
         return notifications.stream()
@@ -60,9 +69,16 @@ public class NotificationService {
                 .toList();
     }
 
+    /**
+     * 알림 읽음 처리
+     * 특정 알림을 읽음 상태로 변경하고 실시간 알림 상태 업데이트
+     *
+     * @param userId 사용자 ID
+     * @param notificationId 알림 ID
+     * @return 읽음 처리된 알림 정보
+     */
     @Transactional
     public NotificationResponse NotificationRead(int userId, int notificationId) {
-        User user = userService.findUserById(userId);
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
@@ -99,15 +115,27 @@ public class NotificationService {
         return response;
     }
 
+    /**
+     * 읽지 않은 알림 개수 조회
+     * 사용자의 읽지 않은 알림 개수를 반환
+     *
+     * @param userId 사용자 ID
+     * @return 읽지 않은 알림 개수
+     */
     @Transactional(readOnly = true)
     public long countUnreadNotifications(int userId) {
-        User user = userService.findUserById(userId);
         return notificationRepository.countByUserUserIdAndIsReadFalse(userId);
     }
 
+    /**
+     * 모든 알림 읽음 처리
+     * 사용자의 모든 알림을 읽음 상태로 변경하고 실시간 알림 상태 업데이트
+     *
+     * @param userId 사용자 ID
+     * @return 읽음 처리된 알림 목록
+     */
     @Transactional
     public List<NotificationResponse> markAllAsRead(int userId) {
-        User user = userService.findUserById(userId);
         List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreatedAtDesc(userId);
 
         for (Notification notification : notifications) {
@@ -142,6 +170,13 @@ public class NotificationService {
         return response;
     }
 
+    /**
+     * 알림 수신 확인
+     * 알림이 클라이언트에 전달되었음을 확인하고 상태 업데이트
+     *
+     * @param userId 사용자 ID
+     * @param notificationId 알림 ID
+     */
     @Transactional
     public void markAsDelivered(int userId, Integer notificationId) {
         Notification notification = notificationRepository.findById(notificationId)

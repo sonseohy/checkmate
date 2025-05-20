@@ -42,7 +42,7 @@ public class Contract {
     @JoinColumn(name = "template_id")
     private Template template;
 
-    @Column(name = "title", length = 20, nullable = false)
+    @Column(name = "title", length = 40, nullable = false)
     private String title;
 
     @Enumerated(EnumType.STRING)

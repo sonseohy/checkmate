@@ -12,6 +12,7 @@ import com.checkmate.domain.checklist.service.CheckListService;
 import com.checkmate.global.common.response.ApiResult;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,13 +33,11 @@ public class CheckListController {
 	 */
 	@Operation(summary = "체크 리스트 조회", description = "체크 리스트를 조회합니다.")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "체크 리스트 조회 성공"),
-		@ApiResponse(responseCode = "401", description = "인증 실패"),
-		@ApiResponse(responseCode = "404", description = "체크 리스트 없음"),
+		@ApiResponse(responseCode = "200", description = "체크 리스트 조회 성공")
 	})
 	@GetMapping("/{categoryId}")
 	public ApiResult<List<CheckListResponseDto>> getCheckListsByContractCategoryId(
-		@PathVariable(value = "categoryId") int categoryId) {
+		@Parameter(description = "카테고리 ID", required = true) @PathVariable(value = "categoryId") int categoryId) {
 		List<CheckListResponseDto> data = checkListService.getCheckListByContractCategoryId(categoryId);
 			return ApiResult.ok(data);
 	}

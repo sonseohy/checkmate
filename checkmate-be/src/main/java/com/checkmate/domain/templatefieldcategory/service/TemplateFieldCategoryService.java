@@ -30,7 +30,11 @@ public class TemplateFieldCategoryService {
     private final TemplateFieldCategoryRepository templateFieldCategoryRepository;
 
     /**
-     * 필드와 카테고리 매핑 생성
+     * 필드와 카테고리 매핑 생성 또는 업데이트
+     * 특정 템플릿 필드와 계약서 카테고리 간의 매핑을 생성하거나, 기존 매핑이 있으면 업데이트합니다.
+     *
+     * @param requestDto 필드-카테고리 매핑 요청 정보
+     * @return 생성 또는 업데이트된 매핑 정보
      */
     @Transactional
     public TemplateFieldCategoryMappingResponseDto createMapping(
@@ -71,7 +75,11 @@ public class TemplateFieldCategoryService {
     }
 
     /**
-     * 필드와 여러 카테고리 일괄 매핑
+     * 필드와 여러 카테고리 일괄 매핑 생성 또는 업데이트
+     * 하나의 필드를 여러 카테고리에 동시에 매핑하거나, 기존 매핑이 있으면 업데이트합니다.
+     *
+     * @param requestDto 일괄 매핑 요청 정보
+     * @return 생성 또는 업데이트된 매핑 정보 목록
      */
     @Transactional
     public List<TemplateFieldCategoryMappingResponseDto> createBatchMapping(
@@ -117,6 +125,10 @@ public class TemplateFieldCategoryService {
 
     /**
      * 필드 ID로 카테고리 매핑 목록 조회
+     * 특정 필드에 매핑된 모든 카테고리 정보를 조회합니다.
+     *
+     * @param fieldId 필드 ID
+     * @return 해당 필드에 매핑된 카테고리 정보 목록
      */
     @Transactional(readOnly = true)
     public List<TemplateFieldCategoryMappingResponseDto> getMappingsByFieldId(Integer fieldId) {
@@ -134,6 +146,10 @@ public class TemplateFieldCategoryService {
 
     /**
      * 카테고리 ID로 필드 매핑 목록 조회
+     * 특정 카테고리에 매핑된 모든 필드 정보를 조회합니다.
+     *
+     * @param categoryId 카테고리 ID
+     * @return 해당 카테고리에 매핑된 필드 정보 목록
      */
     @Transactional(readOnly = true)
     public List<TemplateFieldCategoryMappingResponseDto> getMappingsByCategoryId(Integer categoryId) {
@@ -151,6 +167,10 @@ public class TemplateFieldCategoryService {
 
     /**
      * 카테고리 ID로 필드 키 목록 조회
+     * 특정 카테고리에 매핑된 모든 필드의 키 정보와 카테고리 정보를 함께 조회합니다.
+     *
+     * @param categoryId 카테고리 ID
+     * @return 카테고리 정보와 해당 카테고리에 매핑된 필드 키 목록
      */
     @Transactional(readOnly = true)
     public FieldKeysByCategoryResponseDto getFieldKeysByCategoryId(Integer categoryId) {
@@ -169,6 +189,10 @@ public class TemplateFieldCategoryService {
 
     /**
      * 필드와 카테고리 매핑 삭제
+     * 특정 필드와 카테고리 간의 매핑을 삭제합니다.
+     *
+     * @param fieldId 필드 ID
+     * @param categoryId 카테고리 ID
      */
     @Transactional
     public void deleteMapping(Integer fieldId, Integer categoryId) {
@@ -182,6 +206,9 @@ public class TemplateFieldCategoryService {
 
     /**
      * 필드의 모든 카테고리 매핑 삭제
+     * 특정 필드에 연결된 모든 카테고리 매핑을 삭제합니다.
+     *
+     * @param fieldId 필드 ID
      */
     @Transactional
     public void deleteMappingsByFieldId(Integer fieldId) {
@@ -199,7 +226,12 @@ public class TemplateFieldCategoryService {
     }
 
     /**
-     * 섹션 내 모든 필드의 카테고리 매핑 조회
+     * 섹션 내 필드의 카테고리 매핑 조회
+     * 특정 섹션에 속한 필드 중 특정 카테고리에 매핑된 모든 필드 정보를 조회합니다.
+     *
+     * @param sectionId 섹션 ID
+     * @param categoryId 카테고리 ID
+     * @return 해당 섹션과 카테고리에 매핑된 필드 정보 목록
      */
     @Transactional(readOnly = true)
     public List<TemplateFieldCategoryMappingResponseDto> getMappingsBySectionIdAndCategoryId(

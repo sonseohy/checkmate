@@ -12,14 +12,24 @@ import org.springframework.stereotype.Service;
 public class KeyShareMongoService {
     private final MongoTemplate mongo;
 
-    /** shareB를 저장 */
+    /**
+     * shareB를 MongoDB에 저장
+     *
+     * @param fileId 파일 식별자
+     * @param shareB 저장할 키 조각
+     */
     public void saveShareB(Long fileId, byte[] shareB) {
         Document doc = new Document("fileId", fileId)
                 .append("shareB", shareB);
         mongo.save(doc, "keyShare");
     }
 
-    /** shareB를 조회 */
+    /**
+     * shareB를 MongoDB에서 조회
+     *
+     * @param fileId 파일 식별자
+     * @return 키 조각 바이트 배열
+     */
     public byte[] loadShareB(Long fileId) {
         Query query = Query.query(Criteria.where("fileId").is(fileId));
         Document doc = mongo.findOne(query, Document.class, "keyShare");

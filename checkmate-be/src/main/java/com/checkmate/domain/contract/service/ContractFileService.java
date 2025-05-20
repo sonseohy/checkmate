@@ -8,8 +8,6 @@ import com.checkmate.domain.contract.entity.ContractFile;
 import com.checkmate.domain.contract.entity.FileCategory;
 import com.checkmate.domain.contract.repository.ContractFileRepository;
 import com.checkmate.domain.contract.repository.ContractRepository;
-import com.checkmate.domain.user.entity.User;
-import com.checkmate.domain.user.service.UserService;
 import com.checkmate.global.common.exception.CustomException;
 import com.checkmate.global.common.exception.ErrorCode;
 import com.checkmate.global.common.service.*;
@@ -47,9 +45,16 @@ public class ContractFileService {
     private final FileConversionService fileConversion;
     private final PdfProcessingService pdfProcessing;
     private final MeterRegistry meterRegistry;
-    private final UserService userService;
     private final ContractRepository contractRepository;
 
+    /**
+     * 계약서 파일 업로드
+     * 사용자가 업로드한 계약서 파일을 처리하여 저장하고, 필요한 경우 PDF로 변환
+     *
+     * @param contract 계약서 엔티티
+     * @param files 업로드된 파일 목록
+     * @return 파일 처리 결과 (총 페이지 수 등)
+     */
     @Transactional
     public FileNumberResponse uploadContractFiles(
             Contract contract,
@@ -164,6 +169,12 @@ public class ContractFileService {
         }
     }
 
+    /**
+     * 파일 유효성 검사
+     * 업로드된 파일의 형식과 크기를 검증
+     *
+     * @param file 검증할 파일
+     */
     private void validateFile(MultipartFile file) {
         String ext = StringUtils.getFilenameExtension(
                 file.getOriginalFilename()).toLowerCase();
@@ -176,6 +187,13 @@ public class ContractFileService {
         }
     }
 
+    /**
+     * PDF 파일 병합
+     * 여러 PDF 파일을 하나로 병합
+     *
+     * @param pdfBytesList 병합할 PDF 파일 바이트 배열 목록
+     * @return 병합된 PDF 파일 바이트 배열
+     */
     private byte[] mergePdfs(List<byte[]> pdfBytesList) throws Exception {
         PDFMergerUtility merger = new PDFMergerUtility();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -187,14 +205,27 @@ public class ContractFileService {
         return out.toByteArray();
     }
 
+    /**
+     * 파일 주소로 파일 삭제
+     * S3에 저장된 파일을 삭제
+     *
+     * @param fileAddress 삭제할 파일 주소
+     */
     @Transactional
     public void deleteFileByAddress(String fileAddress) {
         s3Service.deleteFile(fileAddress);
     }
 
+    /**
+     * 뷰어용 파일 조회
+     * 계약서 ID로 뷰어용 파일을 조회하고 접근 권한 확인
+     *
+     * @param userId 사용자 ID
+     * @param contractId 계약서 ID
+     * @return 뷰어용 계약서 파일
+     */
     @Transactional(readOnly = true)
     public ContractFile findViewerFile(int userId, int contractId) {
-        User user = userService.findUserById(userId);
         ContractFile file = contractFileRepository.findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
                 .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
 
@@ -204,9 +235,16 @@ public class ContractFileService {
         return file;
     }
 
+    /**
+     * 뷰어용 PDF 메타데이터 로드
+     * 계약서 미리보기를 위한 PDF 메타데이터 조회
+     *
+     * @param userId 사용자 ID
+     * @param contractId 계약서 ID
+     * @return PDF 메타데이터 (파일 URL, 암호화 정보, 파일명 등)
+     */
     @Transactional(readOnly = true)
     public PdfMetadata loadViewerPdfMetadata(int userId, int contractId) {
-        User user = userService.findUserById(userId);
 
         ContractFile file = contractFileRepository
                 .findByContractIdAndFileCategory(contractId, FileCategory.VIEWER)
@@ -235,9 +273,16 @@ public class ContractFileService {
         );
     }
 
+    /**
+     * 계약서 관련 파일 목록 조회
+     * 특정 계약서와 관련된 파일 목록을 조회
+     *
+     * @param userId 사용자 ID
+     * @param contractId 계약서 ID
+     * @return 계약서 관련 파일 목록
+     */
     @Transactional(readOnly = true)
     public List<ContractFilesResponse> listContractFiles(int userId, int contractId) {
-        User user = userService.findUserById(userId);
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 

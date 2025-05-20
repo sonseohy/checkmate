@@ -13,6 +13,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
+    /**
+     * OpenAPI 문서 설정
+     * API 문서 제목, 버전, JWT 인증 등 설정
+     *
+     * @return 설정된 OpenAPI 인스턴스
+     */
     @Bean
     public OpenAPI openAPI() {
 

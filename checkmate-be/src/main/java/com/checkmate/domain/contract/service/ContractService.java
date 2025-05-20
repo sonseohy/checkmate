@@ -55,6 +55,14 @@ public class ContractService {
     @Value("${hs.client.id:}")
     private String clientId;
 
+    /**
+     * 계약서 업로드
+     * 계약서를 업로드하고 분석 이벤트를 발행
+     *
+     * @param userId 사용자 ID
+     * @param request 계약서 업로드 요청 정보
+     * @return 업로드된 계약서 정보
+     */
     @Transactional
     public ContractUploadResponse uploadContract(Integer userId, ContractUploadsRequest request) {
 
@@ -88,6 +96,13 @@ public class ContractService {
 
     }
 
+    /**
+     * 내 계약서 목록 조회
+     * 사용자의 모든 계약서 목록 조회
+     *
+     * @param userId 사용자 ID
+     * @return 사용자의 계약서 목록
+     */
     @Transactional(readOnly = true)
     public List<MyContractResponse> getMyContracts(Integer userId) {
 
@@ -108,9 +123,15 @@ public class ContractService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 내 계약서 삭제
+     * 특정 계약서와 관련 파일을 삭제
+     *
+     * @param userId 사용자 ID
+     * @param contractId 삭제할 계약서 ID
+     */
     @Transactional
     public void deleteMyContract(int userId, Integer contractId) {
-        User user = userService.findUserById(userId);
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 
@@ -118,13 +139,19 @@ public class ContractService {
             throw new CustomException(ErrorCode.CONTRACT_ACCESS_DENIED);
         }
 
-        contract.getFiles().forEach(file -> {
-            contractFileService.deleteFileByAddress(file.getFileAddress());
-        });
+        contract.getFiles().forEach(file -> contractFileService.deleteFileByAddress(file.getFileAddress()));
 
         contractRepository.deleteById(contractId);
     }
 
+    /**
+     * 계약서 상세 정보 조회
+     * 계약서 ID로 계약서 템플릿 구조와 저장된 값을 함께 조회
+     *
+     * @param userId 사용자 ID
+     * @param contractId 계약서 ID
+     * @return 계약서 템플릿 구조와 저장된 값
+     */
     @Transactional(readOnly = true)
     public ContractDetailsResponseDto getContractWithTemplateAndValues(Integer userId, Integer contractId) {
 
@@ -154,6 +181,15 @@ public class ContractService {
                 .build();
     }
 
+    /**
+     * 계약서 전자서명 업로드 및 요청
+     * 계약서 파일을 서명 서비스에 업로드하고 서명 요청 처리
+     *
+     * @param userId 사용자 ID
+     * @param contractId 계약서 ID
+     * @param signer 서명자 정보
+     * @return 서명 요청 결과 정보
+     */
     @Transactional
     public ContractSignatureUploadResponse uploadAndRequestSignature(
             Integer userId,

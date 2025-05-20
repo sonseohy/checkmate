@@ -25,6 +25,16 @@ public class ContractGeneratedFileController {
 
     private final ContractGeneratedFileService contractGeneratedFileService;
 
+    /**
+     * 계약서 생성 파일 저장
+     * 사용자가 작성 완료한 계약서 파일을 서버에 저장
+     *
+     * @param userDetails 현재 로그인한 사용자 정보
+     * @param contractId 계약서 ID
+     * @param file 저장할 PDF 파일
+     * @param fileName 파일명 (선택사항)
+     * @return 파일 저장 결과 정보
+     */
     @Operation(
             summary = "계약서 생성 파일 저장",
             description = "사용자 입력으로 생성된 계약서 파일을 서버에 저장합니다."
@@ -34,36 +44,11 @@ public class ContractGeneratedFileController {
                     responseCode = "201",
                     description = "파일 저장 성공",
                     content = @Content(schema = @Schema(implementation = ContractGeneratedFileResponseDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "잘못된 요청 (파일 없음, 지원하지 않는 파일 형식 등)",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "인증 실패",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "계약서를 찾을 수 없음",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "413",
-                    description = "파일 크기 초과",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "서버 내부 오류",
-                    content = @Content
             )
     })
     @PostMapping(value = "/{contractId}/generate-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResult<ContractGeneratedFileResponseDto> saveGeneratedFile(
-            @Parameter(description = "유저 ID", required = true)
+            @Parameter(description = "현재 로그인한 사용자 정보", required = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
 
             @Parameter(description = "계약서 ID", required = true)

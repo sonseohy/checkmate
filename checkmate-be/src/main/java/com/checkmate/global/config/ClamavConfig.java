@@ -14,6 +14,12 @@ public class ClamavConfig {
     @Value("${clamav.port}")
     private int port;
 
+    /**
+     * ClamAV 클라이언트 생성
+     * 설정된 호스트와 포트로 ClamAV 서버에 연결하는 클라이언트 생성
+     *
+     * @return 설정된 ClamavClient 인스턴스
+     */
     @Bean
     public ClamavClient clamAvClient() {
         return new ClamavClient(host, port);

@@ -14,6 +14,11 @@ import com.checkmate.domain.auth.service.AuthService;
 import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.response.ApiResult;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth API", description = "회원 인증 API")
 public class AuthController {
     private final AuthService authService;
 
@@ -36,6 +42,10 @@ public class AuthController {
      * @param kakaoLoginRequest 카카오 로그인 요청 정보
      * @return 액세스 토큰과 리프레시 토큰이 포함된 {@link ApiResult} 객체
      */
+    @Operation(summary = "카카오 로그인 처리 및 회원가입", description = "카카오 로그인을 처리하거나 회원가입을 합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "카카오 로그인 처리 및 회원가입 성공"),
+    })
     @PostMapping("/login")
     public ApiResult<KakaoLoginResponse> kakaoLogin(@Valid @RequestBody KakaoLoginRequest kakaoLoginRequest) {
         log.info("kakaoLoginRequest: {}", kakaoLoginRequest);
@@ -50,11 +60,17 @@ public class AuthController {
      * 이 메서드는 현재 로그인한 사용자의 세션 또는 리프레시 토큰을 무효화합니다.
      * </p>
      *
-     * @param userDetails 인증된 사용자 정보
+     * @param userDetails 현재 로그인한 사용자 정보
      * @return HTTP 204 No Content 응답을 포함한 {@link ApiResult} 객체
      */
+    @Operation(summary = "인증된 사용자의 로그아웃 처리", description = "인증된 사용자의 로그아웃을 처리합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "인증된 사용자의 로그아웃 처리 성공"),
+    })
     @PostMapping("/logout")
-    public ApiResult<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ApiResult<?> logout(
+        @Parameter(description = "현재 로그인한 사용자 정보", required = true)
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
         authService.logout(userDetails.getUserId());
         return ApiResult.noContent();
     }
@@ -69,6 +85,10 @@ public class AuthController {
      * @param refreshTokenRequest 리프레시 토큰 요청 정보
      * @return 새로운 토큰 정보가 포함된 {@link ApiResult} 객체
      */
+    @Operation(summary = "리프레시 토큰을 이용해 새로운 액세스 토큰 발급", description = "리프레시 토큰을 이용해 새로운 액세스 토큰을 발급합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "리프레시 토큰을 이용해 새로운 액세스 토큰 발급 성공"),
+    })
     @PostMapping("/reissue-token")
     public ApiResult<?> refreshAccessToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
         TokenPair refreshTokenResponse = authService.refreshAccessToken(refreshTokenRequest);

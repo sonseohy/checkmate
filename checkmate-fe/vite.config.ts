@@ -19,7 +19,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,wasm,css,html}'], // 캐싱할 파일 패턴
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [
-          new RegExp('^/pdf\\.worker\\.mjs$')
+          /^\/pdf\.worker\.mjs$/,      // https://…/pdf.worker.mjs
+          /^\/detail\/pdf\.worker\.mjs$/ // https://…/detail/pdf.worker.mjs
         ],
       },
       includeAssets: ['icons/favicon.ico'],

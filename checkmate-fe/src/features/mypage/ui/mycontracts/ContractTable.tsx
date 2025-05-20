@@ -26,12 +26,7 @@ const ContractTable: React.FC<ContractTableProps> = ({
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
 
-  // // 페이지네이션 로직
-  // const pageCount = Math.ceil(rowData.length / ROW_PER_PAGE);
-  // const offset = currentPage * ROW_PER_PAGE;
-  // const currentRows = rowData.slice(offset, offset + ROW_PER_PAGE);
-
-  /* 1️⃣  최신순 정렬된 배열 ─ useMemo 로 필요할 때만 다시 계산 */
+  /* 최신순 정렬된 배열 */
   const sortedRows = useMemo(() => {
     return [...rowData].sort(
       (a, b) =>
@@ -39,7 +34,7 @@ const ContractTable: React.FC<ContractTableProps> = ({
     );
   }, [rowData]);
 
-  /* 2️⃣  페이지네이션 */
+  /*  페이지네이션 */
   const pageCount = Math.ceil(sortedRows.length / ROW_PER_PAGE);
   const offset = currentPage * ROW_PER_PAGE;
   const currentRows = sortedRows.slice(offset, offset + ROW_PER_PAGE);

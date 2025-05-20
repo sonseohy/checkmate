@@ -137,7 +137,7 @@ const ContractPdfViewer: React.FC = () => {
             {isMobile ? <LuChevronLeft size={18} /> : '이전'}
           </button>
 
-          <span>
+          <span className="whitespace-nowrap">
             {pageNumber} / {numPages}
           </span>
 

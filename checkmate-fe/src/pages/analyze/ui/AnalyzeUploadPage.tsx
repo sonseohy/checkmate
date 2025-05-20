@@ -8,7 +8,7 @@ import {
 } from '@/shared/constants/categorySlugMap';
 import { navigateInvalidAccess } from '@/shared/utils/navigation';
 import Swal from 'sweetalert2';
-import Spinner from '@/shared/ui/Spinner';
+import { Spinner } from '@/shared/ui/Spinner';
 import { useUserInfo } from '@/features/auth';
 import { KakaoLoginModal } from '@/features/main';
 import uploadImage from '@/assets/images/loading/upload.png';
@@ -107,8 +107,11 @@ const AnalyzeUploadPage: React.FC = () => {
             alt="업로드 로딩"
             className="w-24 h-24 mx-auto mb-4"
           />
-          <p className="text-white text-lg font-semibold mb-1">
-            업로드 파일을 검사하고 있어요...
+          <p className="text-white text-lg font-semibold mb-1 flex items-center justify-center">
+            업로드 파일을 검사하고 있어요
+            <span className="dot dot1">.</span>
+            <span className="dot dot2">.</span>
+            <span className="dot dot3">.</span>
           </p>
         </div>
       )}

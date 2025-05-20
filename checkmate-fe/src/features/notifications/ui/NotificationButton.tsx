@@ -8,10 +8,15 @@ import NotificationList from './NotificationList';
 
 interface Props {
   open: boolean;
-  onClick: () => void; // 부모에서 토글 관리
+  onClick: () => void;
+  onItemClick?: () => void;
 }
 
-const NotificationButton: React.FC<Props> = ({ open, onClick }) => {
+const NotificationButton: React.FC<Props> = ({
+  open,
+  onClick,
+  onItemClick,
+}) => {
   const dispatch = useDispatch();
   const hasNew = useSelector((s: RootState) => s.notifications.hasNew);
 
@@ -39,8 +44,8 @@ const NotificationButton: React.FC<Props> = ({ open, onClick }) => {
         <Bell size={20} />
         {hasNew && (
           <>
-            <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full" />
-            <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full animate-ping" />
+            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-ping" />
           </>
         )}
       </button>
@@ -48,16 +53,16 @@ const NotificationButton: React.FC<Props> = ({ open, onClick }) => {
       {open && (
         <div
           className="
-              /* ─ 모바일: 화면 전체 기준 중앙 정렬 ─ */
-              fixed top-14 left-1/2 -translate-x-1/2
-        
-              /* ─ 데스크톱: 기존 위치 ─ */
-              md:absolute md:top-auto md:right-0 md:left-auto md:translate-x-0
-        
-              z-50 mt-2
-            "
+            fixed top-14 left-1/2 -translate-x-1/2
+            md:absolute md:top-auto md:right-0 md:left-auto md:translate-x-0
+            z-50 mt-2
+          "
         >
-          <NotificationList variant="popup" notifications={notifications} />
+          <NotificationList
+            variant="popup"
+            notifications={notifications}
+            onItemClick={onItemClick}
+          />
         </div>
       )}
     </div>

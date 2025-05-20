@@ -1,7 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Document, Page } from 'react-pdf';
-import { LuDownload, LuTrash2, LuPlus, LuMinus } from 'react-icons/lu';
+import {
+  LuDownload,
+  LuTrash2,
+  LuPlus,
+  LuMinus,
+  LuChevronRight,
+  LuChevronLeft,
+} from 'react-icons/lu';
 import { FaSignature } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
@@ -29,7 +36,7 @@ const ContractPdfViewer: React.FC = () => {
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(isMobile ? 0.6 : 1);
-  const [showSignatureModal, setShowSignatureModal] = useState(false);  
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
   const { state: contract } = useLocation();
 
   const documentKey = useMemo(() => {
@@ -62,7 +69,9 @@ const ContractPdfViewer: React.FC = () => {
   };
 
   const handlePdfDownload = () => {
-    const categoryName = contract.contract.category_id ? getCategorName(Number(contract.contract.category_id)) : '제목을 입력하세요';
+    const categoryName = contract.contract.category_id
+      ? getCategorName(Number(contract.contract.category_id))
+      : '제목을 입력하세요';
     getContractownload(Number(contractId), `${categoryName}.pdf`);
   };
 
@@ -123,19 +132,21 @@ const ContractPdfViewer: React.FC = () => {
           <button
             onClick={() => setPageNumber((p) => Math.max(p - 1, 1))}
             disabled={pageNumber <= 1}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 flex items-center justify-center"
           >
-            이전
+            {isMobile ? <LuChevronLeft size={18} /> : '이전'}
           </button>
+
           <span>
             {pageNumber} / {numPages}
           </span>
+
           <button
             onClick={() => setPageNumber((p) => Math.min(p + 1, numPages))}
             disabled={pageNumber >= numPages}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 flex items-center justify-center"
           >
-            다음
+            {isMobile ? <LuChevronRight size={18} /> : '다음'}
           </button>
         </div>
 

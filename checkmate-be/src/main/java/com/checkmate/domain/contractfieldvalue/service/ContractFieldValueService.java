@@ -613,28 +613,59 @@ public class ContractFieldValueService {
             }
         }
 
-        // 일반 필드 키 패턴 처리
-        Pattern fieldPattern = Pattern.compile("\\{([^{}]+)}");
-        Matcher fieldMatcher = fieldPattern.matcher(renderedText);
-        StringBuffer fieldSb = new StringBuffer();
+        // 일반 필드 키 패턴 처리 및 최종 c: 접두사 제거
+        Pattern finalPattern;
+        finalPattern = Pattern.compile("\\{([^{}]+)}|c:(\\d+\\.\\d+)");
+        Matcher finalMatcher = finalPattern.matcher(renderedText);
+        StringBuffer finalSb = new StringBuffer();
 
-        while (fieldMatcher.find()) {
-            String fieldKey = fieldMatcher.group(1);
-            if (!fieldKey.matches("(SUM|SUB|MUL|DIV):.*") && !fieldKey.startsWith("c:")) {
-                String value = fieldKeyValueMap.getOrDefault(fieldKey, "");
-                fieldMatcher.appendReplacement(fieldSb, Matcher.quoteReplacement(value));
-            } else {
-                // c: 접두사가 있는 경우 접두사 제거
-                if (fieldKey.startsWith("c:")) {
-                    fieldMatcher.appendReplacement(fieldSb, fieldKey.substring(2));
+        while (finalMatcher.find()) {
+            if (finalMatcher.group(1) != null) {
+                // 필드 키 처리
+                String fieldKey = finalMatcher.group(1);
+                if (!fieldKey.matches("(SUM|SUB|MUL|DIV):.*")) {
+                    String value = fieldKeyValueMap.getOrDefault(fieldKey, "");
+                    finalMatcher.appendReplacement(finalSb, Matcher.quoteReplacement(value));
                 } else {
-                    fieldMatcher.appendReplacement(fieldSb, "");
+                    // 남아있는 연산 패턴은 빈 문자열로 치환
+                    finalMatcher.appendReplacement(finalSb, "");
+                }
+            } else if (finalMatcher.group(2) != null) {
+                // c: 접두사 제거 및 숫자 포맷팅
+                String numValue = finalMatcher.group(2);
+                try {
+                    double value = Double.parseDouble(numValue);
+                    String formattedValue = String.valueOf(Math.round(value));
+                    finalMatcher.appendReplacement(finalSb, formattedValue);
+                } catch (NumberFormatException e) {
+                    finalMatcher.appendReplacement(finalSb, numValue);
                 }
             }
         }
 
-        fieldMatcher.appendTail(fieldSb);
-        return fieldSb.toString();
+        finalMatcher.appendTail(finalSb);
+
+        // 남아있는 c: 접두사 제거
+        String result = finalSb.toString();
+        result = result.replaceAll("c:(\\d+\\.\\d+)", "$1");
+
+        // 최종 결과의 소수점 형식 처리 - 정수는 반올림, DIV 결과는 소수점 2자리까지
+        Pattern numPattern = Pattern.compile("(\\d+\\.\\d+)");
+        Matcher numMatcher = numPattern.matcher(result);
+        StringBuffer numSb = new StringBuffer();
+
+        while (numMatcher.find()) {
+            try {
+                double value = Double.parseDouble(numMatcher.group(1));
+                String formatted = String.valueOf(Math.round(value));
+                numMatcher.appendReplacement(numSb, formatted);
+            } catch (NumberFormatException e) {
+                // 무시
+            }
+        }
+
+        numMatcher.appendTail(numSb);
+        return numSb.toString();
     }
 
     /**
@@ -715,7 +746,6 @@ public class ContractFieldValueService {
                 // 중간 결과는 정확한 값
                 formattedResult = String.valueOf(result);
             }
-
             renderedText = renderedText.replace(placeholder, formattedResult);
         }
 

@@ -1,3 +1,7 @@
+// src/main.tsx
+import { pdfjs } from 'react-pdf';
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
+
 import { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@app/styles/index.css';
@@ -8,12 +12,10 @@ import { Provider } from 'react-redux';
 import { store } from '@/app/redux/store';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// src/main.tsx
-import { pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-// public 폴더에 복사해 둔 워커를 루트 URL로 가리킵니다.
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+
+
 import { FullPageSpinner } from '@/shared/ui/Spinner';
 
 const queryClient = new QueryClient();
@@ -21,7 +23,6 @@ const queryClient = new QueryClient();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Suspense fallback={<FullPageSpinner />}>
-      {/* 번들 · 라우터 초기화 로딩 */}
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />

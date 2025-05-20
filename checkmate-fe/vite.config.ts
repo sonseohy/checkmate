@@ -19,6 +19,16 @@ export default defineConfig({
         globPatterns: ['**/*.{js,wasm,css,html}'], // 캐싱할 파일 패턴
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [ /^\/pdf\.worker\.mjs$/, ],
+        runtimeCaching: [
+          {
+            urlPattern: /^\/pdf\.worker\.mjs$/,
+            handler: 'NetworkOnly',
+            options: {
+              // 필요하면 캐시 옵션 더 줄 수 있습니다.
+              cacheName: 'pdf-worker-cache',
+            },
+          },
+        ],
       },
       includeAssets: ['pdf.worker.mjs', 'icons/favicon.ico'],
       devOptions: {

@@ -17,17 +17,23 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({
 
   /* ───── 크기 계산 ───── */
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState<number | null>(null); // NaN 보호
+  // 초기값을 null 대신 기본 크기(250)로 설정하여 처음부터 차트가 보이도록 함
+  const [size, setSize] = useState<number>(250);
 
   /* ───── 모바일 최소 크기 보장 및 크기 계산 개선 ───── */
   useEffect(() => {
-    if (!wrapperRef.current) return;
+    // 초기 렌더링 시 딜레이를 주어 정확한 크기 계산
+    const initialTimer = setTimeout(() => {
+      calculateOptimalSize();
+    }, 50);
 
-    const calculateOptimalSize = () => {
-      const { width, height } = wrapperRef.current!.getBoundingClientRect();
+    function calculateOptimalSize() {
+      if (!wrapperRef.current) return;
+
+      const { width, height } = wrapperRef.current.getBoundingClientRect();
 
       // 최소 크기 설정 (모바일에서도 적절한 크기 보장)
-      const minSize = 180; // 모바일에서 최소 크기
+      const minSize = 200; // 모바일에서 최소 크기
 
       if (width > 0 && height > 0) {
         // 부모 컨테이너의 크기를 고려하되 최소 크기 보장
@@ -41,17 +47,31 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({
         );
 
         setSize(optimalSize);
+      } else {
+        // 초기 렌더링 시 크기가 0인 경우, 기본값 설정
+        setSize(minSize);
       }
-    };
+    }
 
     // 초기 계산
     calculateOptimalSize();
 
     // 리사이즈 감지
     const ro = new ResizeObserver(calculateOptimalSize);
-    ro.observe(wrapperRef.current);
+    if (wrapperRef.current) {
+      ro.observe(wrapperRef.current);
+    }
 
-    return () => ro.disconnect();
+    // 컴포넌트가 마운트된 후 일정 시간 후에 다시 계산
+    const recalculateTimer = setTimeout(() => {
+      calculateOptimalSize();
+    }, 300);
+
+    return () => {
+      ro.disconnect();
+      clearTimeout(initialTimer);
+      clearTimeout(recalculateTimer);
+    };
   }, []);
 
   /* ───── ApexCharts 옵션 ───── */
@@ -155,22 +175,23 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({
     <div
       ref={wrapperRef}
       className="w-full h-full flex items-center justify-center overflow-visible"
+      // 최소 높이 설정으로 컨테이너가 0 크기가 되는 것 방지
+      style={{ minHeight: '240px' }}
     >
-      {size && (
-        <div
-          className="flex items-center justify-center"
-          style={{ minHeight: '240px' }}
-        >
-          <ReactApexChart
-            key={series.join('-')}
-            options={options}
-            series={series}
-            type="donut"
-            width={size}
-            height={size}
-          />
-        </div>
-      )}
+      {/* 항상 차트 렌더링 (size는 이제 항상 존재) */}
+      <div
+        className="flex items-center justify-center"
+        style={{ minHeight: '240px' }}
+      >
+        <ReactApexChart
+          key={`${series.join('-')}-${size}`}
+          options={options}
+          series={series}
+          type="donut"
+          width={size}
+          height={size}
+        />
+      </div>
     </div>
   );
 };

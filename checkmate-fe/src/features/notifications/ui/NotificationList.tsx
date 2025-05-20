@@ -34,7 +34,7 @@ const NotificationList: React.FC<Props> = ({
   onItemClick,
 }) => {
   const navigate = useNavigate();
-  const { markAsRead, markAllAsRead } = useNotifications(); // 공통 훅
+  const { markAsRead } = useNotifications(); // 공통 훅
   const [selected, setSelected] = useState<Tab>('ALL');
 
   /* ▼ 필터링 */

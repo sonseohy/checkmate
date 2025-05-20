@@ -218,7 +218,7 @@ const WritePreviewPage: React.FC = () => {
                             : 'list-disc list-inside'
                         }
                       >
-                        {prettifyLine(line)}
+                        {renderLine(line)}
                       </li>
                     ))}
                   </ul>

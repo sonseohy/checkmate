@@ -14,7 +14,6 @@ export const useAutoLogout = (mainRef: React.RefObject<HTMLElement | null>) => {
     dispatch(logout());
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
-    localStorage.removeItem('token_expires_at');
 
     Swal.fire({
       icon: 'info',
@@ -29,7 +28,7 @@ export const useAutoLogout = (mainRef: React.RefObject<HTMLElement | null>) => {
   // 유휴 시간 타이머 초기화
   const resetIdle = useCallback(() => {
     if (idleTimer.current) clearTimeout(idleTimer.current);
-    idleTimer.current = window.setTimeout(doLogout, 30 * 60 * 1000); // 30분
+    idleTimer.current = window.setTimeout(doLogout, 60 * 60 * 1000); // 60분
   }, [doLogout]);
 
   useEffect(() => {

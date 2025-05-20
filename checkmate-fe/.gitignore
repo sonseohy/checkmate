@@ -9,7 +9,10 @@ lerna-debug.log*
 
 package-lock.json
 node_modules
-dist
+dist/*
+
+# dist/pdf.worker.mjs 파일만 다시 추적 대상에 포함
+!dist/pdf.worker.mjs
 dist-ssr
 dev-dist
 *.local

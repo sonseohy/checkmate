@@ -13,10 +13,13 @@ const AreaInput: React.FC<AreaInputProps> = ({
   onChange,
   onBlur,
 }) => {
+  // 화면에 보여줄 포맷된 값: 1500 -> "1,500"
+  const formattedValue = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    const onlyDigits = raw.replace(/\D/g, '');
-    onChange(onlyDigits);
+    // 입력 중에는 콤마·비숫자 모두 제거하고 순수 숫자만 부모로 전달
+    const raw = e.target.value.replace(/\D/g, '');
+    onChange(raw);
   };
 
   return (
@@ -24,9 +27,9 @@ const AreaInput: React.FC<AreaInputProps> = ({
       <input
         type="text"
         inputMode="numeric"
-        pattern="[0-9]*"
-        maxLength={10}
-        value={value}
+        pattern="[0-9,]*"
+        maxLength={15}
+        value={formattedValue}
         onChange={handleChange}
         onBlur={onBlur}
         className="w-full p-2 pr-10 rounded-md border bg-white border-gray-400 text-right"

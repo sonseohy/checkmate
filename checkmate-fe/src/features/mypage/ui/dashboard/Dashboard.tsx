@@ -8,13 +8,14 @@ import {
 import useMobile from '@/shared/hooks/useMobile';
 import { useQuery } from '@tanstack/react-query';
 import UnreadCard from './UnreadCard';
-import { useUserInfo } from '@/features/auth'; // ✨ 추가
+import { useUserInfo } from '@/features/auth';
+import { getColorFromString } from '@/shared/utils/getColorFromString';
 
 export default function Dashboard() {
   const isMobile = useMobile();
-  const user = useUserInfo(); // ✨ 사용자 정보
+  const user = useUserInfo();
   const userName = user?.name ?? '회원';
-
+  const userColor = getColorFromString(userName);
   const { data, isLoading, isError, error } = useQuery<ContractListData, Error>(
     { queryKey: ['contractList'], queryFn: contractList },
   );
@@ -39,7 +40,8 @@ export default function Dashboard() {
           isMobile ? 'text-2xl mb-2' : 'text-3xl mb-4'
         }`}
       >
-        {userName}님의 대시보드
+        <span style={{ color: userColor }}>{userName}</span>
+        님의 대시보드
       </h1>
 
       {/* ── 1행: 계약 활동 + 읽지 않은 알림 ── */}

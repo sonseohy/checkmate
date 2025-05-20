@@ -16,7 +16,7 @@ export default defineConfig({
       workbox: {
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, 
         globDirectory: 'dist',
-        globPatterns: ['**/*.{js,wasm,css,html, mjs}'], // 캐싱할 파일 패턴
+        globPatterns: ['**/*.{js,wasm,css,html, mjs}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [ /^\/pdf\.worker\.mjs$/, ],
         runtimeCaching: [

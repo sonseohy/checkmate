@@ -25,12 +25,10 @@ export const useNotificationSocket = (
         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
       },
       reconnectDelay: 5000,
-      debug: (str) => console.log('[STOMP]', str),
+      // debug: (str) => console.log('[STOMP]', str),
     });
 
     client.onConnect = () => {
-      console.log('✅ STOMP 연결 완료');
-
       client.subscribe('/user/queue/notifications', (msg) => {
         const data: Notification = JSON.parse(msg.body);
 

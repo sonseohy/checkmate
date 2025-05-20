@@ -158,3 +158,6 @@ body {
 .dot3 {
   animation-delay: 0.4s;
 }
+.apexcharts-canvas svg {
+  overflow: visible !important;
+}

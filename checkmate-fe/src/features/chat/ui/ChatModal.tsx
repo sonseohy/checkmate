@@ -90,9 +90,17 @@ const ChatModal = ({ onClose }: ChatModalProps) => {
     <Modal
       isOpen
       onRequestClose={onClose}
-      overlayClassName="fixed inset-0 z-40"
-      className="absolute bottom-6 right-6 w-[400px] h-[460px] bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 flex flex-col transition-all
-                 sm:bottom-10 sm:right-10"
+      overlayClassName="fixed inset-0 z-40 bg-black/30"
+      className="
+        absolute bottom-4 left-1/2 -translate-x-1/2
+        w-[90vw] h-[70vh]
+
+        sm:bottom-6 sm:right-6 sm:left-auto sm:translate-x-0
+        sm:w-[400px] sm:h-[460px]
+
+        bg-white border border-gray-200 rounded-2xl shadow-2xl
+        p-4 flex flex-col transition-all
+      "
     >
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-2">

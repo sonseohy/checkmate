@@ -48,9 +48,11 @@ export default function Dashboard() {
       <div className={isMobile ? 'flex flex-col gap-6' : 'flex gap-8'}>
         {/* 계약 활동 카드 */}
         <div
-          className={`flex-1 flex flex-col rounded-2xl bg-white ${
-            isMobile ? '' : 'shadow-[0_0px_15px_rgba(0,0,0,0.1)]'
-          }`}
+          className={`flex-1 flex flex-col rounded-2xl bg-white overflow-visible
+                       
+                         ${
+                           isMobile ? '' : 'shadow-[0_0px_15px_rgba(0,0,0,0.1)]'
+                         }`}
         >
           <h2 className="mt-5 ml-5 text-black text-2xl font-semibold shrink-0">
             계약 활동

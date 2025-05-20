@@ -36,13 +36,10 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({
       const minSize = 200; // 모바일에서 최소 크기
 
       if (width > 0 && height > 0) {
-        // 부모 컨테이너의 크기를 고려하되 최소 크기 보장
-        const calculatedSize = Math.min(width, height) * 0.95;
-
         // 최소 크기와 계산된 크기 중 큰 값 사용
         // 단, 부모 컨테이너보다 크지 않도록 제한
         const optimalSize = Math.min(
-          Math.max(calculatedSize, minSize),
+          Math.max(Math.min(width, height) * 0.9, minSize), // ← 90 %
           Math.min(width, height),
         );
 
@@ -109,7 +106,7 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({
         // 모바일에서도 적절한 크기를 유지하도록 설정
         offsetX: 0,
         offsetY: 0,
-        customScale: 1, // 작은 화면에서도 크기 유지
+        customScale: 0.9, // 작은 화면에서도 크기 유지
         donut: {
           size: '60%',
           labels: {

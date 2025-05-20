@@ -1,7 +1,8 @@
 // src/main.tsx
 import { pdfjs } from 'react-pdf';
 // pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
-pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}/pdf.worker.mjs`;
+// pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}/pdf.worker.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}${import.meta.env.BASE_URL}pdf.worker.mjs`;
 
 console.log('pdfjs workerSrc:', pdfjs.GlobalWorkerOptions.workerSrc);
 

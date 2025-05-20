@@ -39,3 +39,5 @@ tmp/
 # IntelliJ / WebStorm
 .idea/
 *.iml
+
+public/pdf.worker.mjs

@@ -16,7 +16,7 @@ const ContractDetail: React.FC = () => {
   const contract = state ?? null;
 
   /* 질문 쿼리 */
-  const { data: questions, isLoading, isFetching } = useQuestions(id);
+  const { data: questions } = useQuestions(id);
 
   /* “AI 완료” 플래그 */
   const [aiDone, setAiDone] = useState(false);

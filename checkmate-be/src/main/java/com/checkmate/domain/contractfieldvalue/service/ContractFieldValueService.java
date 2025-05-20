@@ -250,6 +250,12 @@ public class ContractFieldValueService {
                 break;
 
             case RADIO:
+                // RADIO 타입은 옵션에 있는 값인지 확인 로직 추가
+                if (field.getOptions() != null && !field.getOptions().isEmpty()) {
+                    if (!field.getOptions().contains(value)) {
+                        throw new CustomException(ErrorCode.INVALID_FIELD_VALUE);
+                    }
+                }
                 break;
         }
     }
@@ -511,68 +517,131 @@ public class ContractFieldValueService {
         }
 
         String renderedText = text;
-        boolean isTopLevel = true; // 최상위 호출인지 여부를 추적
+        int iterations = 0;
+        final int MAX_ITERATIONS = 10; // 무한 루프 방지를 위한 최대 반복 횟수
 
-        // 중첩 호출을 위한 재귀 함수
-        return processNestedOperations(renderedText, fieldKeyValueMap, fieldIdValueMap, isTopLevel);
+        // 모든 연산이 처리될 때까지 반복
+        while (containsOperation(renderedText) && iterations < MAX_ITERATIONS) {
+            iterations++;
+
+            // 가장 안쪽의 연산부터 처리
+            Pattern innerOperationPattern = Pattern.compile("\\{(SUM|SUB|MUL|DIV):([^{}]+)\\}");
+            Matcher innerOperationMatcher = innerOperationPattern.matcher(renderedText);
+
+            boolean foundOperation = false;
+            StringBuffer sb = new StringBuffer();
+
+            while (innerOperationMatcher.find()) {
+                foundOperation = true;
+                String placeholder = innerOperationMatcher.group(0);
+                String operation = innerOperationMatcher.group(1);
+                String paramsStr = innerOperationMatcher.group(2);
+
+                // 필드 ID 목록과 상수값 파싱
+                List<Integer> fieldIds = new ArrayList<>();
+                List<Double> constants = new ArrayList<>();
+
+                for (String param : paramsStr.split(",")) {
+                    param = param.trim();
+                    if (param.startsWith("c:")) {
+                        try {
+                            double constant = Double.parseDouble(param.substring(2));
+                            constants.add(constant);
+                        } catch (NumberFormatException e) {
+                            // 잘못된 상수 형식은 무시
+                        }
+                    } else {
+                        try {
+                            int fieldId = Integer.parseInt(param);
+                            fieldIds.add(fieldId);
+                        } catch (NumberFormatException e) {
+                            try {
+                                // 숫자 자체도 상수로 처리
+                                double constant = Double.parseDouble(param);
+                                constants.add(constant);
+                            } catch (NumberFormatException ex) {
+                                // 잘못된 형식은 무시
+                            }
+                        }
+                    }
+                }
+
+                // 연산 수행
+                double result;
+
+                switch (operation) {
+                    case "SUM":
+                        result = calculateSumWithConstants(fieldIds, fieldIdValueMap, constants);
+                        break;
+                    case "SUB":
+                        result = calculateSubtractionWithConstants(fieldIds, fieldIdValueMap, constants);
+                        break;
+                    case "MUL":
+                        result = calculateMultiplicationWithConstants(fieldIds, fieldIdValueMap, constants);
+                        break;
+                    case "DIV":
+                        result = calculateDivisionWithConstants(fieldIds, fieldIdValueMap, constants);
+                        break;
+                    default:
+                        result = 0.0;
+                        break;
+                }
+
+                // 결과값을 문자열로 변환 (중간 결과이므로 그대로 사용)
+                String resultStr = String.valueOf(result);
+
+                // 중첩 연산의 경우 중간 결과를 상수로 표시
+                if (containsOperation(renderedText.replace(placeholder, ""))) {
+                    innerOperationMatcher.appendReplacement(sb, "c:" + resultStr);
+                } else {
+                    // 최상위 연산인 경우 최종 결과 포맷팅
+                    String formattedResult;
+                    if (operation.equals("DIV")) {
+                        formattedResult = String.format("%.2f", result);
+                    } else {
+                        formattedResult = String.valueOf(Math.round(result));
+                    }
+                    innerOperationMatcher.appendReplacement(sb, formattedResult);
+                }
+            }
+
+            if (foundOperation) {
+                innerOperationMatcher.appendTail(sb);
+                renderedText = sb.toString();
+            } else {
+                break; // 더 이상 처리할 연산이 없음
+            }
+        }
+
+        // 일반 필드 키 패턴 처리
+        Pattern fieldPattern = Pattern.compile("\\{([^{}]+)}");
+        Matcher fieldMatcher = fieldPattern.matcher(renderedText);
+        StringBuffer fieldSb = new StringBuffer();
+
+        while (fieldMatcher.find()) {
+            String fieldKey = fieldMatcher.group(1);
+            if (!fieldKey.matches("(SUM|SUB|MUL|DIV):.*") && !fieldKey.startsWith("c:")) {
+                String value = fieldKeyValueMap.getOrDefault(fieldKey, "");
+                fieldMatcher.appendReplacement(fieldSb, Matcher.quoteReplacement(value));
+            } else {
+                // c: 접두사가 있는 경우 접두사 제거
+                if (fieldKey.startsWith("c:")) {
+                    fieldMatcher.appendReplacement(fieldSb, fieldKey.substring(2));
+                } else {
+                    fieldMatcher.appendReplacement(fieldSb, "");
+                }
+            }
+        }
+
+        fieldMatcher.appendTail(fieldSb);
+        return fieldSb.toString();
     }
 
     /**
-     * 중첩 연산을 재귀적으로 처리
+     * 문자열에 연산 패턴이 포함되어 있는지 확인
      */
-    private String processNestedOperations(String text, Map<String, String> fieldKeyValueMap,
-                                           Map<Integer, String> fieldIdValueMap, boolean isTopLevel) {
-        // 가장 안쪽의 중첩부터 처리하기 위해 먼저 중첩 없는 연산을 모두 처리
-        String renderedText = text;
-
-        // 중첩 패턴이 있는지 확인
-        Pattern nestedPattern = Pattern.compile("\\{(SUM|SUB|MUL|DIV):[^{}]*\\{");
-        boolean hasNestedOperation = nestedPattern.matcher(renderedText).find();
-
-        if (hasNestedOperation) {
-            // 가장 안쪽의 연산(중첩 없는)부터 처리
-            Pattern innerPattern = Pattern.compile("\\{(SUM|SUB|MUL|DIV):([^{}]+)}");
-            Matcher innerMatcher = innerPattern.matcher(renderedText);
-
-            // 텍스트 내에서 위치를 추적하기 위한 변수들
-            StringBuilder processedText = new StringBuilder(renderedText);
-            int offset = 0;
-
-            while (innerMatcher.find()) {
-                // 중괄호 내에 중첩이 없는 연산만 처리
-                String fullMatch = innerMatcher.group(0);
-                String operation = innerMatcher.group(1);
-                String params = innerMatcher.group(2);
-
-                // 이미 처리된 부분은 건너뛰기
-                if (fullMatch.contains("{" + operation)) {
-                    continue;
-                }
-
-                // 연산 처리
-                double result = performOperation(operation, params, fieldIdValueMap);
-
-                // 결과를 문자열로 변환
-                String resultStr = String.valueOf(result);
-
-                // 치환 (중간 결과는 상수 형태로)
-                int startPos = innerMatcher.start() + offset;
-                int endPos = innerMatcher.end() + offset;
-                processedText.replace(startPos, endPos, "c:" + resultStr);
-
-                // 오프셋 업데이트
-                offset += (("c:" + resultStr).length() - fullMatch.length());
-
-                // 정규식 매처 업데이트
-                innerMatcher = innerPattern.matcher(processedText.toString());
-            }
-
-            // 중간 결과가 있는 텍스트를 재귀적으로 처리
-            return processNestedOperations(processedText.toString(), fieldKeyValueMap, fieldIdValueMap, isTopLevel);
-        }
-
-        // 중첩 없는 기본 연산 처리
-        return processBasicOperations(renderedText, fieldKeyValueMap, fieldIdValueMap, isTopLevel);
+    private boolean containsOperation(String text) {
+        return text.matches(".*\\{(SUM|SUB|MUL|DIV):.*}.*");
     }
 
     private double performOperation(String operation, String params, Map<Integer, String> fieldIdValueMap) {
@@ -894,11 +963,8 @@ public class ContractFieldValueService {
                     String value = fieldIdValueMap.get(fieldId);
                     try {
                         double doubleValue = Double.parseDouble(value);
-                        // 0이 아닌 값만 곱셈에 참여시킴
-                        if (Math.abs(doubleValue) > 0.00001) {
-                            result *= doubleValue;
-                            hasValidValue = true;
-                        }
+                        result *= doubleValue;
+                        hasValidValue = true;
                     } catch (NumberFormatException | NullPointerException e) {
                         // 무시
                     }
@@ -909,7 +975,7 @@ public class ContractFieldValueService {
         // 상수값 곱셈
         if (constants != null) {
             for (Double constant : constants) {
-                if (constant != null && Math.abs(constant) > 0.00001) {
+                if (constant != null) {
                     result *= constant;
                     hasValidValue = true;
                 }

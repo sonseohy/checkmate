@@ -1,6 +1,9 @@
 // src/main.tsx
 import { pdfjs } from 'react-pdf';
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdf.worker.mjs',
+  import.meta.env.BASE_URL
+).href;
 
 import { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';

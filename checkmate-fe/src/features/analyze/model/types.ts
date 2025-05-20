@@ -18,6 +18,7 @@ export interface UploadContractParams {
 // 분석 결과 타입
 export interface AnalysisResult {
   contractId: number;
+  categoryName: string;
   summaries: {
     summaryReportId: string;
     aiAnalysisReportId: string;

@@ -124,11 +124,9 @@ const WriteEditPage: React.FC = () => {
 
   const isResidentId  = includesAny(field.label, ['주민등록번호']);
   const isPhone       = includesAny(field.label, ['전화번호', '연락처']);
-  const isDay         = field.inputType === 'NUMBER' && includesAny(field.label, ['지불일', '지급시기']);
+  const isDayLabel        = includesAny(field.label, ['지불일', '지급시기']);
   const isArea        = field.label.trim().endsWith('면적');
   const isAddress     = includesAny(field.label, ['주소', '소재지']) && !field.label.includes('상세');
-  const moneyKeys     = ['monthly_rent','deposit','earnest_money','balance','total_amount_paid', /* …중략… */ 'maintenance_other_fee'];
-  const isMoney       = moneyKeys.includes(fieldKey);
 
   // 주민등록번호
   if (isResidentId) {
@@ -151,7 +149,15 @@ const WriteEditPage: React.FC = () => {
     );
   }
   // 금액
-  if (isMoney) {
+  const keyBased = ['monthly_rent','deposit','earnest_money','balance','total_amount_paid',
+      'basic_amount','meal_amount','bonus_amount','transportation_fee_amount',
+      'other_allowances_1','other_allowances_2','incentive_amount',
+      'continuous_incentive_amount','provisional_deposit','maintenance_cost_total',
+      'maintenance_common_fee','maintenance_electric_fee','maintenance_water_fee',
+      'maintenance_gas_fee','maintenance_heating_fee','maintenance_internet_fee',
+      'maintenance_tv_fee','maintenance_other_fee'].includes(fieldKey);
+  const labelBased = ['금', '비', '금액'].some(suffix => field.label.endsWith(suffix));
+  if (keyBased || labelBased) {
     return (
       <MoneyInput
         value={value}
@@ -160,16 +166,17 @@ const WriteEditPage: React.FC = () => {
       />
     );
   }
+
   // 날짜 중 “일” 입력
-  if (isDay) {
-    return (
-      <DayInput
-        value={value}
-        onChange={v => setDependsOnStates(p => ({ ...p, [fieldKey]: v }))}
-        onBlur={() => handleFieldBlur(field.id, sectionId, value)}
-      />
-    );
-  }
+  if (isDayLabel && (field.inputType === 'NUMBER' || field.inputType === 'TEXT')) {
+      return (
+        <DayInput
+          value={value}
+          onChange={v => setDependsOnStates(p => ({ ...p, [fieldKey]: v }))}
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
+        />
+      );
+    }
   // 면적
   if (isArea) {
     return (

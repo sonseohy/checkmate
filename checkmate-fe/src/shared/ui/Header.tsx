@@ -158,6 +158,10 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                 closeAllDropdowns();
                 setNotificationOpen(next);
               }}
+              onItemClick={() => {
+                /* ✅ 알림 클릭 → 팝업 닫기 */
+                setNotificationOpen(false);
+              }}
             />
 
             {/* 유저 아바타 */}
@@ -215,6 +219,10 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
               const next = !notificationOpen;
               closeAllDropdowns();
               setNotificationOpen(next);
+            }}
+            onItemClick={() => {
+              /* ✅ 동일하게 전달 */
+              setNotificationOpen(false);
             }}
           />
         )}

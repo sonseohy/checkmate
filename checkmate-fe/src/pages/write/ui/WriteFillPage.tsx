@@ -6,7 +6,7 @@ import { getUserInfo } from '@/entities/user';
 import { WriteStickyBar } from '@/widgets/write';
 import { LuTag } from 'react-icons/lu';
 import Swal from 'sweetalert2';
-import { ResidentIdInput, PhoneNumberInput, MoneyInput, DayInput, AreaInput, AddressInput, DateFieldInput } from '@/shared';
+import { TimeInput, ResidentIdInput, PhoneNumberInput, MoneyInput, DayInput, AreaInput, AddressInput, DateFieldInput } from '@/shared';
 
 // multi-checkbox 부모 필드 감지를 위한 helper
 const isMultiCheckboxField = (field: TemplateField) =>
@@ -183,6 +183,7 @@ const WriteFillPage: React.FC = () => {
     const isDayLabel        = includesAny(field.label, ['지불일', '지급시기']);
     const isAreaLabel       = field.label.trim().endsWith('면적');
     const isAddressLabel    = includesAny(field.label, ['주소', '소재지']) && !field.label.includes('상세');
+    const isTimeLabel = field.label.trim().endsWith('시간');
 
     // 주민등록번호
     if (isResidentIdLabel) {
@@ -207,15 +208,15 @@ const WriteFillPage: React.FC = () => {
     }
 
     // 금액 입력
-    if ([
-      'monthly_rent','deposit','earnest_money','balance','total_amount_paid',
+    const keyBased = ['monthly_rent','deposit','earnest_money','balance','total_amount_paid',
       'basic_amount','meal_amount','bonus_amount','transportation_fee_amount',
       'other_allowances_1','other_allowances_2','incentive_amount',
       'continuous_incentive_amount','provisional_deposit','maintenance_cost_total',
       'maintenance_common_fee','maintenance_electric_fee','maintenance_water_fee',
       'maintenance_gas_fee','maintenance_heating_fee','maintenance_internet_fee',
-      'maintenance_tv_fee','maintenance_other_fee'
-    ].includes(fieldKey)) {
+      'maintenance_tv_fee','maintenance_other_fee'].includes(fieldKey);
+    const labelBased = ['금', '비', '금액'].some(suffix => field.label.endsWith(suffix));
+    if (keyBased || labelBased) {
       return (
         <MoneyInput
           value={value}
@@ -226,7 +227,7 @@ const WriteFillPage: React.FC = () => {
     }
 
     // 일(Day) 입력 — inputType이 NUMBER이고, 라벨에 “지불일” 또는 “지급시기”가 있을 때만
-    if (field.inputType === 'NUMBER' && isDayLabel) {
+    if (isDayLabel && (field.inputType === 'NUMBER' || field.inputType === 'TEXT')) {
       return (
         <DayInput
           value={value}
@@ -256,6 +257,19 @@ const WriteFillPage: React.FC = () => {
             setDependsOnStates(p => ({ ...p, [fieldKey]: v }));
             handleFieldBlur(field.id, sectionId, v);
           }}
+        />
+      );
+    }
+
+    // 시간 입력
+    if (isTimeLabel) {
+      return (
+        <TimeInput
+          value={value}
+          onChange={(v) =>
+            setDependsOnStates((prev) => ({ ...prev, [fieldKey]: v }))
+          }
+          onBlur={() => handleFieldBlur(field.id, sectionId, value)}
         />
       );
     }

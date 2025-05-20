@@ -6,7 +6,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Notification, addNotification } from '@/features/notifications';
 import { toast } from 'react-toastify';
 
-export const useNotificationSocket = (enabled: boolean) => {
+export const useNotificationSocket = (
+  enabled: boolean,
+  onMessage?: (n: Notification) => void,
+) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
 
@@ -18,7 +21,6 @@ export const useNotificationSocket = (enabled: boolean) => {
 
     const client = new Client({
       brokerURL: WS_URL,
-
       connectHeaders: {
         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
       },
@@ -36,22 +38,32 @@ export const useNotificationSocket = (enabled: boolean) => {
         dispatch(addNotification(data));
 
         /* 2) React-Query 캐시에 prepend */
-        queryClient.setQueryData(['notifications'], (prev: any) =>
-          prev?.data
-            ? { ...prev, data: [data, ...prev.data] }
-            : { data: [data] },
+        queryClient.setQueryData(
+          ['notifications'], // ✅ 배열
+          (prev: any) =>
+            prev?.data
+              ? { ...prev, data: [data, ...prev.data] }
+              : { data: [data] },
         );
 
         /* 3) Toast */
-        toast.info(data.message, { position: 'top-right', autoClose: 5000 });
+        toast.info(data.message, {
+          toastId: `noti-${data.id}`, // ★ 같은 id면 한 번만
+          position: 'top-right',
+          autoClose: 5000,
+        });
+        /* 4) 질문 생성 완료 ⇒ 해당 계약 질문 쿼리 무효화 */
+        if (data.type === 'QUESTION_GENERATION' && data.contract_id) {
+          queryClient.invalidateQueries({
+            queryKey: ['questions', data.contract_id], // ⬅️ 필터 객체
+          });
+        }
+        /* 5) 상위 컴포넌트에 이벤트 전달 → ✔️ 이 줄이 필요 */
+        onMessage?.(data);
       });
     };
 
     client.activate();
-
-    /* ⬇️  cleanup — Promise를 반환하지 않도록 ‘void’로 호출 */
-    return () => {
-      void client.deactivate();
-    };
-  }, [enabled, dispatch, queryClient]);
+    return () => void client.deactivate();
+  }, [enabled, dispatch, queryClient, onMessage]);
 };

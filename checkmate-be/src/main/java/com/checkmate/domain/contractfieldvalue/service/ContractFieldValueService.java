@@ -731,11 +731,24 @@ public class ContractFieldValueService {
 
     /**
      * 문자열에 연산 패턴이 포함되어 있는지 확인
+     * 텍스트 내에 {SUM:...}, {SUB:...}, {MUL:...}, {DIV:...} 형식의 연산 패턴이 있는지 검사
+     *
+     * @param text 검사할 텍스트
+     * @return 연산 패턴 포함 여부
      */
     private boolean containsOperation(String text) {
         return text.matches(".*\\{(SUM|SUB|MUL|DIV):.*}.*");
     }
 
+    /**
+     * 지정된 연산을 수행하여 결과값 반환
+     * 연산 유형(SUM, SUB, MUL, DIV)에 따라 필드 ID와 상수값을 처리하여 결과 계산
+     *
+     * @param operation 연산 유형 (SUM, SUB, MUL, DIV)
+     * @param params 쉼표로 구분된 파라미터 문자열 (필드 ID 또는 상수값)
+     * @param fieldIdValueMap 필드ID-값 맵
+     * @return 연산 결과
+     */
     private double performOperation(String operation, String params, Map<Integer, String> fieldIdValueMap) {
         // 필드 ID와 상수 파싱
         List<Integer> fieldIds = new ArrayList<>();
@@ -781,6 +794,16 @@ public class ContractFieldValueService {
         }
     }
 
+    /**
+     * 중첩 없는 기본 연산 패턴을 처리
+     * 텍스트 내의 단일 수준 연산 패턴을 처리하고 실제 값으로 치환
+     *
+     * @param text 처리할 텍스트
+     * @param fieldKeyValueMap 필드키-값 맵
+     * @param fieldIdValueMap 필드ID-값 맵
+     * @param isTopLevel 최상위 호출 여부 (true인 경우 최종 결과 포맷팅 적용)
+     * @return 처리된 텍스트
+     */
     private String processBasicOperations(String text, Map<String, String> fieldKeyValueMap,
                                           Map<Integer, String> fieldIdValueMap, boolean isTopLevel) {
         // 기존 로직과 비슷하게 중첩 없는 기본 연산들을 처리

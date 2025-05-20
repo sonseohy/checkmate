@@ -80,7 +80,7 @@ const NotificationList: React.FC<Props> = ({
   /* ▼ 글꼴 사이즈 – 팝업·페이지 구분 */
   const msgSize = isPopup ? 'text-sm' : 'text-lg'; // 메시지(본문)
   const dateSize = isPopup ? 'text-xs' : 'text-base'; // 생성일시
-  const tabSize = isPopup ? 'text-sm' : 'text-lg'; // 탭 라벨
+  // const tabSize = isPopup ? 'text-sm' : 'text-lg'; // 탭 라벨
 
   const outerCls = isPopup
     ? `w-[90vw] max-w-xs md:w-[400px] bg-white rounded-lg shadow-lg p-4

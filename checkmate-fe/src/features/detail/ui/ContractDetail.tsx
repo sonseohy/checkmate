@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { ContractSummary } from '@/features/detail';
 import { categories, useMobile } from '@/shared';
@@ -8,32 +9,34 @@ import { useUserInfo } from '@/features/auth';
 const ContractDetail: React.FC = () => {
   const isMobile = useMobile();
 
-  /* URL 파라미터 + state */
+  /* URL */
   const { contractId: paramId } = useParams<{ contractId: string }>();
   const { state } = useLocation() as { state?: ContractSummary };
   const id = Number(paramId);
   const contract = state ?? null;
 
-  /* 질문: React-Query */
-  const {
-    data: questions,
-    isLoading, // 최초 요청
-    isFetching, // refetch(무효화) 중
-  } = useQuestions(id);
+  /* 질문 쿼리 */
+  const { data: questions, isLoading, isFetching } = useQuestions(id);
 
-  /* WebSocket 알림 활성화 */
+  /* “AI 완료” 플래그 */
+  const [aiDone, setAiDone] = useState(false);
+
+  /* WebSocket 알림 구독 (로그인 사용자만) */
   const user = useUserInfo();
-  useNotificationSocket(!!user);
+  useNotificationSocket(!!user, (n) => {
+    if (n.type === 'QUESTION_GENERATION' && n.contract_id === id) {
+      setAiDone(true);
+    }
+  });
 
   if (!id) return <p className="p-4">잘못된 접근입니다.</p>;
   const categoryName = categories.find(
     (c) => c.id === contract?.category_id,
   )?.name;
 
-  /* “로딩” 상태 정의 */
+  /* 로딩 상태: 질문이 없고 AI 완료 전이면 무조건 로딩 */
   const showLoading =
-    isLoading ||
-    (isFetching && (!questions || questions.question.length === 0));
+    (!questions || questions.question.length === 0) && !aiDone;
 
   return (
     <div className="flex flex-col h-full">
@@ -56,10 +59,9 @@ const ContractDetail: React.FC = () => {
           <span className="font-semibold text-blue-600">꼭! 물어볼 질문</span>
         </p>
 
-        {/* ① 로딩 (AI 생성 중) */}
+        {/* ① 로딩 스켈레톤 */}
         {showLoading && (
           <div className="flex flex-col items-center justify-center h-full gap-4">
-            {/* spinner */}
             <svg
               className="animate-spin h-10 w-10 text-blue-600"
               xmlns="http://www.w3.org/2000/svg"
@@ -96,14 +98,14 @@ const ContractDetail: React.FC = () => {
           </div>
         )}
 
-        {/* ② 로딩 끝 & 질문 없음 */}
+        {/* ② AI 완료 & 질문 없음 */}
         {!showLoading && questions && questions.question.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full py-6 text-center">
             <p className="text-gray-500">질문이 생성되지 않았습니다.</p>
           </div>
         )}
 
-        {/* ③ 결과 표시 */}
+        {/* ③ 결과 */}
         {!showLoading && questions && questions.question.length > 0 && (
           <ul className="divide-y divide-gray-100">
             {questions.question.map((q, idx) => (

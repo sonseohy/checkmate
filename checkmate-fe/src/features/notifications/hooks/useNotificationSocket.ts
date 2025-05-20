@@ -6,7 +6,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Notification, addNotification } from '@/features/notifications';
 import { toast } from 'react-toastify';
 
-export const useNotificationSocket = (enabled: boolean) => {
+export const useNotificationSocket = (
+  enabled: boolean,
+  onMessage?: (n: Notification) => void,
+) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
 
@@ -55,10 +58,12 @@ export const useNotificationSocket = (enabled: boolean) => {
             queryKey: ['questions', data.contract_id], // ⬅️ 필터 객체
           });
         }
+        /* 5) 상위 컴포넌트에 이벤트 전달 → ✔️ 이 줄이 필요 */
+        onMessage?.(data);
       });
     };
 
     client.activate();
     return () => void client.deactivate();
-  }, [enabled, dispatch, queryClient]);
+  }, [enabled, dispatch, queryClient, onMessage]);
 };

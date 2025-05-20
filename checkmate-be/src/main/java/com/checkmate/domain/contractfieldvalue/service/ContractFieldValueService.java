@@ -250,12 +250,6 @@ public class ContractFieldValueService {
                 break;
 
             case RADIO:
-                // RADIO 타입은 옵션에 있는 값인지 확인 로직 추가
-                if (field.getOptions() != null && !field.getOptions().isEmpty()) {
-                    if (!field.getOptions().contains(value)) {
-                        throw new CustomException(ErrorCode.INVALID_FIELD_VALUE);
-                    }
-                }
                 break;
         }
     }

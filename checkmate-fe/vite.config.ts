@@ -20,7 +20,6 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [
         /^\/pdf\.worker\.mjs$/,      // https://…/pdf.worker.mjs
-        /^\/detail\/pdf\.worker\.mjs$/ // https://…/detail/pdf.worker.mjs
       ],
       },
       includeAssets: ['icons/favicon.ico'],

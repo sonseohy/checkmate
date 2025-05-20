@@ -19,5 +19,6 @@ export { default as DayInput } from './ui/input/DayInput'
 export { default as AreaInput } from './ui/input/AreaInput'
 export { default as AddressInput } from './ui/input/AddressInput'
 export { default as DateFieldInput } from './ui/input/DateFieldInput'
+export { default as TimeInput } from './ui/input/TimeInput'
 
 export  {default as getCategorName } from './utils/getCategoryName';

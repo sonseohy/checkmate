@@ -96,10 +96,11 @@ const WritePreviewPage: React.FC = () => {
 
   // SSN 마스킹 함수
   function maskResidentId(raw: string) {
-    const m = raw.match(/^(\d{6})(\d)(\d*)$/);
+    const m = raw.match(/^(\d{6})(\d)/);
     if (!m) return raw;
-    const [, front, one, rest] = m;
-    return `${front}-${one}${'*'.repeat(rest.length)}`;
+    const [, front, firstDigit] = m;
+    // 뒤에는 항상 6개의 별을 찍는다
+    return `${front}-${firstDigit}${'*'.repeat(6)}`;
   }
 
   // 각 라인 렌더링 헬퍼
@@ -218,7 +219,7 @@ const WritePreviewPage: React.FC = () => {
                             : 'list-disc list-inside'
                         }
                       >
-                        {prettifyLine(line)}
+                        {renderLine(line)}
                       </li>
                     ))}
                   </ul>

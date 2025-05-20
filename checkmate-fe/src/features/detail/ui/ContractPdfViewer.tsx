@@ -102,7 +102,12 @@ const ContractPdfViewer: React.FC = () => {
   return (
     <div className="flex flex-col space-x-4">
       {/* 컨트롤 버튼들 */}
-      <div className="flex justify-between items-center my-3 gap-5 ml-3">
+      <div
+        className="
+     flex flex-wrap items-center justify-between
+     gap-2 sm:gap-5 mx-3 my-3
+   "
+      >
         <div
           className={`flex items-center ${
             isMobile ? 'space-x-1' : 'space-x-2'

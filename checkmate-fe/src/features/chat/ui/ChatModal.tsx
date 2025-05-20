@@ -91,10 +91,6 @@ const ChatModal = ({ onClose }: ChatModalProps) => {
       isOpen
       onRequestClose={onClose}
       overlayClassName="fixed inset-0 z-40 bg-black/30"
-      /**
-       * ▸ mobile : 90 vw · 70 vh, 가운데
-       * ▸ ≥sm    : 기존 400×460, 우측 아래
-       */
       className="
         absolute bottom-4 left-1/2 -translate-x-1/2
         w-[90vw] h-[70vh]

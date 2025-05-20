@@ -1,4 +1,5 @@
 import { customAxios } from '@/shared/api';
+import { AnalysisResponse } from '@/features/analyze';
 
 // 업로드 api
 export const postContractUpload = (formData: FormData) => {
@@ -7,4 +8,15 @@ export const postContractUpload = (formData: FormData) => {
       'Content-Type': 'multipart/form-data',
     },
   });
+};
+
+// 분석 결과 조회 api
+export const fetchAnalysisResult = async (
+  contractId: string,
+): Promise<AnalysisResponse> => {
+  const response = await customAxios.get<AnalysisResponse>(
+    `/api/analysis/${contractId}`,
+  );
+  console.log('fetchAnalysisResult', response.data);
+  return response.data;
 };

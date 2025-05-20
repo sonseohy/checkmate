@@ -10,6 +10,10 @@ const MainPage = lazy(() =>
 const MyPage = lazy(() =>
   import('@pages/mypage').then((module) => ({ default: module.MyPage })),
 );
+const DetailPage = lazy(() =>
+  import('@pages/detail').then((module) => ({ default: module.DetailPage })),
+);
+
 // 계약서 작성 페이지
 const WriteCategoryPage = lazy(() =>
   import('@pages/write').then((module) => ({
@@ -20,7 +24,17 @@ const WriteIntroPage = lazy(() =>
   import('@pages/write').then((module) => ({ default: module.WriteIntroPage })),
 );
 const WriteFillPage = lazy(() =>
-  import('@pages/write').then((module) => ({ default: module.FillPage })),
+  import('@pages/write').then((module) => ({ default: module.WriteFillPage })),
+);
+
+const WriteEditPage = lazy(() =>
+  import('@pages/write').then((module) => ({ default: module.WriteEditPage })),
+);
+
+const WritePreviewPage = lazy(() =>
+  import('@pages/write').then((module) => ({
+    default: module.WritePreviewPage,
+  })),
 );
 
 // 계약서 분석 페이지
@@ -65,11 +79,22 @@ export const router = createBrowserRouter([
     children: [
       { index: true, path: '/', element: <MainPage /> },
       { path: 'mypage', element: <MyPage /> },
+      // 계약서 상세 조회
+      { path: 'detail/:contractId', element: <DetailPage /> },
+
+      // 계약서 작성 가이드
+      { path: 'intro/write', element: <WriteIntroPage /> },
 
       // 계약서 작성 플로우
       { path: 'write/:mainCategorySlug', element: <WriteCategoryPage /> },
-      { path: 'write/:mainCategorySlug/intro', element: <WriteIntroPage /> },
-      { path: 'write/:mainCategorySlug/fill', element: <WriteFillPage /> },
+      // 신규 작성
+      {
+        path: 'write/:mainCategorySlug/:categoryId',
+        element: <WriteFillPage />,
+      },
+      // 이어서 작성
+      { path: 'write/edit/:contractId', element: <WriteEditPage /> },
+      { path: 'contract/:contractId/preview', element: <WritePreviewPage /> },
 
       // 계약서 분석 플로우
       { path: 'analyze/:mainCategorySlug', element: <AnalyzeCategoryPage /> },
@@ -79,7 +104,7 @@ export const router = createBrowserRouter([
       },
 
       {
-        path: 'analyze/:mainCategorySlug/result',
+        path: 'analyze/result/:contractId',
         element: <AnalyzeResultPage />,
       },
 

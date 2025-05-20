@@ -1,66 +1,32 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
 import { WritingProcess } from '@/widgets/write';
-import {
-  RealEstateIntro,
-  EmploymentIntro,
-  RentalIntro,
-} from '@/features/write';
-import { navigateInvalidAccess } from '@/shared/utils/navigation';
-import { useEffect } from 'react';
-
-// slug 타입(url에 사용)
-type Slug = 'contract' | 'certification' | 'order';
-
-//slug에 따라서
-const introMap: Record<
-  Slug,
-  { title: string; Component: React.FC; videoUrl: string }
-> = {
-  contract: {
-    title: '부동산 매매 계약서 자동 작성',
-    Component: RealEstateIntro,
-    videoUrl: 'https://www.youtube.com/embed/REAL_ESTATE_ID',
-  },
-  certification: {
-    title: '근로 계약서 자동 작성',
-    Component: EmploymentIntro,
-    videoUrl: 'https://www.youtube.com/embed/EMPLOYMENT_ID',
-  },
-  order: {
-    title: '임대차 계약서 자동 작성',
-    Component: RentalIntro,
-    videoUrl: 'https://www.youtube.com/embed/RENTAL_ID',
-  },
-};
 
 const WriteIntroPage: React.FC = () => {
-  // url에서 slug를 가져와서 introMap에서 해당하는 컴포넌트를 찾음
-  const { mainCategorySlug } = useParams<{ mainCategorySlug: Slug }>();
-  const navigate = useNavigate();
-  const cfg = mainCategorySlug ? introMap[mainCategorySlug] : undefined;
-
-  useEffect(() => {
-    if (!cfg) {
-      navigateInvalidAccess(navigate);
-    }
-  }, [cfg, navigate]);
-
-  if (!cfg) return null;
-
-  const { title, Component: Intro, videoUrl } = cfg;
+  const title = '계약서 자동 작성';
+  const videoUrl = 'https://www.youtube.com/embed/REAL_ESTATE_ID'; // 실제 영상 URL로 교체하세요
 
   return (
     <div className="container py-16 mx-auto space-y-16">
-      {/* 섹션1: 템플릿별 소개 */}
+      {/* 섹션 1 : 템플릿 소개 */}
       <section className="px-4 text-center">
         <h1 className="mb-6 text-3xl font-bold">{title}</h1>
-        <Intro />
+        <div className="space-y-4 text-gray-700">
+          <p>
+            계약서 자동 작성 페이지입니다.<br />
+            계약 정보, 당사자 정보, 조건을 입력하시면<br />
+            표준 양식에 맞춰 계약서를 완성할 수 있습니다.
+          </p>
+          <ul className="space-y-1 text-gray-600 list-disc list-inside">
+            <li>계약 당사자 정보 입력</li>
+            <li>계약 기간 및 조건 설정</li>
+            <li>특약 사항 추가 가능</li>
+          </ul>
+        </div>
       </section>
 
-      {/* 섹션2: 공통 기능 소개 */}
+      {/* 섹션 2 : 공통 기능 소개 */}
       <WritingProcess />
 
-      {/* 섹션3: 가이드 영상 */}
+      {/* 섹션 3 : 가이드 영상 */}
       <section className="px-4 text-center">
         <h2 className="mb-4 text-2xl font-semibold">간단 가이드 영상</h2>
         <div className="w-full max-w-3xl mx-auto aspect-video">
@@ -72,16 +38,6 @@ const WriteIntroPage: React.FC = () => {
           />
         </div>
       </section>
-
-      {/* 작성 시작 버튼 */}
-      <div className="text-center">
-        <Link
-          to={`/write/${mainCategorySlug}/fill`}
-          className="inline-block px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
-        >
-          계약서 작성 시작하기
-        </Link>
-      </div>
     </div>
   );
 };

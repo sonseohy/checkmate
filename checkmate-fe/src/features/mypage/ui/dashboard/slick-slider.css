@@ -1,0 +1,39 @@
+
+.slick-track {
+  max-width: 1100px !important;
+  height: auto  !important;
+  flex-wrap: nowrap !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  margin-left: 0 !important;
+}
+
+.slick-slide {
+
+  height: 260px !important;
+  margin: 0 5px; 
+}
+
+.slick-list {
+  padding-top: 20px !important;
+  height: 250px !important;
+}
+
+/* 반응형 (앱) */
+@media (max-width:768px) {
+  .slick-slide {
+    width: 100% !important; /* 모바일에서는 한 슬라이드만 보이도록 크기 변경 */
+    height: 200px !important; /* 높이 조정 */
+    margin: 0; /* 마진 없애기 */
+  }
+
+  .slick-list {
+    padding-top: 5px; /* 모바일에서 상단 패딩 제거 */
+    height: 240px !important; /* 높이를 좀 더 작은 값으로 조정 */
+  }
+
+  .slick-track {
+    
+    flex-wrap: wrap; /* 모바일에서 슬라이드가 잘 보이도록 설정 */
+  }
+}

@@ -108,3 +108,53 @@ body {
     background-position: 0% 0%;
   }
 }
+
+/* 스크롤바를 완전히 숨기되, 스크롤 동작은 유지 */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome / Safari / Opera */
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
+}
+/* ───── 로딩 점 애니메이션 ───── */
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.dot {
+  animation: blink 1.2s infinite;
+  display: inline-block;
+  font-weight: 700; /* 점을 조금 더 굵게 */
+  width: 0.25rem; /* 글자 간격 균등 */
+}
+
+/* 지연 시간을 줘서 순차적으로 깜빡이게 */
+.dot1 {
+  animation-delay: 0s;
+}
+.dot2 {
+  animation-delay: 0.2s;
+}
+.dot3 {
+  animation-delay: 0.4s;
+}

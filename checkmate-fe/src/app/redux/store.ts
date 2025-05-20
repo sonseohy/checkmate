@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import themeReducer from '@/features/theme/model/themeSlice';
+import authReducer from '@/features/auth/slices/authSlice';
+import { notificationReducer } from '@/features/notifications';
 
 export const store = configureStore({
   reducer: {
-    theme: themeReducer,
+    auth: authReducer, //로그인 상태 관리
+    notifications: notificationReducer, // 알림 상태관리
   },
 });
 

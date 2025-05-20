@@ -1,0 +1,23 @@
+#preview-root ul {
+  /* 불릿 + 텍스트 간격 확보 */
+  padding-left: 1.25rem;   /* 기본 1em 보다 조금 넓게 */
+  margin: 0 0 0.6rem;      /* 항목간 아래 여백 */
+  list-style-position: inside !important;
+}
+
+#preview-root li {
+  /* 불릿 뒤 글자 들여쓰기 0.25rem */
+  text-indent: -0.25rem;
+  padding-left: 0.25rem;
+}
+
+#preview-root article {
+  /* 페이지 내부에서 잘리지 않도록 */
+  page-break-inside: avoid;
+  break-inside: avoid;            /* 최신 브라우저용 */
+}
+
+#preview-root .section-start-new-page {
+  page-break-inside: avoid;
+  break-inside: avoid;   /* 최신 브라우저용 */
+}

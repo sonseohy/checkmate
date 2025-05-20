@@ -1,107 +1,176 @@
 import { useEffect, useState } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import {
+  AnalysisService,
+  AnalysisDashboard,
+  AnalysisResult,
+} from '@/features/analyze';
+import { useUserInfo } from '@/features/auth';
+import { Spinner } from '@/shared/ui/Spinner';
+import uploadImage from '@/assets/images/loading/upload.png';
+import {
+  getOverallLevel,
+  levelLabel,
+  levelLottie,
+  levelColor,
+} from '@/shared/utils/levelUtils';
+import Lottie from 'lottie-react'; // ✅ 변경
 
-interface AnalysisResult {
-  summary: string[];
-  feedback: string[];
-  explanation: { clause: string; plain: string }[];
-}
-
-// 💡 스켈레톤 UI 컴포넌트
-const SkeletonBox = () => (
-  <div className="p-6 space-y-4 bg-white rounded-lg shadow animate-pulse">
-    <div className="w-1/3 h-6 bg-gray-200 rounded"></div>
-    <div className="space-y-2">
-      <div className="w-full h-4 bg-gray-200 rounded"></div>
-      <div className="w-5/6 h-4 bg-gray-200 rounded"></div>
-      <div className="w-4/6 h-4 bg-gray-200 rounded"></div>
-    </div>
-  </div>
+/* Skeleton 카드 – Dashboard 카드와 높이·둥근모서리 동일 */
+const CardSkeleton = () => (
+  <div className="h-56 rounded-lg bg-gray-100 animate-pulse" />
 );
 
+/* 배너 애니메이션 */
+const bannerVar = {
+  hidden: { y: -40, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: 'spring', stiffness: 70, damping: 12 },
+  },
+};
+
+/* 그리드·카드 스태거 */
+const gridVar = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.15, delayChildren: 0.1 } },
+};
+const cardVar = {
+  hidden: { y: 30, opacity: 0 },
+  visible: { y: 0, opacity: 1 },
+};
+
 const AnalyzeResultPage: React.FC = () => {
+  /* URL & 제목 state */
+  const { contractId } = useParams<{ contractId: string }>();
+  const { state } = useLocation() as { state?: { contractTitle?: string } };
+
+  /* 로그인 사용자 */
+  const me = useUserInfo();
+  const userName = me?.name ?? '사용자';
+  const contractTitle = state?.contractTitle ?? '계약서';
+
+  /* API 상태 */
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  /* 로딩 문구 회전 */
+  const [msgIdx, setMsgIdx] = useState(0);
+  const msgs = [
+    '분석에는 최대 1~2분이 걸릴 수 있어요.',
+    '분석이 완료되면 알려드릴게요!',
+  ];
   useEffect(() => {
-    // TODO: 백엔드 호출 → 분석 결과 가져오기
-    setTimeout(() => {
-      setResult({
-        summary: ['근로자: 김육비', '계약 기간: 2025.04.22 ~ 2025.10.21'],
-        feedback: ['계약 기간이 6개월로 퇴직금 조건인 1년 미만입니다.'],
-        explanation: [
-          {
-            clause: '제1조 (근로계약의 목적)',
-            plain: '‘을’은 … 정리된 문서입니다.',
-          },
-        ],
-      });
-    }, 2000);
-  }, []);
+    if (!loading) return;
+    const id = setInterval(() => setMsgIdx((i) => (i + 1) % msgs.length), 5000);
+    return () => clearInterval(id);
+  }, [loading]);
 
-  // 로딩 중일 때 스켈레톤 보여주기
-  if (!result) {
-    return (
-      <section className="container px-4 py-16 mx-auto space-y-12">
-        <h1 className="text-3xl font-bold">근로계약서 분석결과</h1>
+  /* fetch */
+  useEffect(() => {
+    if (!contractId) return;
+    setLoading(true);
+    AnalysisService.getResult(contractId)
+      .then(setResult)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [contractId]);
 
-        <div className="grid gap-8 md:grid-cols-2">
-          <SkeletonBox />
-          <SkeletonBox />
-          <div className="md:col-span-2">
-            <SkeletonBox />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
+  /* 단계 계산 */
+  const level = result ? getOverallLevel(result) : 1;
+  const stageTxt = levelLabel[level];
+  const stageColor = levelColor[level];
+  /* showDash: 배너 애니 끝나면 true */
+  const [showDash, setShowDash] = useState(false);
+  const stageSize = 'text-3xl md:text-4xl';
   return (
     <section className="container px-4 py-16 mx-auto space-y-12">
-      <h1 className="text-3xl font-bold">근로계약서 분석결과</h1>
+      <h1 className="text-3xl font-bold text-center">
+        {' '}
+        {result?.categoryName ?? contractTitle} 분석결과
+      </h1>
 
-      <div className="grid gap-8 md:grid-cols-2">
+      {/* 배너 */}
+      {!loading && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-6 bg-white rounded-lg shadow"
+          className="flex flex-row items-center justify-center gap-4 mt-6 
+          
+          "
+          variants={bannerVar}
+          initial="hidden"
+          animate="visible"
+          onAnimationComplete={() => setShowDash(true)}
         >
-          <h2 className="mb-4 text-xl font-semibold">계약서 요약</h2>
-          <ul className="space-y-1 list-disc list-inside">
-            {result.summary.map((s, i) => (
-              <li key={i}>{s}</li>
-            ))}
-          </ul>
-        </motion.div>
+          <Lottie
+            animationData={levelLottie[level]}
+            loop={false}
+            className="w-24 h-24 md:w-28 md:h-28"
+          />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-6 bg-white rounded-lg shadow"
-        >
-          <h2 className="mb-4 text-xl font-semibold">계약서 메이트해설</h2>
-          <div className="space-y-4">
-            {result.explanation.map((exp, i) => (
-              <div key={i}>
-                <h3 className="font-semibold">{exp.clause}</h3>
-                <p>{exp.plain}</p>
-              </div>
-            ))}
-          </div>
+          <p className="text-xl md:text-2xl font-semibold drop-shadow-sm">
+            {userName}님의 {contractTitle}는&nbsp;
+            <span className={`underline ${stageColor} ${stageSize}`}>
+              {stageTxt}
+            </span>
+            단계입니다
+          </p>
         </motion.div>
+      )}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-6 bg-white rounded-lg shadow md:col-span-2"
-        >
-          <h2 className="mb-4 text-xl font-semibold">계약서 피드백</h2>
-          <ul className="space-y-1 list-disc list-inside">
-            {result.feedback.map((f, i) => (
-              <li key={i}>{f}</li>
-            ))}
-          </ul>
-        </motion.div>
-      </div>
+      {/* 로딩 화면 */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center mt-10 space-y-4">
+          <img
+            src={uploadImage}
+            alt="분석 로딩"
+            className="w-24 h-24 animate-pulse"
+          />
+          <Spinner />
+          <p className="text-lg font-medium text-gray-700 text-center">
+            {msgs[msgIdx]}
+          </p>
+        </div>
+      )}
+
+      {/* 그리드: skeleton → 대시보드로 morph */}
+      <motion.div
+        className="grid gap-8 md:grid-cols-2"
+        variants={gridVar}
+        initial="hidden"
+        animate={showDash ? 'visible' : 'hidden'}
+      >
+        {showDash && result ? (
+          /* 실제 카드 4개 */
+          <AnalysisDashboard
+            result={result}
+            userName={userName}
+            contractTitle={contractTitle}
+            cardVar={cardVar}
+          />
+        ) : (
+          /* skeleton 4개 (layout 모핑) */
+          Array.from({ length: 4 }).map((_, i) => (
+            <motion.div key={i} variants={cardVar} layout>
+              <CardSkeleton />
+            </motion.div>
+          ))
+        )}
+      </motion.div>
+
+      {/* 실패 시 */}
+      {!loading && !result && (
+        <p className="text-center text-gray-500">
+          분석 결과를 불러오지 못했습니다.&nbsp;
+          <button
+            className="underline text-blue-600"
+            onClick={() => window.location.reload()}
+          >
+            다시 시도
+          </button>
+        </p>
+      )}
     </section>
   );
 };

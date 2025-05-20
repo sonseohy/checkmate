@@ -1,46 +1,57 @@
 import { useState, useEffect } from "react";
 import { PostKakaoCallback } from "@/features/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Auth() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [isProcessed, setIsProcessed] = useState<boolean>(false); // 상태 추가
-  const [error, setError] = useState<string | null>(null); // 오류 처리 추가
+  const location = useLocation();
+  const queryClient = useQueryClient();  
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const code = new URL(window.location.href).searchParams.get("code");
-    if (!code || isProcessed) return; // 이미 처리된 경우 다시 처리하지 않도록
-
-    setIsProcessed(true);
-
-    const processCallback = async () => {
-      try {
-        const res = await PostKakaoCallback(code);
-        if (res) {
-          navigate("/"); // 리다이렉트
-        } else {
-          setError("카카오 콜백 처리에 실패했습니다.");
-        }
-      } catch (err) {
-        setError("카카오 콜백 처리 중 오류가 발생했습니다.");
-        console.error(err);
-      } finally {
-        setIsProcessed(false);  // 호출이 끝나면 isProcessed를 false로 돌려놓기
-      }
-    };
-
-    processCallback();
-  }, [navigate]); // isProcessed, navigate 상태에 따라 한 번만 호출되도록 의존성 관리
-
-  useEffect(() => {
-    if (error) {
-      alert(error); // 오류 발생 시 alert로 표시
+    // 1) 콜백 경로, code 파라미터 체크
+    if (location.pathname !== "/login") return;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    if (!code) {
+      return;
     }
+
+    // 2) 같은 code 처리 방지
+    const prev = sessionStorage.getItem("kakaoProcessedCode");
+    if (prev === code) {
+      navigate("/", { replace: true });
+      return;
+    }
+    // 3) 새 code 이므로 저장
+    sessionStorage.setItem("kakaoProcessedCode", code);
+
+    // 4) URL 에서 code 지우기
+    window.history.replaceState(null, document.title, location.pathname);
+
+    // 5) 토큰 요청
+    PostKakaoCallback(code, dispatch)
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["userInfo"] });
+        navigate("/", { replace: true });
+      })
+      .catch((err) => {
+        console.error("[Auth] 토큰 발급 실패:", err);
+        setError("카카오 콜백 처리에 실패했습니다.");
+      });
+  }, [dispatch, location, navigate, queryClient]);
+
+  // 에러 알림
+  useEffect(() => {
+    if (error) alert(error);
   }, [error]);
 
   return (
     <div className="h-screen flex items-center justify-center">
-      {!error && <p>로그인 처리 중입니다…</p>} {/* 기본 메시지 */}
+      {!error && <p>로그인 처리 중…</p>}
     </div>
   );
 }

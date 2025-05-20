@@ -1,92 +1,128 @@
-// features/mypage/ui/courtlocation/KoreaMap.tsx
+import { useEffect, useMemo } from 'react';
 import * as d3 from 'd3';
 import koreaJson from '@assets/images/map/koreamap.simple.json';
 import { feature } from 'topojson-client';
-import { useEffect, useRef, useMemo } from 'react';
-import { CourtWithCoords } from '@/features/mypage';
 import type { Topology, Objects } from 'topojson-specification';
 import type { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
+import { useSelector } from 'react-redux';
+import { RootState } from "@/app/redux/store";
+import { Dropdown, getRegionName } from '@/features/mypage';
+import { useMobile } from '@/shared';
+
+
+// 시·도별 JSON 파일 이름 매핑
+const regionFileMap: Record<string, string> = {
+  '서울특별시': 'seoul',
+  '부산광역시': 'Busan',
+  '대구광역시': 'Daegu',
+  '인천광역시': 'Incheon',
+  '광주광역시': 'Gwangju',
+  '대전광역시': 'Daejeon',
+  '울산광역시': 'Ulsan',
+  '세종특별자치시': 'sejong',
+  '경기도': 'Gyeonggido',
+  '강원특별자치도': 'Gangwondo',
+  '충청북도': 'Chungbug',
+  '충청남도': 'Chungnam',
+  '전라북도': 'Jeonbuk',
+  '전라남도': 'Jeonnam',
+  '경상북도': 'Gyeongbuk',
+  '경상남도': 'Gyeongnam',
+  '제주특별자치도': 'Jeju',
+};
+
+// 대한민국 전체 지도 데이터
+const topology = koreaJson as unknown as Topology<Objects<GeoJsonProperties>>;
+const mapGeo = feature(topology, topology.objects['koreamap']) as FeatureCollection<Geometry, GeoJsonProperties>;
 
 interface KoreaMapProps {
-  courtCoords: CourtWithCoords[];
+  onRegionSelect: (regionName: string | null) => void;
+  selectedRegion: string | null;
 }
 
-const topology = koreaJson as unknown as Topology<Objects<GeoJsonProperties>>;
-const mapGeo = feature(topology, topology.objects['koreamap']) as FeatureCollection<
-  Geometry,
-  GeoJsonProperties
->;
+export default function KoreaMap({
+  onRegionSelect,
+  selectedRegion,
+}: KoreaMapProps) {
+  const isMobile = useMobile();
+  const location = useSelector((state: RootState) => state.auth.location);
 
-const width = 800;
-const height = 600;
-
-export default function KoreaMap({ courtCoords }: KoreaMapProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  console.log('위도/경도:', courtCoords)
   
-  // 1) projection & path 메모이제이션
-  //    geoIdentity 로 planar 좌표계 → 화면 맞춤 transform 계산
-  const projection = useMemo(() => 
-    d3.geoIdentity()
-      .reflectY(true)
-      .fitSize([width, height], mapGeo),
-    []
-  );
-  const path = useMemo(() => d3.geoPath().projection(projection), [projection]);
+  const width = isMobile ? 350 : 760;
+  const height = isMobile ? 400 : 660;
 
-  const geoProj = useMemo(() =>
-      d3
-        .geoMercator()
-        .fitSize([width, height], mapGeo),
-    []
-  );
+  // 드롭다운 옵션
+  const options = useMemo(() =>
+    Object.keys(regionFileMap).map(region => ({
+      value: region,
+      label: region,
+    })), []);
 
+  const filterOption = selectedRegion
+    ? { value: selectedRegion, label: selectedRegion }
+    : null;
+
+  // projection & path (전체 지도)
+  const projection = useMemo(
+    () => d3.geoIdentity().reflectY(true).fitSize([width, height], mapGeo),
+    [width, height]
+  );
+  const pathGen = useMemo(() => d3.geoPath().projection(projection), [projection]);
+
+  // 지도 path 생성 (hover, active 모두 state 기반으로)
+  const paths = useMemo(() => {
+    return mapGeo.features.map((feat, i) => {
+      const korName = (feat.properties as any).CTP_KOR_NM as string;
+      const fileBase = regionFileMap[korName];
+      const isActive = korName === selectedRegion;
+
+      let fill = "#F0F0F0";
+      if (isActive) fill = "#B4C7FF"; // 선택된 지역
+
+      return (
+        <path
+          key={i}
+          d={pathGen(feat)!}
+          fill={fill}
+          stroke="#666"
+          strokeWidth={0.5}
+          style={{ cursor: fileBase ? "pointer" : "default" }}
+          onClick={() => {
+            if (!fileBase) return;
+            onRegionSelect(korName);
+          }}
+        />
+      );
+    });
+  }, [pathGen, selectedRegion, onRegionSelect]);
+
+
+  // 사용자 위도/경도 → 지역으로 바꾸기 (자동 선택)
   useEffect(() => {
-    if (!containerRef.current) return;
-    const svg = d3
-      .select(containerRef.current)
-      .selectAll<SVGSVGElement, unknown>('svg')
-      .data([null])
-      .join('svg')
-      .attr('width', width)
-      .attr('height', height);
+    if (!location) return;
+    (async () => {
+      const regionName = await getRegionName(location.lat, location.lng);
+      if (regionName) onRegionSelect(regionName);
+    })();
+    // eslint-disable-next-line
+  }, [location]);
 
-    // 기존 내용 초기화
-    svg.selectAll('*').remove();
-
-    //지형 경계선
-    svg
-      .append('g')
-      .attr('class', 'boundary')
-      .selectAll('path')
-      .data(mapGeo.features)
-      .join('path')
-      .attr('d', path)
-      .attr('fill', 'transparent')
-      .style('pointer-events', 'all') 
-      .attr('stroke', '#666')
-      .attr('stroke-width', 0.5)
-      .style('cursor', 'pointer')   
-      .on('mouseover', function () {
-        d3.select(this).attr('fill', '#60A5FA');
-      })
-      .on('mouseout', function () {
-        d3.select(this).attr('fill', 'transparent');
-      });
-  
-      // 마커 그리기
-    svg
-    .append('g')
-    .attr('class', 'markers')
-    .selectAll('circle')
-    .data(courtCoords)
-    .join('circle')
-    .attr('cx', d => geoProj([d.lng, d.lat])![0])
-    .attr('cy', d => geoProj([d.lng, d.lat])![1])
-    .attr('r', 4)
-    .attr('fill', 'red');
-}, [courtCoords, path, geoProj]);
-  
-
-  return <div ref={containerRef} />;
+  return (
+    <div className='p-5'>
+      <div className={isMobile ? 'w-35' : 'w-50'}>
+        <Dropdown
+          options={options}
+          value={filterOption}
+          onChange={opt => onRegionSelect(opt.value)}
+        />
+      </div>
+      <div className='flex flex-row'>
+        <div className="py-5">
+          <svg width={width} height={height}>
+            <g className="boundary">{paths}</g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
 }

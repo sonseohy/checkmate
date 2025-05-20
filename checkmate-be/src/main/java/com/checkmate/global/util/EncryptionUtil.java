@@ -10,6 +10,13 @@ public class EncryptionUtil {
 
     private final TextEncryptor textEncryptor;
 
+    /**
+     * EncryptionUtil 생성자
+     * 암호와 솔트를 사용하여 TextEncryptor 초기화
+     *
+     * @param password 암호화에 사용할 비밀번호
+     * @param salt 암호화에 사용할 솔트 값
+     */
     public EncryptionUtil(
             @Value("${encryption.password}") String password,
             @Value("${encryption.salt}") String salt

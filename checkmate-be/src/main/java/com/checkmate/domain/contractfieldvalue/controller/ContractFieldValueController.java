@@ -6,8 +6,6 @@ import com.checkmate.domain.contractfieldvalue.service.ContractFieldValueService
 import com.checkmate.global.common.response.ApiResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,13 +24,18 @@ import java.util.Map;
 public class ContractFieldValueController {
     private final ContractFieldValueService contractFieldValueService;
 
+    /**
+     * 필드값 저장 및 법조항 렌더링
+     * 여러 섹션의 필드값을 한 번에 저장하고, 저장된 값을 기반으로 법조항을 렌더링하여 반환
+     *
+     * @param contractId 계약서 ID
+     * @param request 필드값 저장 요청 (섹션별 필드값 목록)
+     * @return 렌더링된 법조항 목록
+     */
     @Operation(summary = "필드값 저장 및 법조항 렌더링",
             description = "여러 섹션의 필드값을 한 번에 저장하고, 법조항을 렌더링하여 반환합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "필드값 저장 성공",
-                    content = @Content(schema = @Schema(implementation = ContractFieldValueResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
-            @ApiResponse(responseCode = "404", description = "계약서 또는 섹션 없음", content = @Content)
+            @ApiResponse(responseCode = "200", description = "필드값 저장 성공")
     })
     @PostMapping("/{contractId}/inputs")
     public ApiResult<List<ContractFieldValueResponseDto>> saveFieldValues(
@@ -46,13 +49,17 @@ public class ContractFieldValueController {
         return ApiResult.ok(responses);
     }
 
+    /**
+     * 계약서 필드값 초기화
+     * 계약서의 모든 필드값을 초기화(삭제)
+     *
+     * @param contractId 계약서 ID
+     * @return 초기화 결과 정보 (삭제된 필드값 개수 등)
+     */
     @Operation(summary = "계약서 필드값 초기화",
             description = "계약서의 모든 필드값을 초기화(삭제)합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "필드값 초기화 성공"),
-            @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
-            @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content),
-            @ApiResponse(responseCode = "404", description = "계약서 없음", content = @Content)
+            @ApiResponse(responseCode = "200", description = "필드값 초기화 성공")
     })
     @DeleteMapping("/{contractId}/inputs")
     public ApiResult<Map<String, Object>> resetFieldValues(

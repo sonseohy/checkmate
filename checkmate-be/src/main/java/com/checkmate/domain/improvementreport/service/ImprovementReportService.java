@@ -31,6 +31,7 @@ public class ImprovementReportService {
 	 * 각 ai 분석 리포트에 해당되는 개선 사항 리포트를 데이터베이스에서 조회
 	 *
 	 * @param aiAnalysisIdHex ai 분석 리포트 ID
+	 * @param userId 유저 ID
 	 * @return 개선 사항 리포트 DTO 리스트
 	 */
 	public List<ImprovementResponseDto> getImprovementReport(String aiAnalysisIdHex, int userId) {

@@ -26,6 +26,14 @@ public class StompHandler implements ChannelInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(StompHandler.class);
     private final JwtUtil jwtUtil;
 
+    /**
+     * 메시지 전송 전 처리 메서드
+     * CONNECT 명령에 대해 JWT 토큰 검증 수행
+     *
+     * @param message 처리할 메시지
+     * @param channel 메시지가 전송될 채널
+     * @return 처리된 메시지
+     */
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         final StompHeaderAccessor accessor = StompHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -38,10 +46,22 @@ public class StompHandler implements ChannelInterceptor {
         return message;
     }
 
+    /**
+     * 헤더에서 JWT 토큰 추출
+     *
+     * @param accessor STOMP 헤더 접근자
+     * @return Authorization 헤더 값
+     */
     private String extractJwt(final StompHeaderAccessor accessor) {
         return accessor.getFirstNativeHeader("Authorization");
     }
 
+    /**
+     * JWT 토큰 유효성 검증 및 인증 정보 설정
+     *
+     * @param accessor STOMP 헤더 접근자
+     * @throws CustomException 토큰이 유효하지 않은 경우
+     */
     private void validateJwt(final StompHeaderAccessor accessor) {
         final String authorization = extractJwt(accessor);
 

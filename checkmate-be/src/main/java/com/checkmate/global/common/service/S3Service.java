@@ -50,6 +50,9 @@ public class S3Service {
     private static final int    IV_LEN         = 12;
     private static final int    TAG_BITS       = 128;
 
+    /**
+     * 초기화: CloudFront 도메인 기반 파일 접두사 설정
+     */
     @PostConstruct
     public void init() {
         this.filePrefix = "https://" + cloudFrontDomain + "/";
@@ -65,6 +68,15 @@ public class S3Service {
         private final byte[] iv;
         private final byte[] shareA;
         private final byte[] shareB;
+
+        /**
+         * 암호화 및 키 분할 결과 생성자
+         *
+         * @param url S3에 저장된 파일의 URL
+         * @param iv 초기화 벡터
+         * @param shareA 키 조각 A (MySQL에 저장)
+         * @param shareB 키 조각 B (MongoDB에 저장)
+         */
         public SplitEncryptedResult(String url, byte[] iv, byte[] shareA, byte[] shareB) {
             this.url    = url;
             this.iv     = iv;
@@ -76,6 +88,10 @@ public class S3Service {
     /**
      * MultipartFile을 AES-GCM 암호화 → S3 업로드,
      * DEK를 랜덤 shareA/ shareB로 2-of-2 분할하여 반환.
+     *
+     * @param file 업로드할 MultipartFile
+     * @param prefix 파일 저장 경로 접두사
+     * @return 암호화 및 키 분할 결과
      */
     public SplitEncryptedResult uploadEncryptedFileWithKeySplit(
             MultipartFile file,
@@ -129,6 +145,12 @@ public class S3Service {
     /**
      * byte[]을 AES-GCM 암호화 → S3 업로드,
      * DEK를 shareA/ shareB로 2-of-2 분할하여 반환.
+     *
+     * @param data 업로드할 바이트 배열
+     * @param fileName 저장될 파일명
+     * @param contentType 파일의 MIME 타입
+     * @param prefix 파일 저장 경로 접두사
+     * @return 암호화 및 키 분할 결과
      */
     public SplitEncryptedResult uploadEncryptedBytesWithKeySplit(
             byte[] data,
@@ -184,6 +206,12 @@ public class S3Service {
     /**
      * S3에서 암호문을 가져와,
      * shareA(mysql)와 shareB(mongo)로 DEK 복원 → 평문 반환
+     *
+     * @param fileUrl 다운로드할 파일의 URL
+     * @param iv 초기화 벡터
+     * @param shareA 키 조각 A (MySQL에서 가져온 값)
+     * @param fileId 파일 ID (MongoDB에서 shareB를 조회하는 데 사용)
+     * @return 복호화된 파일 바이트 배열
      */
     public byte[] downloadAndDecryptWithKeySplit(
             String fileUrl,
@@ -237,6 +265,13 @@ public class S3Service {
 
     /**
      * S3에서 암호화된 객체를 가져와 AES-GCM 복호화 후 CipherInputStream을 반환
+     * 스트리밍 방식으로 대용량 파일을 처리할 때 유용
+     *
+     * @param key S3에 저장된 객체의 키
+     * @param iv 초기화 벡터
+     * @param shareA 키 조각 A (MySQL에서 가져온 값)
+     * @param fileId 파일 ID (MongoDB에서 shareB를 조회하는 데 사용)
+     * @return 복호화된 데이터 스트림
      */
     public InputStream getDecryptedStream(
             String key,
@@ -275,7 +310,14 @@ public class S3Service {
     // 2. 기존 메서드 (암호화 없이 업로드/다운로드 등)
     // ----------------------------------------------------
 
-    /** MultipartFile → S3 업로드 */
+    /**
+     * MultipartFile을 S3에 업로드
+     * 암호화 없이 파일을 S3에 직접 업로드
+     *
+     * @param file 업로드할 MultipartFile
+     * @param prefix 파일 저장 경로 접두사
+     * @return 업로드된 파일의 URL
+     */
     public String uploadFile(MultipartFile file, String prefix) {
         String ext  = StringUtils.getFilenameExtension(file.getOriginalFilename());
         String key  = prefix + UUID.randomUUID() + System.currentTimeMillis() + "." + ext;
@@ -292,7 +334,16 @@ public class S3Service {
         }
     }
 
-    /** byte[] → S3 업로드 */
+    /**
+     * 바이트 배열을 S3에 업로드
+     * 암호화 없이 바이트 데이터를 S3에 직접 업로드
+     *
+     * @param bytes 업로드할 바이트 배열
+     * @param fileName 저장될 파일명
+     * @param contentType 파일의 MIME 타입
+     * @param prefix 파일 저장 경로 접두사
+     * @return 업로드된 파일의 URL
+     */
     public String uploadBytes(byte[] bytes, String fileName, String contentType, String prefix) {
         String extension = fileName.contains(".")
                 ? fileName.substring(fileName.lastIndexOf("."))
@@ -309,7 +360,14 @@ public class S3Service {
         return filePrefix + key;
     }
 
-    /** AES 없이 다운로드 (단순 복호화) */
+    /**
+     * S3에서 파일을 다운로드하고 AES로 복호화
+     * 단일 AES 키로 암호화된 파일을 다운로드하고 복호화
+     *
+     * @param fileUrl 다운로드할 파일의 URL
+     * @param iv 초기화 벡터
+     * @return 복호화된 파일 바이트 배열
+     */
     public byte[] downloadAndDecrypt(String fileUrl, byte[] iv) {
         String key = fileUrl.replace(filePrefix, "");
         ResponseBytes<GetObjectResponse> resp = s3Client.getObjectAsBytes(
@@ -320,7 +378,12 @@ public class S3Service {
         return aesService.decrypt(resp.asByteArray(), iv);
     }
 
-    /** 파일 삭제 */
+    /**
+     * S3에서 파일 삭제
+     * 지정된 URL의 파일을 S3에서 완전히 제거
+     *
+     * @param fileUrl 삭제할 파일의 URL
+     */
     public void deleteFile(String fileUrl) {
         String key = fileUrl.replace(filePrefix, "");
         try {
@@ -333,7 +396,13 @@ public class S3Service {
         }
     }
 
-    /** 전체 바이트로 다운로드 */
+    /**
+     * S3에서 파일을 다운로드하여 바이트 배열로 반환
+     * 암호화 없이 파일 원본 그대로 다운로드
+     *
+     * @param fileUrl 다운로드할 파일의 URL
+     * @return 파일 바이트 배열
+     */
     public byte[] getFileAsBytes(String fileUrl) {
         String key = fileUrl.replace(filePrefix, "");
         try (ResponseInputStream<GetObjectResponse> s3obj =
@@ -354,7 +423,14 @@ public class S3Service {
         }
     }
 
-    /** MultipartFile 형태로 변환 */
+    /**
+     * S3에서 파일을 다운로드하여 MultipartFile로 변환
+     * 파일을 메모리에 로드하여 MultipartFile 형태로 제공
+     *
+     * @param fileUrl 다운로드할 파일의 URL
+     * @param contentType 파일의 MIME 타입
+     * @return MultipartFile 인스턴스
+     */
     public MultipartFile getFileAsMultipartFile(String fileUrl, String contentType) {
         byte[] bytes = getFileAsBytes(fileUrl);
         String name  = fileUrl.replace(filePrefix, "")
@@ -362,6 +438,13 @@ public class S3Service {
         return new CustomMultipartFile(bytes, name, contentType);
     }
 
+    /**
+     * S3 객체의 크기 조회
+     * 지정된 키에 해당하는 S3 객체의 바이트 단위 크기 반환
+     *
+     * @param key 조회할 S3 객체의 키
+     * @return 객체 크기(바이트)
+     */
     public long getObjectContentLength(String key) {
         HeadObjectResponse head = s3Client.headObject(
                 HeadObjectRequest.builder()

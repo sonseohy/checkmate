@@ -52,7 +52,11 @@ public class HelloSignCallbackService {
     private final NotificationRepository notificationRepository;
 
     /**
-     * Webhook 페이로드(JSON)와 HMAC 서명값을 받아 처리합니다.
+     * HelloSign 웹훅 콜백 처리
+     * 웹훅 페이로드(JSON)와 HMAC 서명값을 받아 서명 완료된 계약서를 처리
+     *
+     * @param payloadJson JSON 형태의 이벤트 데이터
+     * @param signatureHeader HelloSign에서 제공하는 HMAC 서명
      */
     @Transactional
     public void handleCallback(String payloadJson, String signatureHeader) throws Exception {
@@ -160,7 +164,15 @@ public class HelloSignCallbackService {
         );
     }
 
-    /** HMAC-SHA256 계산 후 hex 비교 */
+    /**
+     * HMAC-SHA256 검증
+     * HelloSign으로부터 받은 서명값과 계산한 HMAC 값을 비교하여 인증
+     *
+     * @param apiKey HelloSign API 키
+     * @param payload 서명 대상 페이로드
+     * @param signature HelloSign에서 제공한 HMAC 서명
+     * @return 서명 일치 여부
+     */
     private boolean hmacMatches(String apiKey, String payload, String signature) throws Exception {
         Mac mac = Mac.getInstance("HmacSHA256");
         SecretKeySpec keySpec = new SecretKeySpec(

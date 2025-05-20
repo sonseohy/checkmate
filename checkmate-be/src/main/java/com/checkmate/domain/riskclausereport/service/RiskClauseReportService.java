@@ -32,6 +32,7 @@ public class RiskClauseReportService {
 	 * 각 ai 분석 리포트에 해당되는 위험 사항 리포트를 데이터베이스에서 조회
 	 *
 	 * @param aiAnalysisIdHex ai 분석 리포트 ID
+	 * @param userId 유저 ID
 	 * @return 위험 사항 리포트 DTO 리스트
 	 */
 	public List<RiskClauseReportResponseDto> getImprovementReportsByAnalysisId(String aiAnalysisIdHex, int userId) {

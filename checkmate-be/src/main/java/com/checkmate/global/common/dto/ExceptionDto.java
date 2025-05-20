@@ -14,11 +14,22 @@ public class ExceptionDto {
     @NotNull
     private final String message;
 
+    /**
+     * 기본 에러 코드 기반 생성자
+     *
+     * @param errorCode 시스템에 정의된 에러 코드
+     */
     public ExceptionDto(ErrorCode errorCode) {
         this.code = errorCode.getCode();
         this.message = errorCode.getMessage();
     }
 
+    /**
+     * 에러 코드와 커스텀 메시지 기반 생성자
+     *
+     * @param errorCode 시스템에 정의된 에러 코드
+     * @param customMessage 추가 오류 상세 내용
+     */
     public ExceptionDto(ErrorCode errorCode, String customMessage) {
         this.code = errorCode.getCode();
         StringBuilder sb = new StringBuilder();

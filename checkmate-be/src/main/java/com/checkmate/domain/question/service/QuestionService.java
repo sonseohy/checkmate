@@ -32,6 +32,7 @@ public class QuestionService {
 	 * 각 계약서에 해당하는 질문 리스트를 데이터베이스에서 조회
 	 *
 	 * @param contractId 계약서 ID
+	 * @param userId 유저 ID
 	 * @return 질문 리스트 DTO
 	 */
 	@Transactional(readOnly = true)

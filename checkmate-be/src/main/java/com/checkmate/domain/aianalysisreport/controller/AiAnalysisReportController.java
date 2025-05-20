@@ -13,6 +13,7 @@ import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.response.ApiResult;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,19 +30,18 @@ public class AiAnalysisReportController {
 	 * ai 분석 리포트 조회
 	 *
 	 * @param contractId 계약서 ID
-	 * @param userDetails 유저
+	 * @param userDetails 현재 로그인한 사용자 정보
 	 * @return ai 분석 리포트 ID, 계약서 ID, 개선 사항, 누락 사항, 위험 사항
 	 */
 	@Operation(summary = "AI 분석 리포트 조회", description = "AI 분석 리포트를 조회합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "AI 분석 리포트 조회 성공"),
-		@ApiResponse(responseCode = "401", description = "인증 실패"),
 	})
 	@GetMapping("/{contractId}")
 	@PreAuthorize("isAuthenticated()")
 	public ApiResult<AiAnalysisReportResponseDto> getAiAnalysisReportByContractId(
-		@PathVariable(value = "contractId") int contractId,
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		@Parameter(description = "계약서 ID", required = true) @PathVariable(value = "contractId") int contractId,
+		@Parameter(description = "현재 로그인한 사용자 정보", required = true) @AuthenticationPrincipal CustomUserDetails userDetails) {
 		AiAnalysisReportResponseDto data = aiAnalysisReportService.getAiAnalysisReportByContractId(contractId, userDetails.getUserId());
 		return ApiResult.ok(data);
 	}

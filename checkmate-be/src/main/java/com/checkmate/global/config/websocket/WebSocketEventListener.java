@@ -18,6 +18,12 @@ public class WebSocketEventListener {
     private final SimpMessagingTemplate template;
     private final NotificationService notificationService;
 
+    /**
+     * 세션 연결 완료 이벤트 처리
+     * 사용자가 웹소켓에 연결되면 해당 사용자의 읽지 않은 알림 개수를 전송
+     *
+     * @param event 세션 연결 이벤트
+     */
     @EventListener
     public void handleSessionConnected(SessionConnectedEvent event) {
         Principal principal = event.getUser();

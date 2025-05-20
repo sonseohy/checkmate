@@ -5,6 +5,7 @@ import com.checkmate.domain.contract.service.ContractFileService;
 import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.service.S3Service;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,16 +34,23 @@ public class ContractFileController {
     private final ContractFileService contractFileService;
     private final S3Service s3Service;
 
+    /**
+     * 계약서 PDF 다운로드
+     * 계약서 파일을 클라이언트에서 다운로드할 수 있도록 처리
+     *
+     * @param userDetails 현재 로그인한 사용자 정보
+     * @param contractId 다운로드할 계약서 ID
+     * @return 계약서 PDF 파일 리소스
+     */
     @Operation(summary = "내 계약서 PDF 다운로드", description = "계약서를 다운로드합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "다운 성공"),
-            @ApiResponse(responseCode = "401", description = "인증 실패"),
-            @ApiResponse(responseCode = "403", description = "접근 권한 없음")
+            @ApiResponse(responseCode = "200", description = "다운 성공")
     })
     @GetMapping("/{contractId}/download")
     public ResponseEntity<Resource> downloadPdf(
+            @Parameter(description = "현재 로그인한 사용자 정보", required = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable int contractId) throws Exception {
+            @Parameter(description = "게약서 ID", required = true) @PathVariable int contractId) throws Exception {
 
         ContractFile file = contractFileService.findViewerFile(
                 userDetails.getUserId(), contractId);

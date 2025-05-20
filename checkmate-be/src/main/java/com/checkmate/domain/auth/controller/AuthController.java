@@ -14,6 +14,7 @@ import com.checkmate.domain.auth.service.AuthService;
 import com.checkmate.domain.user.dto.CustomUserDetails;
 import com.checkmate.global.common.response.ApiResult;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +55,9 @@ public class AuthController {
      * @return HTTP 204 No Content 응답을 포함한 {@link ApiResult} 객체
      */
     @PostMapping("/logout")
-    public ApiResult<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ApiResult<?> logout(
+        @Parameter(description = "유저 정보", required = true)
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
         authService.logout(userDetails.getUserId());
         return ApiResult.noContent();
     }

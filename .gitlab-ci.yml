@@ -22,6 +22,7 @@ build_checkmate_fe:
     - cat .env
     - npm ci
     - npm run build
+    - cp node_modules/pdfjs-dist/build/pdf.worker.mjs dist/
   artifacts:
     paths:
       - checkmate-fe/dist
@@ -39,9 +40,6 @@ deploy_checkmate_fe:
   stage: deploy
   only:
     - fe
-  needs:
-    - job: build_checkmate_fe
-      artifacts: true
   script:
     - echo "🚀 Docker 배포 시작"
     - cd checkmate-fe

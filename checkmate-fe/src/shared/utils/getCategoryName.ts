@@ -1,4 +1,4 @@
-import { categories } from "../constants/categories";
+import { categories } from "@/shared/constants/categories";
 
 // 카테고리 id와 이름 매핑
 const getCategorName = (id:number): string => {

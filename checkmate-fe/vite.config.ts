@@ -16,13 +16,21 @@ export default defineConfig({
       workbox: {
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, 
         globDirectory: 'dist',
-        globPatterns: ['**/*.{js,wasm,css,html}'], // 캐싱할 파일 패턴
+        globPatterns: ['**/*.{js,wasm,css,html, mjs}'], // 캐싱할 파일 패턴
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [
-          new RegExp('^/pdf\\.worker\\.mjs$')
+        navigateFallbackDenylist: [ /^\/pdf\.worker\.mjs$/, ],
+        runtimeCaching: [
+          {
+            urlPattern: /^\/pdf\.worker\.mjs$/,
+            handler: 'NetworkOnly',
+            options: {
+              // 필요하면 캐시 옵션 더 줄 수 있습니다.
+              cacheName: 'pdf-worker-cache',
+            },
+          },
         ],
       },
-      includeAssets: ['icons/favicon.ico'],
+      includeAssets: ['pdf.worker.mjs', 'icons/favicon.ico'],
       devOptions: {
         enabled: true, //개발 환경에서도 PWA가 정상적으로 작성하도록 설정
       },

@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+// src/components/AddressInput.tsx
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import DaumPostcodeEmbed from 'react-daum-postcode';
 import { LuX } from 'react-icons/lu';
 
@@ -8,51 +10,66 @@ interface AddressInputProps {
   onBlur?: () => void;
 }
 
-const AddressInput: React.FC<AddressInputProps> = ({ value, onChange, onBlur }) => {
+const AddressInput: React.FC<AddressInputProps> = ({
+  value,
+  onChange,
+  onBlur,
+}) => {
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 모달이 열려있는 동안 배경 스크롤 잠금
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
 
   const handleComplete = (data: any) => {
-    const fullAddress = data.address;
-    onChange(fullAddress);
+    onChange(data.address);
     setOpen(false);
   };
 
-  const handleClickOutside = (e: MouseEvent) => {
-    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-      setOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
   return (
-    <div className="relative w-full" ref={containerRef}>
+    <div className="relative w-full">
       <input
         type="text"
         value={value}
         onClick={() => setOpen(true)}
-        onChange={() => {}}
         onBlur={onBlur}
-        placeholder="주소를 검색하세요"
         readOnly
-        className="w-full p-2 rounded-md border bg-white border-gray-400 cursor-pointer"
+        placeholder="주소를 검색하세요"
+        className="w-full p-2 rounded-md border bg-white border-gray-300 cursor-pointer"
       />
-      {open && (
-        <div className="absolute z-50 mt-2 w-full rounded-md shadow-lg border border-gray-300 bg-white">
-          <div className="flex justify-end p-2">
-            <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-black">
-              <LuX className="w-5 h-5" />
-            </button>
-          </div>
-          <DaumPostcodeEmbed onComplete={handleComplete} autoClose={false} />
-        </div>
-      )}
+
+      {open &&
+        ReactDOM.createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50"
+            aria-modal="true"
+          >
+            <div className="relative w-full max-w-lg bg-white rounded-lg overflow-hidden shadow-lg">
+              {/* ── 헤더 (닫기 버튼) ── */}
+              <div className="flex justify-end p-2 border-b border-gray-200 bg-white z-10">
+                <button
+                  onClick={() => setOpen(false)}
+                  className="text-gray-500 hover:text-black"
+                >
+                  <LuX className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* ── 주소 검색 영역 ── */}
+              <div className="h-full overflow-y-auto">
+                <DaumPostcodeEmbed
+                  onComplete={handleComplete}
+                  autoClose={false}
+                />
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

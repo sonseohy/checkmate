@@ -58,7 +58,9 @@ export default function SideBar({ selectedMenu, onMenuClick }: SideBarProps) {
               <Icon
                 size={26}
                 style={{ strokeWidth: 1.6 }}
-                className={active ? 'text-blue-500' : 'text-gray-700'}
+                className={`${
+                  active ? 'text-blue-500' : 'text-gray-700'
+                } mx-auto`}
               />
             </button>
           );
@@ -72,34 +74,40 @@ export default function SideBar({ selectedMenu, onMenuClick }: SideBarProps) {
     <div
       className="
         group/sidebar relative flex flex-col
-        h-full bg-white shadow-md
-        overflow-hidden transition-all duration-300
-        w-16 hover:w-64
+        h-full bg-white shadow-md overflow-hidden
+        transition-all duration-300
+        w-16 hover:w-48            /* 폭 조금만 넓힘 */
       "
     >
-      <div className="mt-10 space-y-6">
+      <div className="mt-10 space-y-7 px-2">
         {menu.map(({ icon: Icon, label }) => {
           const active = selectedMenu === label;
           return (
             <button
               key={label}
               onClick={() => handleClick(label)}
-              className="flex items-center gap-4 w-full px-4"
+              className="
+                grid grid-cols-[40px_1fr] items-center   /* 40px = 아이콘 고정폭 */
+                w-full gap-x-3
+                transition-colors
+              "
             >
               <Icon
                 size={26}
-                style={{ strokeWidth: 1.5 }}
-                className={active ? 'text-blue-500' : 'text-gray-800'}
+                style={{ strokeWidth: 1.4 }}
+                className={`${
+                  active ? 'text-blue-500' : 'text-gray-800'
+                } mx-auto`}
               />
 
-              {/* 라벨: 사이드바 호버 시에만 노출 */}
               <span
                 className={`
-                  hidden group-hover/sidebar:inline-block
-                  whitespace-nowrap text-lg font-medium
+                  whitespace-nowrap text-base font-medium
                   ${active ? 'text-blue-500' : 'text-gray-800'}
-                  transition-opacity duration-300
-                  opacity-0 group-hover/sidebar:opacity-100
+                  opacity-0 translate-x-2
+                  transition-all duration-200
+                  group-hover/sidebar:opacity-100
+                  group-hover/sidebar:translate-x-0
                 `}
               >
                 {label}

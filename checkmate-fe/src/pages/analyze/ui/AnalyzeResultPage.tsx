@@ -88,8 +88,10 @@ const AnalyzeResultPage: React.FC = () => {
   return (
     <section className="container px-4 py-16 mx-auto space-y-12">
       <h1 className="text-3xl font-bold text-center">
-        {' '}
-        {result?.categoryName ?? contractTitle} 분석결과
+        <span className="whitespace-nowrap sm:whitespace-normal">
+          {result?.categoryName ?? contractTitle}
+        </span>{' '}
+        분석결과
       </h1>
 
       {/* 배너 */}
@@ -109,8 +111,9 @@ const AnalyzeResultPage: React.FC = () => {
             className="w-24 h-24 md:w-28 md:h-28"
           />
 
-          <p className="text-xl md:text-2xl font-semibold drop-shadow-sm">
-            {userName}님의 {contractTitle}는&nbsp;
+          <p className="text-xl md:text-2xl font-semibold drop-shadow-sm text-center">
+            {userName}님의&nbsp;{contractTitle}는
+            <br className="md:hidden" />
             <span className={`underline ${stageColor} ${stageSize}`}>
               {stageTxt}
             </span>

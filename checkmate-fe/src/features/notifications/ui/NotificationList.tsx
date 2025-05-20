@@ -80,7 +80,7 @@ const NotificationList: React.FC<Props> = ({
   /* ▼ 글꼴 사이즈 – 팝업·페이지 구분 */
   const msgSize = isPopup ? 'text-sm' : 'text-lg'; // 메시지(본문)
   const dateSize = isPopup ? 'text-xs' : 'text-base'; // 생성일시
-  const tabSize = isPopup ? 'text-sm' : 'text-lg'; // 탭 라벨
+  // const tabSize = isPopup ? 'text-sm' : 'text-lg'; // 탭 라벨
 
   const outerCls = isPopup
     ? `w-[90vw] max-w-xs md:w-[400px] bg-white rounded-lg shadow-lg p-4
@@ -93,23 +93,32 @@ const NotificationList: React.FC<Props> = ({
 
   return (
     <div className={outerCls}>
-      {/* ── 탭 ─────────────────────────────────── */}
-      <div className="flex space-x-4 border-b border-gray-200 pb-2 mb-4">
+      <div
+        className={`
+    flex space-x-3 sm:space-x-4
+    overflow-x-auto sm:overflow-visible no-scrollbar
+    border-b border-gray-200 pb-2 mb-4
+  `}
+      >
         {TABS.map((t) => (
           <button
             key={t.type}
             onClick={() => setSelected(t.type)}
-            className={`${tabSize} font-semibold ${
-              selected === t.type
-                ? 'text-black border-b-2 border-blue-500'
-                : 'text-gray-400'
-            }`}
+            /* ↓ 글자 크기 · 줄바꿈 방지 추가 */
+            className={`
+        ${isPopup ? 'text-sm' : 'text-base sm:text-lg'}
+        whitespace-nowrap font-semibold
+        ${
+          selected === t.type
+            ? 'text-black border-b-2 border-blue-500'
+            : 'text-gray-400'
+        }
+      `}
           >
             {t.label}
           </button>
         ))}
       </div>
-
       {/* ── 알림 목록 ─────────────────────────── */}
       <div
         className={`${listMaxH} overflow-y-auto no-scrollbar
@@ -142,7 +151,6 @@ const NotificationList: React.FC<Props> = ({
           </p>
         )}
       </div>
-
       {/* ── 하단 액션 (variant 별) ───────────────── */}
       {isPopup && (
         <div className="mt-4 text-right">

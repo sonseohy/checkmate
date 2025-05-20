@@ -17,6 +17,5 @@ export const fetchAnalysisResult = async (
   const response = await customAxios.get<AnalysisResponse>(
     `/api/analysis/${contractId}`,
   );
-  console.log('fetchAnalysisResult', response.data);
   return response.data;
 };

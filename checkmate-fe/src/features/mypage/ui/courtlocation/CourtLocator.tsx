@@ -35,7 +35,7 @@ export default function CourtLocation() {
         const data = await getCourthouseList();
         setCourts(data);
       } catch (err) {
-        console.error('법원 리스트 불러오기 실패:', err);
+        // console.error('법원 리스트 불러오기 실패:', err);
       } finally {
         setLoading(false); // 성공/실패 상관없이 로딩 종료
       }

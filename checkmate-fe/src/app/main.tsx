@@ -5,6 +5,8 @@
 // pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}${import.meta.env.BASE_URL}pdf.worker.mjs`;
 // pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdf.worker.mjs', window.location.origin).toString();
 
+<<<<<<< HEAD
+=======
 // import pdfWorkerURL from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 // pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerURL;
@@ -18,6 +20,7 @@
 // })();
 
 
+>>>>>>> 30fb6b7faed7ad31ed8df90e1211ab941941a0f5
 // console.log('pdfjs workerSrc:', pdfjs.GlobalWorkerOptions.workerSrc);
 
 import { StrictMode, Suspense } from 'react';
@@ -33,7 +36,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
-
 import { FullPageSpinner } from '@/shared/ui/Spinner';
 
 const queryClient = new QueryClient();
@@ -44,6 +46,7 @@ createRoot(document.getElementById('root')!).render(
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
+
           <ToastContainer />
         </QueryClientProvider>
       </Provider>

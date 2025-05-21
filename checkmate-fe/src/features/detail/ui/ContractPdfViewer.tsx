@@ -2,14 +2,18 @@ import { pdfjs } from 'react-pdf';
 
 // pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 (async () => {
-  const { pdfjs } = await import("react-pdf");
+  const { pdfjs } = await import('react-pdf');
   pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
 })();
 console.log('pdfjs workerSrc:', pdfjs.GlobalWorkerOptions.workerSrc);
 
-
 import { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  Location,
+} from 'react-router-dom';
 import { Document, Page } from 'react-pdf';
 import {
   LuDownload,
@@ -33,26 +37,44 @@ import { useMobile } from '@/shared';
 import { SignatureRequestForm } from '@/features/e-sign';
 import { getCategorName } from '@/shared';
 
+/* ────────────────────────── 타입 ────────────────────────── */
 interface Params {
   contractId: string;
   [key: string]: string | undefined;
 }
 
+/** location.state 여러 형태를 모두 허용 */
+type LocationState =
+  | {
+      contract?: { category_id?: number };
+      category_id?: number;
+    }
+  | undefined;
+
+/* ────────────────────────── 컴포넌트 ────────────────────────── */
 const ContractPdfViewer: React.FC = () => {
+  /* ─ 기본 훅 세팅 ─ */
   const isMobile = useMobile();
   const navigate = useNavigate();
   const { contractId } = useParams<Params>();
+
+  /* ─ location.state (느슨하게) ─ */
+  const { state } = useLocation() as Location<LocationState>;
+
+  /* ─ PDF / 뷰어 상태 ─ */
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(isMobile ? 0.6 : 1);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
-  const { state: contract } = useLocation();
 
-  const documentKey = useMemo(() => {
-    return pdfBlob ? URL.createObjectURL(pdfBlob) : 'empty';
-  }, [pdfBlob]);
+  /* ─ PDF key (리렌더 방지) ─ */
+  const documentKey = useMemo(
+    () => (pdfBlob ? URL.createObjectURL(pdfBlob) : 'empty'),
+    [pdfBlob],
+  );
 
+  /* ─ PDF 가져오기 ─ */
   useEffect(() => {
     if (!contractId) return;
     (async () => {
@@ -60,31 +82,39 @@ const ContractPdfViewer: React.FC = () => {
         const blob = await getContractDetail(Number(contractId));
         setPdfBlob(blob);
       } catch (err) {
-        console.error(err);
+        // console.error(err);
       }
     })();
   }, [contractId]);
 
+  /* ─ 모바일 ↔ 데스크톱 축척 동기화 ─ */
   useEffect(() => {
     setScale(isMobile ? 0.6 : 1);
   }, [isMobile]);
 
+  /* ─ 문서 로드 완료 ─ */
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setPageNumber(1);
   };
 
-  const handleThumbnailClick = (page: number) => {
-    setPageNumber(page);
-  };
+  /* ─ 썸네일 클릭 ─ */
+  const handleThumbnailClick = (page: number) => setPageNumber(page);
 
+  /* ─ PDF 다운로드 ─ */
   const handlePdfDownload = () => {
-    const categoryName = contract.contract.category_id
-      ? getCategorName(Number(contract.contract.category_id))
-      : '제목을 입력하세요';
+    /* ① location.state 형태에 관계없이 category_id만 추출 */
+    const categoryId =
+      state?.contract?.category_id ?? //  { contract: { category_id } }
+      state?.category_id; //  { category_id }
+
+    /* ② 이름 결정 (없으면 '알수없음') */
+    const categoryName = getCategorName(categoryId ?? -1);
+
     getContractownload(Number(contractId), `${categoryName}.pdf`);
   };
 
+  /* ─ 계약서 삭제 ─ */
   const handleDeleteContract = async () => {
     try {
       const result = await Swal.fire({
@@ -105,19 +135,20 @@ const ContractPdfViewer: React.FC = () => {
         navigate('/mypage');
       }
     } catch (error) {
-      console.error('계약서 삭제 실패:', error);
+      // console.error('계약서 삭제 실패:', error);
     }
   };
 
   return (
     <div className="flex flex-col space-x-4">
-      {/* 컨트롤 버튼들 */}
+      {/* ───────────── 컨트롤 바 ───────────── */}
       <div
         className="
-     flex flex-wrap items-center justify-between
-     gap-2 sm:gap-5 mx-3 my-3
-   "
+          flex flex-wrap items-center justify-between
+          gap-2 sm:gap-5 mx-3 my-3
+        "
       >
+        {/* 확대/축소 */}
         <div
           className={`flex items-center ${
             isMobile ? 'space-x-1' : 'space-x-2'
@@ -142,7 +173,7 @@ const ContractPdfViewer: React.FC = () => {
           </button>
         </div>
 
-        {/* Pagination */}
+        {/* 페이지네이션 */}
         <div className="flex space-x-4 items-center">
           <button
             onClick={() => setPageNumber((p) => Math.max(p - 1, 1))}
@@ -151,11 +182,9 @@ const ContractPdfViewer: React.FC = () => {
           >
             {isMobile ? <LuChevronLeft size={18} /> : '이전'}
           </button>
-
           <span className="whitespace-nowrap">
             {pageNumber} / {numPages}
           </span>
-
           <button
             onClick={() => setPageNumber((p) => Math.min(p + 1, numPages))}
             disabled={pageNumber >= numPages}
@@ -165,7 +194,7 @@ const ContractPdfViewer: React.FC = () => {
           </button>
         </div>
 
-        {/* Actions */}
+        {/* 액션 아이콘 */}
         <div className="flex space-x-3">
           {isMobile ? (
             <div className="flex flex-row">
@@ -214,8 +243,8 @@ const ContractPdfViewer: React.FC = () => {
         </div>
       </div>
 
-      {/* PDF Viewer */}
-      <div className={`${isMobile ? 'mt-1' : 'mt-2'}`}>
+      {/* ───────────── PDF 뷰어 ───────────── */}
+      <div className={isMobile ? 'mt-1' : 'mt-2'}>
         {!pdfBlob ? (
           <div>PDF 불러오는 중…</div>
         ) : (
@@ -226,6 +255,7 @@ const ContractPdfViewer: React.FC = () => {
             loading="로딩 중…"
           >
             <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'}`}>
+              {/* 썸네일 목록 */}
               <div
                 className={
                   isMobile
@@ -250,6 +280,7 @@ const ContractPdfViewer: React.FC = () => {
                 ))}
               </div>
 
+              {/* 본문 페이지 */}
               <div className="flex-1 flex justify-center items-start">
                 <Page pageNumber={pageNumber} scale={scale} />
               </div>
@@ -258,7 +289,7 @@ const ContractPdfViewer: React.FC = () => {
         )}
       </div>
 
-      {/* 전자서명 모달 */}
+      {/* ───────────── 전자서명 모달 ───────────── */}
       {showSignatureModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative">

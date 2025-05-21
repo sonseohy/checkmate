@@ -92,15 +92,15 @@ export async function PostKakaoCallback(code: string, dispatch: AppDispatch) {
 
       return loginResponse.data;
     } else {
-      console.error('로그인 실패:', loginResponse.data.error.message);
+      // console.error('로그인 실패:', loginResponse.data.error.message);
       return null;
     }
   } catch (error) {
     // 오류 처리 (AxiosError 타입으로 캐스팅)
     if (axios.isAxiosError(error)) {
-      console.error(error.response?.data || error.message); // 에러 시 상세 응답 출력
+      // console.error(error.response?.data || error.message); // 에러 시 상세 응답 출력
     } else {
-      console.error('An unknown error occurred:', error); // AxiosError가 아닌 경우
+      // console.error('An unknown error occurred:', error); // AxiosError가 아닌 경우
     }
     return profileRes ? profileRes.data : null; // profileRes가 없으면 null 반환
   }
@@ -138,6 +138,6 @@ export const postLogout = async (
 
     return response.data;
   } catch (error) {
-    console.error('로그아웃 실패:', error);
+    // console.error('로그아웃 실패:', error);
   }
 };

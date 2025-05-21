@@ -48,6 +48,8 @@ type LocationState =
   | {
       contract?: { category_id?: number };
       category_id?: number;
+
+      fileName?: string;
     }
   | undefined;
 
@@ -102,15 +104,16 @@ const ContractPdfViewer: React.FC = () => {
   const handleThumbnailClick = (page: number) => setPageNumber(page);
 
   /* ─ PDF 다운로드 ─ */
-  const handlePdfDownload = () => {
-    /* ① location.state 형태에 관계없이 category_id만 추출 */
-    const categoryId =
-      state?.contract?.category_id ?? //  { contract: { category_id } }
-      state?.category_id; //  { category_id }
+  const handlePdfDownload = async () => {
+    // 1. WritePreviewPage가 이미 넘겨준 fileName이 있으면 그대로 사용
+    if (state?.fileName) {
+      return getContractownload(Number(contractId), state.fileName);
+    }
 
-    /* ② 이름 결정 (없으면 '알수없음') */
+    // 2. 없으면 예전 로직으로 category_id → 카테고리명
+    const categoryId = state?.contract?.category_id ?? state?.category_id;
+
     const categoryName = getCategorName(categoryId ?? -1);
-
     getContractownload(Number(contractId), `${categoryName}.pdf`);
   };
 

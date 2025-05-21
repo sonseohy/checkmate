@@ -14,7 +14,7 @@ const WriteIntroPage: React.FC = () => {
           <p>
             더 이상 계약서 작성에 시간을 낭비하지 마세요.
             <br />
-            체크메이트로 10분안에 완성해보세요! <br />
+            체크메이트로 10분 안에 완성해보세요! <br />
             표준 양식에 맞춰 계약서를 완성할 수 있습니다.
           </p>
           <ul className="space-y-1 text-gray-600 list-disc list-inside">

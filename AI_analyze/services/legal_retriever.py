@@ -25,14 +25,15 @@ class EmptyLegalInfoError(Exception):
     retry=retry_if_exception_type(EmptyLegalInfoError),
     reraise=True
 )
-async def get_sections_from_gpt(llm, contract_type: str, existing_sections_text: str) -> list:
+async def get_sections_from_gpt(llm, contract_type: str, existing_sections_text: str, category_name: str) -> list:
     """GPT를 통해 필수 조항 가져오기 (재시도 로직 포함)"""
 
     # LCEL 방식으로 프롬프트 체인 실행
     chain = required_sections_prompt | llm
     result = chain.invoke({
         "contract_type": contract_type,
-        "existing_sections": existing_sections_text
+        "existing_sections": existing_sections_text,
+        "category_name": category_name,
     })
 
     # 결과 텍스트 추출
@@ -78,7 +79,7 @@ async def get_sections_from_gpt(llm, contract_type: str, existing_sections_text:
     return valid_sections
 
 
-async def get_contract_type_requirements(contract_type: str, llm=None) -> List[str]:
+async def get_contract_type_requirements(contract_type: str, category_name:str, llm=None) -> List[str]:
     """계약 유형에 따른 필수 조항 목록 및 관련 법률 정보 가져오기"""
 
     # 계약 유형별 필수 조항 (정적 매핑)
@@ -241,7 +242,7 @@ async def get_contract_type_requirements(contract_type: str, llm=None) -> List[s
         existing_sections_text = "\n".join([f"- {section}" for section in required_sections])
 
         # 재시도 로직이 포함된 함수 호출
-        gpt_required_sections = await get_sections_from_gpt(llm, contract_type, existing_sections_text)
+        gpt_required_sections = await get_sections_from_gpt(llm, contract_type, existing_sections_text, category_name)
         # 필수 조항 이름만 추출
         gpt_section_names = [section["name"] for section in gpt_required_sections]
 

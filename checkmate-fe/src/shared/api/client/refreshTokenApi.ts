@@ -1,15 +1,13 @@
 import { customAxios } from '@/shared/api';
-import { getRepreshAccessToken } from '@/entities/user';
+import { getRefreshToken } from '@/entities/user';
 
 export const refreshAccessToken = async () => {
-  const refreshToken = getRepreshAccessToken();
+  const refreshToken = getRefreshToken();
 
   try {
     const response = await customAxios.post('/api/auth/reissue-token', {
       refresh_token: refreshToken,
     });
-
-    // console.log('API Response:', response); // API 응답 로그 출력
 
     if (response.data.success) {
       const [access_token, refresh_token] = response.data.data;
@@ -18,10 +16,8 @@ export const refreshAccessToken = async () => {
       localStorage.setItem('refresh_token', refresh_token);
 
       return access_token;
-    } else {
-      //   console.error('Token reissue 실패:', response.data.error.message);
     }
-  } catch (error) {
+  } catch {
     // console.error('Error while refreshing token:', error);
   }
 };

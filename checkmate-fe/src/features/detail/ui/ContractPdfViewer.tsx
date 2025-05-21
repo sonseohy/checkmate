@@ -1,11 +1,10 @@
-import { pdfjs } from 'react-pdf';
+// import { pdfjs } from 'react-pdf';
 
-// pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 (async () => {
   const { pdfjs } = await import('react-pdf');
   pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
 })();
-console.log('pdfjs workerSrc:', pdfjs.GlobalWorkerOptions.workerSrc);
+
 
 import { useState, useEffect, useMemo } from 'react';
 import {
@@ -53,24 +52,21 @@ type LocationState =
     }
   | undefined;
 
-/* ────────────────────────── 컴포넌트 ────────────────────────── */
+
 const ContractPdfViewer: React.FC = () => {
   /* ─ 기본 훅 세팅 ─ */
   const isMobile = useMobile();
   const navigate = useNavigate();
   const { contractId } = useParams<Params>();
 
-  /* ─ location.state (느슨하게) ─ */
   const { state } = useLocation() as Location<LocationState>;
 
-  /* ─ PDF / 뷰어 상태 ─ */
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(isMobile ? 0.6 : 1);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
 
-  /* ─ PDF key (리렌더 방지) ─ */
   const documentKey = useMemo(
     () => (pdfBlob ? URL.createObjectURL(pdfBlob) : 'empty'),
     [pdfBlob],
@@ -83,7 +79,7 @@ const ContractPdfViewer: React.FC = () => {
       try {
         const blob = await getContractDetail(Number(contractId));
         setPdfBlob(blob);
-      } catch (err) {
+      } catch {
         // console.error(err);
       }
     })();
@@ -137,7 +133,7 @@ const ContractPdfViewer: React.FC = () => {
         );
         navigate('/mypage');
       }
-    } catch (error) {
+    } catch {
       // console.error('계약서 삭제 실패:', error);
     }
   };

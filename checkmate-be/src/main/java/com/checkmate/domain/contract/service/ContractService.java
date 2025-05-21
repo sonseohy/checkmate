@@ -85,7 +85,7 @@ public class ContractService {
 
         // 트랜잭션 완료 후 분석 이벤트 발행
         applicationEventPublisher.publishEvent(
-            new ContractUploadCompletedEvent(contract.getId(), category.getId())
+            new ContractUploadCompletedEvent(contract.getId(), category.getId(), category.getName())
         );
 
         return ContractUploadResponse.builder()

@@ -27,6 +27,6 @@ public class AiAnalysisListener {
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void handleContractUploaded(ContractUploadCompletedEvent event) {
 		log.info("계약서 업로드 완료 이벤트 수신: contractId={}", event.contractId());
-		webClientConfig.analyzeContract(event.contractId(), event.contractCategoryId()).subscribe();
+		webClientConfig.analyzeContract(event.contractId(), event.contractCategoryId(), event.contractCategoryName()).subscribe();
 	}
 }

@@ -1,7 +1,11 @@
 // src/main.tsx
 import { pdfjs } from 'react-pdf';
 
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
+import pdfWorkerURL from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerURL;
+console.log(pdfWorkerURL);
+// pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 // pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}/pdf.worker.mjs`;
 // pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}${import.meta.env.BASE_URL}pdf.worker.mjs`;
 // pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdf.worker.mjs', window.location.origin).toString();

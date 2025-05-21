@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import { AppLayout } from '@/shared';
+import { ScrollToTop } from '@/shared/utils/ScrollToTop';
 
 //메인 페이지
 const MainPage = lazy(() =>
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<div>Loading...</div>}>
         <AppLayout>
+          <ScrollToTop />
           <Outlet />
         </AppLayout>
       </Suspense>

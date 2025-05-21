@@ -2,7 +2,8 @@ import { WritingProcess } from '@/widgets/write';
 
 const WriteIntroPage: React.FC = () => {
   const title = '계약서 자동 작성';
-  const videoUrl = 'https://www.youtube.com/embed/REAL_ESTATE_ID'; // 실제 영상 URL로 교체하세요
+  // ✅ ‘/embed/동영상ID’ 형태로 교체
+  const videoUrl = 'https://www.youtube.com/embed/XS7rlNfEht8';
 
   return (
     <div className="container py-16 mx-auto space-y-16">
@@ -11,14 +12,16 @@ const WriteIntroPage: React.FC = () => {
         <h1 className="mb-6 text-3xl font-bold">{title}</h1>
         <div className="space-y-4 text-gray-700">
           <p>
-            계약서 자동 작성 페이지입니다.<br />
-            계약 정보, 당사자 정보, 조건을 입력하시면<br />
+            더 이상 계약서 작성에 시간을 낭비하지 마세요.
+            <br />
+            체크메이트로 10분안에 완성해보세요! <br />
             표준 양식에 맞춰 계약서를 완성할 수 있습니다.
           </p>
           <ul className="space-y-1 text-gray-600 list-disc list-inside">
-            <li>계약 당사자 정보 입력</li>
-            <li>계약 기간 및 조건 설정</li>
-            <li>특약 사항 추가 가능</li>
+            <li>카테고리 선택</li>
+            <li>작성 전 체크리스트 확인</li>
+            <li>간편 작성 & 자동 저장</li>
+            <li>전자서명 후 PDF로 다운</li>
           </ul>
         </div>
       </section>
@@ -34,6 +37,7 @@ const WriteIntroPage: React.FC = () => {
             src={videoUrl}
             title={`${title} 가이드 영상`}
             allowFullScreen
+            loading="lazy"
             className="w-full h-full rounded-lg"
           />
         </div>

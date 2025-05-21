@@ -11,6 +11,7 @@ class AnalysisConfig(BaseModel):
 class OcrRequest(BaseModel):
     contract_id: int
     contract_category_id: Optional[int] = 1
+    contract_category_name: Optional[str] = ""
 
 
 # 계약서 조항 정의
@@ -35,13 +36,7 @@ class StructuredContract(BaseModel):
     metadata: ContractMetadata = Field(description="계약서 메타데이터")
     sections: List[ContractSection] = Field(description="계약서 조항 목록")
 
-
-# 요청 모델
-class ContractAnalysisRequest(BaseModel):
-    contract_text: str
-    contract_id: Optional[int] = None
-    contract_category_id: Optional[int] = None
-
 class QuestionGenerationRequest(BaseModel):
     contract_id: int
     contract_category_id: Optional[int] = 1
+    contract_category_name: Optional[str] = ""

@@ -72,7 +72,8 @@ async def analyze_contract_parallel(
         ai_analysis_report_id: str,
         required_sections: List[str],
         clause_specific_laws: Dict,
-        contract_type: str  # 추가
+        contract_type: str,
+        category_name: str,
 ) -> Dict[str, Any]:
     """계약서 전체를 분석하여 누락 조항, 개선 사항, 위험 영역 식별"""
 
@@ -94,6 +95,7 @@ async def analyze_contract_parallel(
     common_data = {
         "title": structured_contract.metadata.title,
         "contract_type": contract_type,
+        "category_name": category_name,
         "content": content[:15000],  # 토큰 제한을 위해 길이 제한
         "legal_context": legal_context
     }
@@ -117,6 +119,7 @@ async def analyze_contract_parallel(
     questions_input = {
         "title": structured_contract.metadata.title,
         "contract_type": contract_type,
+        "category_name": category_name,
         "content": content[:15000]
     }
     analysis_tasks.append(("questions", analyze_with_retry(llm, questions_generation_prompt, questions_input)))

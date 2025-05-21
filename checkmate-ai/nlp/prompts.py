@@ -30,6 +30,11 @@ JSON 형식으로 아래 내용을 포함해야 합니다:
 - payment_order (지급명령)
 - other_contract (기타)
 
+계약서 카테고리 이름:
+```
+{category_name}
+```
+
 계약서 내용:
 ```
 {contract_text}
@@ -71,6 +76,7 @@ missing_sections_prompt = ChatPromptTemplate.from_messages([
 
 계약서 제목: {title}
 계약서 유형: {contract_type}
+계약서 카테고리 이름: {category_name}
 
 계약서 전체 내용:
 {content}
@@ -117,6 +123,7 @@ improvements_prompt = ChatPromptTemplate.from_messages([
 
 계약서 제목: {title}
 계약서 유형: {contract_type}
+계약서 카테고리 이름: {category_name}
 
 계약서 전체 내용:
 {content}
@@ -159,6 +166,7 @@ risk_analysis_prompt = ChatPromptTemplate.from_messages([
 
 계약서 제목: {title}
 계약서 유형: {contract_type}
+계약서 카테고리 이름: {category_name}
 
 계약서 전체 내용:
 {content}
@@ -204,6 +212,7 @@ questions_generation_prompt = ChatPromptTemplate.from_messages([
 
 계약서 제목: {title}
 계약서 유형: {contract_type}
+계약서 카테고리 이름: {category_name}
 
 계약서 전체 내용:
 {content}
@@ -243,6 +252,7 @@ required_sections_prompt = PromptTemplate(
     다음 유형의 계약서에 포함되어야 할 필수 조항과 그 중요도를 알려주세요.
 
     계약서 유형: {contract_type}
+    계약서 카테고리 이름: {category_name}
 
     이미 존재하는 기본 필수 조항들:
     {existing_sections}

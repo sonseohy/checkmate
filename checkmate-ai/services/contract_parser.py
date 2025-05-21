@@ -19,7 +19,7 @@ class EmptyStructureError(Exception):
     pass
 
 
-async def structure_contract_with_gpt(contract_text: str, contract_id: int = None, llm=None) -> StructuredContract:
+async def structure_contract_with_gpt(contract_text: str, contract_id: int = None, category_name = None, llm=None) -> StructuredContract:
     """OpenAI GPT-4를 이용한 계약서 구조화"""
 
     if contract_id is None:
@@ -39,10 +39,10 @@ async def structure_contract_with_gpt(contract_text: str, contract_id: int = Non
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             # 일반적인 경우: 전체 텍스트 한 번에 처리
-            result = await process_single_chunk(llm, contract_text)
+            result = await process_single_chunk(llm, contract_text, category_name)
 
             # 응답 검증
-            validate_structure_response(result)
+            validate_structure_response(result, category_name)
 
             # 구조화된 계약서 객체 생성
             contract_data = {
@@ -80,11 +80,11 @@ async def structure_contract_with_gpt(contract_text: str, contract_id: int = Non
     raise last_exception
 
 
-async def process_single_chunk(llm, contract_text):
+async def process_single_chunk(llm, contract_text, category_name):
     """단일 청크 계약서 처리"""
     # 프롬프트 체인 실행
     chain = contract_structuring_chat_prompt | llm
-    result = await chain.ainvoke({"contract_text": contract_text})
+    result = await chain.ainvoke({"contract_text": contract_text, "category_name": category_name})
 
     # JSON 파싱
     # ChatOpenAI는 AIMessage 객체를 반환하므로 content 추출

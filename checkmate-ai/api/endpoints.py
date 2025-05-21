@@ -214,6 +214,7 @@ async def process_contract_pipeline(
 ):
     """OCR → 요약 → 분석 파이프라인"""
     cid = req.contract_id
+    cname = req.contract_category_name
 
     try:
         # 1. OCR 처리
@@ -225,7 +226,7 @@ async def process_contract_pipeline(
         if process_type == "QUESTION_GENERATION":
             # 질문 생성만 수행
             logger.info(f"[{cid}] 질문 생성만 수행")
-            structured_contract = await structure_contract_with_gpt(all_text, cid, llm)
+            structured_contract = await structure_contract_with_gpt(all_text, cid, cname, llm)
 
             # 계약서 전체 내용
             content = "\n\n".join([f"{section.number} {section.title}\n{section.content}"
@@ -234,6 +235,7 @@ async def process_contract_pipeline(
             questions_input = {
                 "title": structured_contract.metadata.title,
                 "contract_type": structured_contract.metadata.contract_type,
+                "category_name": cname,
                 "content": content[:15000]
             }
 
@@ -271,7 +273,7 @@ async def process_contract_pipeline(
             # 4. 구조화 및 분석
             logger.info(f"[{cid}] 구조화 및 분석 시작")
 
-            structured_contract_task = lambda: structure_contract_with_gpt(all_text, cid, llm)
+            structured_contract_task = lambda: structure_contract_with_gpt(all_text, cid, cname, llm)
             tasks.append(("structure", structured_contract_task))
 
             results = await execute_parallel_tasks(tasks)
@@ -295,7 +297,7 @@ async def process_contract_pipeline(
                 ("mysql_save", lambda: mysql.save_contract_clauses(cid, sections_data)),
                 ("summary_save",
                  lambda: mongo.save_summary_report(ai_analysis_report_id, summary_result) if summary_result else None),
-                ("required_sections", lambda: get_contract_type_requirements(contract_type, llm)),
+                ("required_sections", lambda: get_contract_type_requirements(contract_type, cname, llm)),
                 ("clause_laws", lambda: get_clause_specific_laws_parallel(structured_contract, vector_store))
             ]
             # None이 아닌 작업만 필터링
@@ -317,7 +319,8 @@ async def process_contract_pipeline(
                 ai_analysis_report_id,
                 required_sections,
                 clause_specific_laws,
-                contract_type
+                contract_type,
+                cname
             )
 
             logger.info(f"[{cid}] 전체 파이프라인 완료")

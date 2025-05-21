@@ -78,8 +78,7 @@ export default function MyContracts() {
         await refetch();
         Swal.fire('삭제 완료', '선택한 계약서가 삭제되었습니다.', 'success');
       }
-    } catch (error) {
-      // console.error("계약서 삭제 실패:", error);
+    } catch {
       Swal.fire('삭제 실패', '계약서 삭제 중 문제가 발생했습니다.', 'error');
     }
   };

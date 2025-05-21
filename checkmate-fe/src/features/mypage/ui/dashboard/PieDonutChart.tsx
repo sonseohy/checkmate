@@ -108,7 +108,7 @@ export const PieDonutChart: React.FC<PieDonutChartProps> = ({
         offsetY: 0,
         customScale: 0.9, // 작은 화면에서도 크기 유지
         donut: {
-          size: '60%',
+          size: '50%',
           labels: {
             show: true,
             name: {

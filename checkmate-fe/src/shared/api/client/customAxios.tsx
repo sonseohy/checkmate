@@ -1,5 +1,5 @@
 import { getAccessToken } from '@/entities/user';
-import { getRepreshAccessToken } from '@/entities/user';
+import { refreshAccessToken } from '@/shared/api'
 import axios from 'axios';
 
 // 공통 axios 인스턴스 생성
@@ -34,7 +34,7 @@ customAxios.interceptors.response.use(
 
       try {
         // 리프레시 토큰으로 새로운 access_token을 요청
-        const newAccessToken = await getRepreshAccessToken();
+        const newAccessToken = await refreshAccessToken();
         
         // 새로운 access_token을 헤더에 설정하고, 원래의 요청을 다시 보냄
         originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;

@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -16,7 +17,7 @@ export default defineConfig({
       workbox: {
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, 
         globDirectory: 'dist',
-        globPatterns: ['**/*.{js,wasm,css,html, mjs}'],
+        globPatterns: ['**/*.{js,wasm,css,html,mjs}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [ /^\/pdf\.worker\.mjs$/, ],
         runtimeCaching: [

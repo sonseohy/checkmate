@@ -1,4 +1,12 @@
-/* src/features/detail/ui/ContractPdfViewer.tsx */
+import { pdfjs } from 'react-pdf';
+
+// pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
+(async () => {
+  const { pdfjs } = await import('react-pdf');
+  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
+})();
+console.log('pdfjs workerSrc:', pdfjs.GlobalWorkerOptions.workerSrc);
+
 import { useState, useEffect, useMemo } from 'react';
 import {
   useLocation,

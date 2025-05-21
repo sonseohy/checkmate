@@ -4,4 +4,10 @@
 /// <reference types="vite-plugin-pwa/client" /> 
 
 declare module 'pdfjs-dist/build/pdf.worker.entry';
+declare module 'pdfjs-dist/build/pdf.worker.entry?worker' {
+  const WorkerConstructor: {
+    new (options?: { name?: string }): Worker;
+  };
+  export default WorkerConstructor;
+}
 declare module '*.mjs';

@@ -121,7 +121,7 @@ public class ContractGeneratedFileService {
             log.info("계약서 생성 파일 저장 및 상태 업데이트 완료: contractId={}, fileId={}, status=COMPLETED",
                     contractId, savedFile.getId());
 
-            webClientConfig.generateQuestions(contractId, contract.getCategory().getId())
+            webClientConfig.generateQuestions(contractId, contract.getCategory().getId(), contract.getCategory().getName())
                 .subscribe();
 
             // 10. 응답 생성

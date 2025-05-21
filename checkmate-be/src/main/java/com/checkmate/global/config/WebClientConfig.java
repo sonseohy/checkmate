@@ -48,10 +48,11 @@ public class WebClientConfig {
 	 * @param categoryId 카테고리 ID
 	 * @return 요청 처리 결과를 담은 Mono 객체
 	 */
-	public Mono<Void> analyzeContract(int contractId, int categoryId) {
+	public Mono<Void> analyzeContract(int contractId, int categoryId, String categoryName) {
 		AiContractAnalysisRequestDto request = AiContractAnalysisRequestDto.builder()
 			.contractId(contractId)
 			.contractCategoryId(categoryId)
+			.contractCategoryName(categoryName)
 			.build();
 
 		return webClient.build()
@@ -73,10 +74,11 @@ public class WebClientConfig {
 	 * @param categoryId 카테고리 ID
 	 * @return 요청 처리 결과를 담은 Mono 객체
 	 */
-	public Mono<Void> generateQuestions(int contractId, int categoryId) {
+	public Mono<Void> generateQuestions(int contractId, int categoryId, String categoryName) {
 		QuestionGenerationRequestDtp request = QuestionGenerationRequestDtp.builder()
 			.contractId(contractId)
 			.contractCategoryId(categoryId)
+			.contractCategoryName(categoryName)
 			.build();
 
 		return webClient.build()

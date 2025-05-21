@@ -19,9 +19,9 @@ export const refreshAccessToken = async () => {
 
       return access_token;
     } else {
-      console.error('Token reissue 실패:', response.data.error.message);
+      //   console.error('Token reissue 실패:', response.data.error.message);
     }
   } catch (error) {
-    console.error('Error while refreshing token:', error);
+    // console.error('Error while refreshing token:', error);
   }
 };

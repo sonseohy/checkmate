@@ -24,7 +24,7 @@ const SignatureRequestForm = ({ contractId, onSuccess }: Props) => {
 
       onSuccess(); // ✅ 부모에게 성공 알림
     } catch (err: any) {
-      console.error(err);
+      // console.error(err);
       setStatus('error');
 
       const code = err?.response?.data?.error?.code;

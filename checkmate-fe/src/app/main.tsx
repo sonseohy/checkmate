@@ -12,7 +12,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
-
 import { FullPageSpinner } from '@/shared/ui/Spinner';
 
 const queryClient = new QueryClient();
@@ -23,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
+
           <ToastContainer />
         </QueryClientProvider>
       </Provider>

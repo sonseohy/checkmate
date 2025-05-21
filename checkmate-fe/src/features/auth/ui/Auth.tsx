@@ -1,33 +1,33 @@
-import { useState, useEffect } from "react";
-import { PostKakaoCallback } from "@/features/auth";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from 'react';
+import { PostKakaoCallback } from '@/features/auth';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function Auth() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();  
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // 1) 콜백 경로, code 파라미터 체크
-    if (location.pathname !== "/login") return;
+    if (location.pathname !== '/login') return;
     const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
+    const code = params.get('code');
     if (!code) {
       return;
     }
 
     // 2) 같은 code 처리 방지
-    const prev = sessionStorage.getItem("kakaoProcessedCode");
+    const prev = sessionStorage.getItem('kakaoProcessedCode');
     if (prev === code) {
-      navigate("/", { replace: true });
+      navigate('/', { replace: true });
       return;
     }
     // 3) 새 code 이므로 저장
-    sessionStorage.setItem("kakaoProcessedCode", code);
+    sessionStorage.setItem('kakaoProcessedCode', code);
 
     // 4) URL 에서 code 지우기
     window.history.replaceState(null, document.title, location.pathname);
@@ -35,12 +35,12 @@ export default function Auth() {
     // 5) 토큰 요청
     PostKakaoCallback(code, dispatch)
       .then(() => {
-        queryClient.invalidateQueries({ queryKey: ["userInfo"] });
-        navigate("/", { replace: true });
+        queryClient.invalidateQueries({ queryKey: ['userInfo'] });
+        navigate('/', { replace: true });
       })
-      .catch((err) => {
-        console.error("[Auth] 토큰 발급 실패:", err);
-        setError("카카오 콜백 처리에 실패했습니다.");
+      .catch(() => {
+        // console.error("[Auth] 토큰 발급 실패:", err);
+        setError('카카오 콜백 처리에 실패했습니다.');
       });
   }, [dispatch, location, navigate, queryClient]);
 

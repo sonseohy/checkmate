@@ -1,0 +1,61 @@
+image: node:22.12.0
+
+stages:
+  - build
+  - deploy
+
+variables:
+  MATTERMOST_WEBHOOK: $MATTERMOST_WEBHOOK
+
+before_script:
+  - echo "GitLab CI/CD 시작!"
+  - node -v
+  - npm -v
+
+build_checkmate_fe:
+  stage: build
+  only:
+    - fe
+  script:
+    - cd checkmate-fe
+    - echo "$FRONTEND_ENV" > .env
+    - cat .env
+    - npm ci
+    - mkdir -p public
+    - cp node_modules/pdfjs-dist/build/pdf.worker.mjs public/
+    - npm run build
+  artifacts:
+    paths:
+      - checkmate-fe/dist
+  after_script:
+    - |
+      if [ "$CI_JOB_STATUS" == "success" ]; then
+        curl -X POST -H 'Content-Type: application/json' \
+        -d "{\"text\": \"✅ [프론트 빌드 성공] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+      else
+        curl -X POST -H 'Content-Type: application/json' \
+        -d "{\"text\": \"❌ [프론트 빌드 실패] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+      fi
+
+deploy_checkmate_fe:
+  stage: deploy
+  only:
+    - fe
+  script:
+    - echo "🚀 Docker 배포 시작"
+    - cd checkmate-fe
+    - docker stop checkmate-fe-container || true
+    - docker rm checkmate-fe-container || true
+    - docker rmi checkmate-fe || true
+    - docker build -t checkmate-fe .  # 이때 Dockerfile은 dist만 복사
+    - docker run -d --name checkmate-fe-container -p 3000:80 checkmate-fe
+  after_script:
+    - |
+      if [ "$CI_JOB_STATUS" == "success" ]; then
+        curl -X POST -H 'Content-Type: application/json' \
+        -d "{\"text\": \"✅ [프론트 배포 성공] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+      else
+        curl -X POST -H 'Content-Type: application/json' \
+        -d "{\"text\": \"❌ [프론트 배포 실패] $CI_PROJECT_NAME - $CI_COMMIT_BRANCH\"}" $MATTERMOST_WEBHOOK
+      fi
+

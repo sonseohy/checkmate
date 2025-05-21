@@ -36,7 +36,6 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ onClose }) => {
       }).then(onClose);
     },
     onError: () => {
-      //   console.error("회원 정보 수정 실패:", err);
       Swal.fire({
         title: '오류',
         text: '회원 정보 수정 중 문제가 발생했습니다.',

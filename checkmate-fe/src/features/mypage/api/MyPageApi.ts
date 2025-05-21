@@ -10,8 +10,7 @@ export const getCourthouseList = async (): Promise<Courthouse[]> => {
       '/api/courthouses',
     );
     return response.data.data;
-  } catch (error) {
-    // console.error("법원 리스트 불러오기 실패:", error);
+  } catch {
     return [];
   }
 };
@@ -21,8 +20,7 @@ export const contractList = async (): Promise<ContractListData> => {
   try {
     const response = await customAxios.get('/api/contract');
     return { contracts: response.data.data };
-  } catch (error) {
-    // console.error('계약서 리스트 불러오기 실패:', error);
+  } catch {
     return { contracts: [] };
   }
 };
@@ -45,8 +43,7 @@ export const getRegionName = async (lat: number, lng: number) => {
     );
     // 1depth_name: 시/도
     return response.data.documents?.[0]?.region_1depth_name || null;
-  } catch (error) {
-    // console.error('위치 시•도 명으로 바꾸기 실패:', error);
+  } catch {
     return null;
   }
 };

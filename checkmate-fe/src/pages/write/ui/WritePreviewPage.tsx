@@ -56,7 +56,7 @@ const WritePreviewPage: React.FC = () => {
         })
         .outputPdf('blob');
 
-      const res = await uploadMutation.mutateAsync({
+      await uploadMutation.mutateAsync({
         contractId,
         pdfBlob: blob,
         fileName,
@@ -67,7 +67,7 @@ const WritePreviewPage: React.FC = () => {
           navigate(`/detail/${contractId}`, {
             state: {
               contract_id: contractId,
-              fileName: res.fileName ?? '',
+              fileName,
             },
             replace: true,
           }),

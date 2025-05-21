@@ -9,7 +9,7 @@ import {
 } from '@/features/write';
 import Swal from 'sweetalert2';
 import html2pdf from 'html2pdf.js';
-import '@/features/write/style/pdf-fix.css'
+import '@/features/write/style/pdf-fix.css';
 
 const WritePreviewPage: React.FC = () => {
   const { state } = useLocation() as {
@@ -83,13 +83,15 @@ const WritePreviewPage: React.FC = () => {
 
   /* 섹션 정렬 */
   const sortedSections = [...legalClauses].sort(
-    (a, b) => (a.legalClauses[0]?.order ?? Infinity) - (b.legalClauses[0]?.order ?? Infinity)
+    (a, b) =>
+      (a.legalClauses[0]?.order ?? Infinity) -
+      (b.legalClauses[0]?.order ?? Infinity),
   );
 
   const allOrders = legalClauses
-  .flatMap((group) => group.legalClauses.map((c) => c.order ?? Infinity))
-  .filter((o) => o !== Infinity)
-  .sort((a, b) => a - b);
+    .flatMap((group) => group.legalClauses.map((c) => c.order ?? Infinity))
+    .filter((o) => o !== Infinity)
+    .sort((a, b) => a - b);
 
   const lastTwoOrders = allOrders.slice(-2);
   let currentOrder = 1;
@@ -137,7 +139,10 @@ const WritePreviewPage: React.FC = () => {
             const nextClauses = sortedSections[idx + 1]?.legalClauses ?? [];
             return (
               // 묶음 전체를 새 페이지에서 시작하게
-              <div key={`combined-${section.groupId}`} className="section-start-new-page">
+              <div
+                key={`combined-${section.groupId}`}
+                className="section-start-new-page"
+              >
                 <p className="text-center font-semibold">{today}.</p>
                 {[...clauses, ...nextClauses].map((c, i) => (
                   <article key={`${section.groupId}-${c.order ?? i}`}>
@@ -164,7 +169,7 @@ const WritePreviewPage: React.FC = () => {
           if (orderNo === lastTwoOrders[1]) return null;
 
           /* ── 일반 조항 ── */
-           return (
+          return (
             <article key={section.groupId}>
               {header && header.titleText ? (
                 <>
@@ -236,7 +241,7 @@ const WritePreviewPage: React.FC = () => {
           disabled={uploadMutation.isPending}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
         >
-          {uploadMutation.isPending ? '업로드 중…' : 'PDF 저장하기'}
+          {uploadMutation.isPending ? '업로드 중…' : '계약서 저장하기'}
         </button>
       </div>
     </div>

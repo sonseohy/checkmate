@@ -19,10 +19,10 @@ export default defineConfig({
         globDirectory: 'dist',
         globPatterns: ['**/*.{js,wasm,css,html,mjs}'],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [ /^\/pdf\.worker\.mjs$/, ],
+        navigateFallbackDenylist: [ /^\/pdf\.worker\.js$/, ],
         runtimeCaching: [
           {
-            urlPattern: /^\/pdf\.worker\.mjs$/,
+            urlPattern: /^\/pdf\.worker\.js$/,
             handler: 'NetworkOnly',
             options: {
               // 필요하면 캐시 옵션 더 줄 수 있습니다.
@@ -31,7 +31,7 @@ export default defineConfig({
           },
         ],
       },
-      includeAssets: ['pdf.worker.mjs', 'icons/favicon.ico'],
+      includeAssets: ['pdf.worker.js', 'icons/favicon.ico'],
       devOptions: {
         enabled: true, //개발 환경에서도 PWA가 정상적으로 작성하도록 설정
       },

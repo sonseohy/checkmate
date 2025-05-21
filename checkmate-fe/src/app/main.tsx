@@ -1,14 +1,7 @@
 // src/main.tsx
 import { pdfjs } from 'react-pdf';
 
-(async () => {
-  const { pdfjs } = await import("react-pdf");
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.mjs",
-    import.meta.url
-  ).toString();
-})();
-// pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 // pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}/pdf.worker.mjs`;
 // pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}${import.meta.env.BASE_URL}pdf.worker.mjs`;
 // pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdf.worker.mjs', window.location.origin).toString();
@@ -17,6 +10,13 @@ import { pdfjs } from 'react-pdf';
 
 // pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerURL;
 // console.log(pdfWorkerURL);
+// (async () => {
+//   const { pdfjs } = await import("react-pdf");
+//   pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+//     "pdfjs-dist/build/pdf.worker.mjs",
+//     import.meta.url
+//   ).toString();
+// })();
 
 
 console.log('pdfjs workerSrc:', pdfjs.GlobalWorkerOptions.workerSrc);

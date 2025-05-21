@@ -82,7 +82,7 @@ const WriteFillPage: React.FC = () => {
         ],
       });
     } catch (e: any) {
-      console.error('멀티체크박스 저장 실패:', e.response?.data || e);
+      // console.error('멀티체크박스 저장 실패:', e.response?.data || e);
     }
   };
 
@@ -145,7 +145,7 @@ const WriteFillPage: React.FC = () => {
         ],
       });
     } catch (err: any) {
-      console.error('자동 저장 실패:', err.response?.data || err);
+      // console.error('자동 저장 실패:', err.response?.data || err);
     }
   };
 
@@ -569,8 +569,8 @@ const WriteFillPage: React.FC = () => {
         },
       });
     } catch (err: any) {
-      console.error('Status:', err.response?.status);
-      console.error('Body:', err.response?.data);
+      // console.error('Status:', err.response?.status);
+      // console.error('Body:', err.response?.data);
       Swal.fire({
         icon: 'error',
         title: '저장 실패',

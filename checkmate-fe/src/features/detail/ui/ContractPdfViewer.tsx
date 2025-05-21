@@ -74,7 +74,7 @@ const ContractPdfViewer: React.FC = () => {
         const blob = await getContractDetail(Number(contractId));
         setPdfBlob(blob);
       } catch (err) {
-        console.error(err);
+        // console.error(err);
       }
     })();
   }, [contractId]);
@@ -127,7 +127,7 @@ const ContractPdfViewer: React.FC = () => {
         navigate('/mypage');
       }
     } catch (error) {
-      console.error('계약서 삭제 실패:', error);
+      // console.error('계약서 삭제 실패:', error);
     }
   };
 

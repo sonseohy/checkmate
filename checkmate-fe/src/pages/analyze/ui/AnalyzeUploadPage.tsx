@@ -85,7 +85,7 @@ const AnalyzeUploadPage: React.FC = () => {
 
       navigate('/');
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       Swal.fire({
         icon: 'error',
         title: '업로드 실패',

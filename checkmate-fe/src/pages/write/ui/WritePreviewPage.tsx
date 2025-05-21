@@ -73,7 +73,7 @@ const WritePreviewPage: React.FC = () => {
           }),
       );
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       Swal.fire('오류', 'PDF 생성/업로드에 실패했습니다.', 'error');
     }
   };

@@ -9,7 +9,7 @@ export const getContractDetail = async (contractId: number): Promise<Blob> => {
     });
     return response.data as Blob;
   } catch (error) {
-    console.error('계약서 상세조회 불러오기 실패:', error);
+    // console.error('계약서 상세조회 불러오기 실패:', error);
     throw error;
   }
 };
@@ -34,7 +34,7 @@ export const getContractownload = async (
     document.body.appendChild(link);
     link.click();
   } catch (error) {
-    console.error('계약서 다운로드 실패:', error);
+    // console.error('계약서 다운로드 실패:', error);
   }
 };
 
@@ -44,7 +44,7 @@ export const deleteContractDetail = async (contractId: number) => {
     const response = await customAxios.delete(`/api/contract/${contractId}`);
     return response;
   } catch (error) {
-    console.error('계약서 삭제 실패:', error);
+    // console.error('계약서 삭제 실패:', error);
   }
 };
 
@@ -77,7 +77,7 @@ export const getContractQuestions = async (
 
     return { question: cleaned };
   } catch (e) {
-    console.error('질문 리스트 불러오기 실패:', e);
+    // console.error('질문 리스트 불러오기 실패:', e);
     return { question: [] };
   }
 };

@@ -6,9 +6,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 // pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}${import.meta.env.BASE_URL}pdf.worker.mjs`;
 // pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdf.worker.mjs', window.location.origin).toString();
 
-
-
-console.log('pdfjs workerSrc:', pdfjs.GlobalWorkerOptions.workerSrc);
+// console.log('pdfjs workerSrc:', pdfjs.GlobalWorkerOptions.workerSrc);
 
 import { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -22,7 +20,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-
 
 import { FullPageSpinner } from '@/shared/ui/Spinner';
 

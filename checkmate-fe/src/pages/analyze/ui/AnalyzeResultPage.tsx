@@ -74,7 +74,7 @@ const AnalyzeResultPage: React.FC = () => {
     setLoading(true);
     AnalysisService.getResult(contractId)
       .then(setResult)
-      .catch(console.error)
+      // .catch(console.error)
       .finally(() => setLoading(false));
   }, [contractId]);
 

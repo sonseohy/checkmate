@@ -22,7 +22,7 @@ export const getUserInfo = async () => {
     const response = await customAxios.get('api/users');
     return response.data.data;
   } catch (error) {
-    console.error('회원 정보 가져오기 실패: ', error);
+    // console.error('회원 정보 가져오기 실패: ', error);
     return null;
   }
 };
